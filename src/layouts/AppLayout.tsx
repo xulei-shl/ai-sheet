@@ -27,11 +27,11 @@ import { ConfigPage } from '../pages/ConfigPage';
 import { PromptsPage } from '../pages/PromptsPage';
 
 const tabs: Array<{ id: AppTab; label: string; icon: typeof FileSpreadsheet; description: string }> = [
-  { id: 'data', label: '数据加载', icon: FileSpreadsheet, description: '上传 Excel 文件，预览 Sheet 和列数据。' },
-  { id: 'formula', label: '公式处理', icon: Sigma, description: 'AI 辅助生成或手动输入公式，批量应用到指定列。' },
-  { id: 'ai', label: 'LLM 处理', icon: Bot, description: '提示词生成、LLM 批量处理和 Python 脚本执行。' },
-  { id: 'config', label: '配置管理', icon: Settings, description: '管理 LLM API 配置，支持自动降级。' },
-  { id: 'prompts', label: '提示词管理', icon: MessageSquare, description: '管理和复用已保存的提示词模板。' },
+  { id: 'data', label: '数据加载', icon: FileSpreadsheet, description: '上传 Excel 文件，预览 Sheet 和列数据' },
+  { id: 'formula', label: '公式处理', icon: Sigma, description: 'AI 辅助生成或手动输入公式，批量应用到指定列' },
+  { id: 'ai', label: 'LLM 处理', icon: Bot, description: '提示词生成、LLM 批量处理和 Python 脚本执行' },
+  { id: 'config', label: '配置管理', icon: Settings, description: '管理 LLM API 配置，支持自动降级' },
+  { id: 'prompts', label: '提示词管理', icon: MessageSquare, description: '管理和复用已保存的提示词模板' },
 ];
 
 function ResizableHandle({ onResize }: { onResize: (delta: number) => void }) {
@@ -147,13 +147,15 @@ export function AppLayout() {
         }}
         aria-label="主导航"
       >
-        <div className="flex flex-1 flex-col p-3">
-          <div className="mb-6 px-2">
-            <div className="text-lg font-semibold whitespace-nowrap">AI-Sheet</div>
-            <div className="text-xs whitespace-nowrap" style={{ color: 'var(--muted)' }}>
-              Modern desktop data agent
-            </div>
+        <header
+          className="flex h-14 flex-shrink-0 items-center border-b px-5"
+          style={{ borderColor: 'var(--border)' }}
+        >
+          <div className="flex items-center gap-2">
+            <div className="text-base font-semibold whitespace-nowrap leading-tight">AI-Sheet</div>
           </div>
+        </header>
+        <div className="flex-1 overflow-y-auto p-3">
           <div className="space-y-1">
             {tabs.map((tab) => {
               const isActive = tab.id === currentTab;
@@ -183,28 +185,28 @@ export function AppLayout() {
 
       {/* ─── Center Content ─────────────────────────────────────────── */}
       <main className="relative flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center justify-between border-b p-3" style={{ borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleLeftSidebar}
-              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded transition-colors hover:bg-[var(--surface-hover)]"
-              style={{ color: 'var(--muted)' }}
-              aria-label={leftSidebarCollapsed ? '显示导航' : '隐藏导航'}
-            >
-              {leftSidebarCollapsed ? (
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
-              )}
-            </button>
-            <div className="flex items-center gap-3">
-              <h1 className="text-lg font-semibold whitespace-nowrap">{activeTab.label}</h1>
-              <span className="text-sm whitespace-nowrap" style={{ color: 'var(--muted)' }}>
-                {activeTab.description}
-              </span>
-            </div>
-          </div>
+        <div className="flex h-14 flex-shrink-0 items-center justify-between border-b px-3" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleLeftSidebar}
+                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded transition-colors hover:bg-[var(--surface-hover)]"
+                  style={{ color: 'var(--muted)' }}
+                  aria-label={leftSidebarCollapsed ? '显示导航' : '隐藏导航'}
+                >
+                  {leftSidebarCollapsed ? (
+                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </button>
+                <div className="flex items-center gap-2 leading-none">
+                  <h1 className="text-lg font-semibold whitespace-nowrap leading-none">{activeTab.label}</h1>
+                  <span className="text-sm whitespace-nowrap leading-none" style={{ color: 'var(--muted)' }}>
+                    {activeTab.description}
+                  </span>
+                </div>
+              </div>
           <button
             type="button"
             onClick={toggleRightSidebar}

@@ -44,7 +44,7 @@ export function AgentChatPanel() {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label="AI-Sheet Agent">
-      <header className="flex items-center justify-between border-b p-3" style={{ borderColor: 'var(--border)' }}>
+      <header className="flex h-14 flex-shrink-0 items-center justify-between border-b px-3" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-2">
           <span
             className="inline-flex h-7 w-7 items-center justify-center rounded-md"

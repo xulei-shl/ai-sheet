@@ -6,6 +6,8 @@ import {
   Square,
   FileSpreadsheet,
   AlertCircle,
+  Terminal,
+  Table,
   ChevronDown,
   ChevronRight,
 } from 'lucide-react';
@@ -14,6 +16,7 @@ import { usePromptStore } from '../stores/promptStore';
 import { useProcessingStore } from '../stores/processingStore';
 import { getColumnNames } from '../services/tauri';
 import type { ColumnInfo } from '../types/excel';
+import { SearchableSelect } from '../components/excel/SearchableSelect';
 
 export function LLMProcessingPage() {
   const { files, selections } = useExcelStore();
@@ -46,8 +49,8 @@ export function LLMProcessingPage() {
   const [selectedSheet, setSelectedSheet] = useState('');
   const [promptMode, setPromptMode] = useState<'saved' | 'custom'>('custom');
   const [availableColumns, setAvailableColumns] = useState<ColumnInfo[]>([]);
-  const [previewExpanded, setPreviewExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedFiles, setExpandedFiles] = useState<number[]>([0]);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const currentFile = files[selectedFileIdx];
@@ -65,18 +68,45 @@ export function LLMProcessingPage() {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [batchLogs]);
 
-  const handleSheetChange = async (sheet: string) => {
+  useEffect(() => {
+    if (files.length > 0 && !selectedSheet) {
+      const idx = selections.findIndex((s) => s.sheetInfo.length > 0);
+      const selIdx = idx >= 0 ? idx : 0;
+      const sel = selections[selIdx];
+      if (sel && sel.sheetInfo.length > 0) {
+        setSelectedFileIdx(selIdx);
+        handleSheetChange(sel.sheetInfo[0].name, selIdx);
+      }
+    }
+  }, [files]);
+
+  const toggleExpand = (idx: number) => {
+    setExpandedFiles((prev) =>
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
+
+  const handleSheetChange = async (sheet: string, fileIdx = selectedFileIdx) => {
     setSelectedSheet(sheet);
     setInputColumns([]);
     setOutputColumn('');
-    if (sheet && currentFile) {
+    const file = files[fileIdx];
+    if (sheet && file) {
       try {
-        const cols = await getColumnNames(currentFile.path, sheet);
+        const cols = await getColumnNames(file.path, sheet);
         setAvailableColumns(cols);
-      } catch { setAvailableColumns([]); }
+      } catch { 
+        setAvailableColumns([]); 
+      }
     } else {
       setAvailableColumns([]);
     }
+  };
+
+  const handleFocusSheet = (fileIdx: number, sheetName: string) => {
+    setSelectedFileIdx(fileIdx);
+    handleSheetChange(sheetName, fileIdx);
+    setError(null);
   };
 
   const activePrompt =
@@ -86,7 +116,7 @@ export function LLMProcessingPage() {
 
   const handleStart = async () => {
     if (!currentFile || !selectedSheet || inputColumns.length === 0 || !outputColumn || !activePrompt) {
-      setError('请完善文件、Sheet、列和提示词选择');
+      setError('请完善文件、Sheet、输入输出列和提示词选择');
       return;
     }
     setError(null);
@@ -112,243 +142,271 @@ export function LLMProcessingPage() {
     : 0;
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex-1 overflow-auto p-6">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <div className="flex items-center gap-3">
-            <Bot className="h-6 w-6" style={{ color: 'var(--primary)' }} />
-            <h2 className="text-lg font-semibold">LLM 批量处理</h2>
-          </div>
-
-          {/* Configuration Panel */}
-          <div className="rounded-lg border p-4 space-y-4" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-            {/* File Selection */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>Excel 文件</label>
-                {files.length > 0 ? (
-                  <select
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={selectedFileIdx}
-                    onChange={(e) => { setSelectedFileIdx(Number(e.target.value)); setSelectedSheet(''); setAvailableColumns([]); }}
-                  >
-                    {files.map((f, i) => (
-                      <option key={i} value={i}>{f.name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="flex h-9 items-center rounded-md px-3 text-sm" style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
-                    请先上传文件
+    <div className="flex h-full flex-row overflow-hidden bg-[var(--bg)]">
+      {/* Left Sidebar: File Tree */}
+      <div 
+        className="w-60 shrink-0 border-r flex flex-col overflow-hidden" 
+        style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+      >
+        <div className="p-3 border-b" style={{ borderColor: 'var(--border)' }}>
+          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>数据源</span>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2 space-y-2">
+          {files.map((file, fi) => {
+            const sel = selections[fi];
+            const isExpanded = expandedFiles.includes(fi);
+            return (
+              <div key={fi} className="space-y-0.5">
+                <div 
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-[var(--surface-hover)] cursor-pointer transition-colors"
+                  onClick={() => toggleExpand(fi)}
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="h-3 w-3 shrink-0" style={{ color: 'var(--muted)' }} />
+                  ) : (
+                    <ChevronRight className="h-3 w-3 shrink-0" style={{ color: 'var(--muted)' }} />
+                  )}
+                  <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--primary)' }} />
+                  <span className="text-[11px] font-medium truncate flex-1" title={file.name}>{file.name}</span>
+                </div>
+                {isExpanded && sel && (
+                  <div className="pl-4 space-y-0.5">
+                    {sel.sheetInfo.map((sheet) => {
+                      const isActive = selectedFileIdx === fi && selectedSheet === sheet.name;
+                      return (
+                        <div
+                          key={sheet.name}
+                          className={`flex items-center gap-2 rounded px-2 py-1 text-[11px] transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-[var(--primary-glow)] font-medium text-[var(--ink)]'
+                              : 'hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--ink)]'
+                          }`}
+                          onClick={() => handleFocusSheet(fi, sheet.name)}
+                        >
+                          <Table className="h-3 w-3 shrink-0" style={{ color: isActive ? 'var(--primary)' : 'var(--muted)' }} />
+                          <span className="truncate flex-1">{sheet.name}</span>
+                          <span className="text-[9px] opacity-60">({sheet.rowCount})</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>Sheet</label>
-                <select
-                  className="h-9 w-full rounded-md px-3 text-sm"
-                  style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                  value={selectedSheet}
-                  onChange={(e) => handleSheetChange(e.target.value)}
-                  disabled={sheets.length === 0}
-                >
-                  <option value="">选择 Sheet</option>
-                  {sheets.map((s) => (
-                    <option key={s.name} value={s.name}>{s.name} ({s.rowCount}行)</option>
-                  ))}
-                </select>
-              </div>
+            );
+          })}
+          {files.length === 0 && (
+            <div className="py-6 text-center text-[10px]" style={{ color: 'var(--muted)' }}>
+              请先在"数据"页面导入文件
             </div>
+          )}
+        </div>
+      </div>
 
-            {/* Columns */}
-            {availableColumns.length > 0 && (
-              <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>输入列（选择要处理的列）</label>
-                <div className="flex flex-wrap gap-2">
-                  {availableColumns.map((col) => {
-                    const isSelected = inputColumns.includes(col.name);
-                    return (
-                      <button
-                        key={col.name}
-                        onClick={() => {
-                          setInputColumns(
-                            isSelected
-                              ? inputColumns.filter((c) => c !== col.name)
-                              : [...inputColumns, col.name],
-                          );
-                        }}
-                        className={`rounded-md border px-3 py-1 text-sm transition-colors ${
-                          isSelected
-                            ? 'border-[var(--primary)] bg-[var(--primary-glow)] text-[var(--primary)]'
-                            : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--primary)]'
-                        }`}
-                      >
-                        {col.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+      {/* Middle: Configuration Panel */}
+      <div 
+        className="w-72 shrink-0 border-r flex flex-col overflow-hidden" 
+        style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+      >
+        <div className="p-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>处理配置</span>
+          <Bot className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
+        </div>
 
-            {availableColumns.length > 0 && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>输出列</label>
-                  <select
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={outputColumn}
-                    onChange={(e) => setOutputColumn(e.target.value)}
-                  >
-                    <option value="">选择输出列</option>
-                    {availableColumns
-                      .filter((c) => !inputColumns.includes(c.name))
-                      .map((col) => (
-                        <option key={col.name} value={col.name}>{col.name}</option>
-                      ))}
-                    <option value="__new__">[新建列] AI结果</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>温度</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={modelParams.temperature}
-                    onChange={(e) => setModelParams({ temperature: parseFloat(e.target.value) })}
-                    className="w-full"
-                  />
-                  <span className="text-xs" style={{ color: 'var(--muted)' }}>{modelParams.temperature}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Prompt Selection */}
-            <div>
-              <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>提示词</label>
-              <div className="mb-2 flex gap-2">
-                <button
-                  onClick={() => setPromptMode('saved')}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                    promptMode === 'saved'
-                      ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
-                      : 'border text-[var(--muted)]'
-                  }`}
-                  style={promptMode === 'saved' ? {} : { borderColor: 'var(--border)' }}
-                >
-                  已保存
-                </button>
-                <button
-                  onClick={() => setPromptMode('custom')}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                    promptMode === 'custom'
-                      ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
-                      : 'border text-[var(--muted)]'
-                  }`}
-                  style={promptMode === 'custom' ? {} : { borderColor: 'var(--border)' }}
-                >
-                  自定义
-                </button>
-              </div>
-              {promptMode === 'saved' ? (
-                <select
-                  className="h-9 w-full rounded-md px-3 text-sm"
-                  style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                  value={selectedPromptId ?? ''}
-                  onChange={(e) => setSelectedPromptId(e.target.value || null)}
-                >
-                  <option value="">选择已保存提示词</option>
-                  {filteredPrompts.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-              ) : (
-                <textarea
-                  className="w-full resize-none rounded-md px-3 py-2 text-sm"
-                  rows={3}
-                  placeholder="输入处理提示词，如：请将以下文本翻译成英文..."
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                />
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              {!isRunning ? (
-                <button
-                  onClick={handleStart}
-                  disabled={!currentFile || !selectedSheet || inputColumns.length === 0 || !activePrompt}
-                  className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
-                  style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-                >
-                  <Play className="h-4 w-4" />
-                  开始处理
-                </button>
-              ) : (
-                <>
-                  {batchProgress?.status === 'paused' ? (
-                    <button
-                      onClick={resumeBatch}
-                      className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium"
-                      style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-                    >
-                      <Play className="h-4 w-4" />
-                      继续
-                    </button>
-                  ) : (
-                    <button
-                      onClick={pauseBatch}
-                      className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium"
-                      style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
-                    >
-                      <Pause className="h-4 w-4" />
-                      暂停
-                    </button>
-                  )}
-                  <button
-                    onClick={stopBatch}
-                    className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium"
-                    style={{ background: 'var(--error)', color: 'white' }}
-                  >
-                    <Square className="h-4 w-4" />
-                    停止
-                  </button>
-                </>
-              )}
-              <button
-                onClick={reset}
-                className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium"
-                style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
-              >
-                重置
-              </button>
-            </div>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="flex items-center gap-2 rounded-lg border p-3" style={{ borderColor: 'var(--error)', background: 'oklch(0.6 0.12 20 / 0.1)' }}>
-              <AlertCircle className="h-4 w-4" style={{ color: 'var(--error)' }} />
-              <span className="text-sm" style={{ color: 'var(--error)' }}>{error}</span>
-              <button onClick={() => setError(null)} className="ml-auto text-sm" style={{ color: 'var(--muted)' }}>关闭</button>
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          {/* Input Columns Selector */}
+          {availableColumns.length > 0 && (
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>输入列 (可多选)</label>
+              <SearchableSelect
+                options={availableColumns.map((c) => ({ value: c.name, label: c.name }))}
+                value={inputColumns}
+                onChange={(v) => setInputColumns(Array.isArray(v) ? v : [])}
+                mode="multiple"
+                placeholder="选择输入列..."
+                searchPlaceholder="搜索输入列..."
+              />
             </div>
           )}
 
-          {/* Progress */}
-          {batchProgress && batchProgress.total > 0 && (
-            <div className="rounded-lg border p-4 space-y-3" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-              <div className="flex items-center justify-between text-sm">
-                <span style={{ color: 'var(--ink)' }}>
-                  {batchProgress.current} / {batchProgress.total} 行
-                </span>
-                <span style={{ color: 'var(--muted)' }}>{progressPercent.toFixed(1)}%</span>
+          {/* Output Column */}
+          {availableColumns.length > 0 && (
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>输出结果列</label>
+              <SearchableSelect
+                options={[
+                  ...availableColumns
+                    .filter((c) => !inputColumns.includes(c.name))
+                    .map((c) => ({ value: c.name, label: c.name })),
+                  { value: '__new__', label: '[新建列] AI结果' },
+                ]}
+                value={outputColumn}
+                onChange={(v) => setOutputColumn(typeof v === 'string' ? v : '')}
+                mode="single"
+                placeholder="选择输出列..."
+                searchPlaceholder="搜索输出列..."
+              />
+            </div>
+          )}
+
+          {/* Temperature */}
+          {availableColumns.length > 0 && (
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>LLM 温度</label>
+                <span className="text-[10px] font-mono px-1 rounded bg-[var(--bg)]" style={{ color: 'var(--primary)' }}>{modelParams.temperature}</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--bg)' }}>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={modelParams.temperature}
+                onChange={(e) => setModelParams({ temperature: parseFloat(e.target.value) })}
+                className="w-full h-1.5 accent-[var(--primary)] cursor-pointer"
+              />
+            </div>
+          )}
+
+          {/* Prompt Setup */}
+          <div>
+            <label className="text-[10px] font-semibold uppercase tracking-wider mb-1 block" style={{ color: 'var(--muted)' }}>提示词模板</label>
+            <div className="mb-2 flex gap-1">
+              <button
+                type="button"
+                onClick={() => setPromptMode('saved')}
+                className={`flex-1 text-center py-1 rounded text-[10px] font-medium border cursor-pointer transition-colors ${
+                  promptMode === 'saved'
+                    ? 'border-[var(--primary)] bg-[var(--primary-glow)] text-[var(--ink)]'
+                    : 'border-[var(--border)] text-[var(--muted)]'
+                }`}
+              >
+                已保存
+              </button>
+              <button
+                type="button"
+                onClick={() => setPromptMode('custom')}
+                className={`flex-1 text-center py-1 rounded text-[10px] font-medium border cursor-pointer transition-colors ${
+                  promptMode === 'custom'
+                    ? 'border-[var(--primary)] bg-[var(--primary-glow)] text-[var(--ink)]'
+                    : 'border-[var(--border)] text-[var(--muted)]'
+                }`}
+              >
+                自定义
+              </button>
+            </div>
+            {promptMode === 'saved' ? (
+              <SearchableSelect
+                options={[
+                  { value: '', label: '选择模板' },
+                  ...filteredPrompts.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+                value={selectedPromptId ?? ''}
+                onChange={(v) => setSelectedPromptId(typeof v === 'string' && v ? v : null)}
+                mode="single"
+                placeholder="选择模板"
+                searchPlaceholder="搜索模板..."
+                formatValue={(sel) => sel[0]?.label || '选择模板'}
+              />
+            ) : (
+              <textarea
+                className="w-full resize-none rounded px-2 py-1.5 text-[11px] focus-visible:outline-[var(--primary)]"
+                rows={3}
+                placeholder="输入处理提示词模板，例如：翻译以下文本：{{}}"
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Monitor Workspace */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* Workspace Header */}
+        <div className="p-3 border-b flex items-center justify-between shrink-0" style={{ borderColor: 'var(--border)' }}>
+          <div>
+            <span className="text-[10px]" style={{ color: 'var(--muted)' }}>LLM 批量数据处理控制台</span>
+            <h2 className="text-sm font-semibold flex items-center gap-1.5">
+              <Terminal className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+              {currentFile ? `${currentFile.name} · ${selectedSheet || '未选择'}` : '未加载数据'}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {!isRunning ? (
+              <button
+                onClick={handleStart}
+                disabled={!currentFile || !selectedSheet || inputColumns.length === 0 || !activePrompt}
+                className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                style={{ background: 'var(--primary)' }}
+              >
+                <Play className="h-3 w-3" />
+                开始
+              </button>
+            ) : (
+              <>
+                {batchProgress?.status === 'paused' ? (
+                  <button
+                    onClick={resumeBatch}
+                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-white cursor-pointer"
+                    style={{ background: 'var(--primary)' }}
+                  >
+                    <Play className="h-3 w-3" />
+                    继续
+                  </button>
+                ) : (
+                  <button
+                    onClick={pauseBatch}
+                    className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-[var(--surface-hover)] cursor-pointer"
+                    style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
+                  >
+                    <Pause className="h-3 w-3" />
+                    暂停
+                  </button>
+                )}
+                <button
+                  onClick={stopBatch}
+                  className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-white cursor-pointer"
+                  style={{ background: 'var(--error)' }}
+                >
+                  <Square className="h-3 w-3" />
+                  停止
+                </button>
+              </>
+            )}
+            <button
+              onClick={reset}
+              className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium hover:bg-[var(--surface-hover)] cursor-pointer"
+              style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+            >
+              重置
+            </button>
+          </div>
+        </div>
+
+        {/* Console Area */}
+        <div className="flex-1 flex flex-col min-h-0 p-3 gap-3">
+          {/* Error Message */}
+          {error && (
+            <div className="flex items-center gap-2 rounded-lg border p-2.5 text-xs shrink-0" style={{ borderColor: 'var(--error)', background: 'oklch(0.6 0.12 20 / 0.1)' }}>
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--error)' }} />
+              <span className="flex-1" style={{ color: 'var(--error)' }}>{error}</span>
+              <button onClick={() => setError(null)} className="text-xs font-medium hover:text-[var(--ink)] cursor-pointer shrink-0" style={{ color: 'var(--muted)' }}>关闭</button>
+            </div>
+          )}
+
+          {/* Progress Card */}
+          {batchProgress && batchProgress.total > 0 && (
+            <div className="rounded-lg border p-3 space-y-2 shrink-0" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium">
+                  进度：{batchProgress.current} / {batchProgress.total}
+                </span>
+                <span className="font-semibold" style={{ color: 'var(--primary)' }}>{progressPercent.toFixed(1)}%</span>
+              </div>
+              
+              <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--bg)' }}>
                 <div
                   className="h-full rounded-full transition-all duration-300"
                   style={{
@@ -357,61 +415,70 @@ export function LLMProcessingPage() {
                   }}
                 />
               </div>
-              <div className="flex items-center justify-between text-xs" style={{ color: 'var(--muted)' }}>
-                <span>
-                  速度: {batchProgress.speed.toFixed(1)} 行/分钟
-                </span>
+              
+              <div className="flex items-center justify-between text-[10px]" style={{ color: 'var(--muted)' }}>
+                <span>速度: {batchProgress.speed.toFixed(1)} 行/分</span>
                 {batchProgress.speed > 0 && (
-                  <span>
-                    预计剩余: {Math.ceil((batchProgress.total - batchProgress.current) / batchProgress.speed)} 分钟
-                  </span>
+                  <span>预计剩余: {Math.ceil((batchProgress.total - batchProgress.current) / batchProgress.speed)} 分钟</span>
                 )}
-                <span style={{ color: batchProgress.status === 'paused' ? 'var(--warning, #f59e0b)' : 'var(--primary)' }}>
-                  {batchProgress.status === 'running' ? '处理中...' : batchProgress.status === 'paused' ? '已暂停' : batchProgress.status}
+                <span className="font-medium" style={{ color: batchProgress.status === 'paused' ? 'oklch(0.7 0.12 80)' : 'var(--primary)' }}>
+                  {batchProgress.status === 'running' ? '执行中' : batchProgress.status === 'paused' ? '已暂停' : '已完成'}
                 </span>
               </div>
             </div>
           )}
 
-          {/* Logs */}
-          {batchLogs.length > 0 && (
-            <div className="rounded-lg border" style={{ borderColor: 'var(--border)' }}>
-              <div
-                className="flex items-center justify-between border-b px-4 py-2 cursor-pointer"
-                style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
-                onClick={() => setPreviewExpanded(!previewExpanded)}
-              >
-                <span className="text-sm font-medium">处理日志 ({batchLogs.length})</span>
-                {previewExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              </div>
-              {previewExpanded && (
-                <div className="max-h-64 overflow-auto p-2 space-y-1">
-                  {batchLogs.map((log) => (
-                    <div key={log.id} className="flex gap-2 rounded px-2 py-1 text-xs" style={{
-                      background: log.level === 'error' ? 'oklch(0.6 0.12 20 / 0.08)' :
-                        log.level === 'success' ? 'oklch(0.65 0.1 150 / 0.08)' :
-                        log.level === 'warning' ? 'oklch(0.7 0.12 80 / 0.08)' : 'transparent',
-                    }}>
-                      <span style={{ color: 'var(--muted)', whiteSpace: 'nowrap' }}>
-                        {log.row >= 0 ? `第${log.row + 1}行` : ''}
-                      </span>
-                      <span style={{ color: 'var(--ink)' }}>{log.content}</span>
-                    </div>
-                  ))}
-                  <div ref={logsEndRef} />
-                </div>
+          {/* Full-Height Terminal */}
+          <div className="flex flex-col border rounded-lg overflow-hidden flex-1 min-h-0" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between px-3 py-1.5 shrink-0" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+              <span className="text-[10px] font-semibold flex items-center gap-1" style={{ color: 'var(--muted)' }}>
+                <Terminal className="h-3 w-3" />
+                终端日志 ({batchLogs.length})
+              </span>
+              {batchLogs.length > 0 && (
+                <button
+                  onClick={clearLogs}
+                  className="text-[9px] hover:text-[var(--ink)] cursor-pointer"
+                  style={{ color: 'var(--muted)' }}
+                >
+                  清空
+                </button>
               )}
             </div>
-          )}
 
-          {/* Empty State */}
-          {files.length === 0 && (
-            <div className="py-16 text-center">
-              <FileSpreadsheet className="mx-auto mb-4 h-12 w-12" style={{ color: 'var(--muted)' }} />
-              <h3 className="mb-1 text-base font-medium">请先上传 Excel 文件</h3>
-              <p className="text-sm" style={{ color: 'var(--muted)' }}>在左侧"数据"页面上传后，即可在此处进行 LLM 批量处理</p>
+            <div 
+              className="flex-1 overflow-y-auto p-3 font-mono text-[11px] leading-relaxed space-y-1 select-text"
+              style={{ background: '#0a0a0a' }}
+            >
+              {batchLogs.length > 0 ? (
+                batchLogs.map((log) => {
+                  let colorClass = 'text-slate-300';
+                  if (log.level === 'error') colorClass = 'text-red-400 font-medium';
+                  else if (log.level === 'success') colorClass = 'text-emerald-400';
+                  else if (log.level === 'warning') colorClass = 'text-amber-400';
+                  
+                  return (
+                    <div key={log.id} className={`flex items-start gap-1.5 ${colorClass}`}>
+                      <span className="opacity-40 shrink-0 select-none text-[9px]">
+                        [{new Date(log.timestamp).toLocaleTimeString()}]
+                      </span>
+                      {log.row >= 0 && (
+                        <span className="text-indigo-400 shrink-0 font-medium select-none text-[10px]">
+                          [第 {log.row + 1} 行]
+                        </span>
+                      )}
+                      <span className="break-all whitespace-pre-wrap">{log.content}</span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="h-full flex items-center justify-center text-xs opacity-35 select-none text-slate-500 font-sans">
+                  控制台空闲，等待任务开始...
+                </div>
+              )}
+              <div ref={logsEndRef} />
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

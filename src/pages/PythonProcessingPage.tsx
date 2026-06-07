@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { FileCode, Terminal, FileSpreadsheet, AlertCircle, Play } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileCode, Terminal, FileSpreadsheet, AlertCircle, Play, Sparkles } from 'lucide-react';
 import { useExcelStore } from '../stores/excelStore';
-import { getSampleData } from '../services/tauri';
+import { SearchableSelect } from '../components/excel/SearchableSelect';
 
 export function PythonProcessingPage() {
   const { files, selections } = useExcelStore();
@@ -15,6 +15,18 @@ export function PythonProcessingPage() {
   const currentFile = files[selectedFileIdx];
   const currentSel = selections[selectedFileIdx];
   const sheets = currentSel?.sheetInfo ?? [];
+
+  useEffect(() => {
+    if (files.length > 0 && !selectedSheet) {
+      const idx = selections.findIndex((s) => s.sheetInfo.length > 0);
+      const selIdx = idx >= 0 ? idx : 0;
+      const sel = selections[selIdx];
+      if (sel && sel.sheetInfo.length > 0) {
+        setSelectedFileIdx(selIdx);
+        setSelectedSheet(sel.sheetInfo[0].name);
+      }
+    }
+  }, [files]);
 
   const generateTemplateScript = () => {
     if (!currentFile || !selectedSheet) return;
@@ -47,8 +59,7 @@ print(df.head())
     console.error = (...args) => { lines.push(`[ERROR] ${args.map(String).join(' ')}`); };
 
     try {
-      const AsyncFunctionConstructor = Object.getPrototypeOf(async () => {}).constructor as new (...args: string[]) => (...args: unknown[]) => Promise<unknown>;
-      const asyncFn = new AsyncFunctionConstructor('__filename', '__sheetname', script);
+      const asyncFn = AsyncFunction('__filename', '__sheetname', script);
       const result = await asyncFn(currentFile?.path ?? '', selectedSheet);
       if (result !== undefined) {
         lines.push(`返回值: ${String(result)}`);
@@ -65,117 +76,146 @@ print(df.head())
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex-1 overflow-auto p-6">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <div className="flex items-center gap-3">
-            <FileCode className="h-6 w-6" style={{ color: 'var(--primary)' }} />
-            <h2 className="text-lg font-semibold">Python 处理</h2>
+    <div className="flex h-full flex-row overflow-hidden bg-[var(--bg)] divide-x divide-[var(--border)]">
+      {/* Left Column: Script Workspace */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-[360px]">
+        {/* Compact header toolbar */}
+        <div className="p-3 border-b shrink-0" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--muted)' }}>
+              <FileCode className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
+              Python 脚本
+            </span>
+            {currentFile && selectedSheet && (
+              <button
+                onClick={generateTemplateScript}
+                className="flex items-center gap-1 text-[10px] hover:text-[var(--ink)] cursor-pointer"
+                style={{ color: 'var(--primary)' }}
+              >
+                <Sparkles className="h-3 w-3" />
+                生成模板
+              </button>
+            )}
           </div>
 
-          {/* File/Sheet Selection */}
-          <div className="rounded-lg border p-4 space-y-4" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>Excel 文件</label>
-                {files.length > 0 ? (
-                  <select
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={selectedFileIdx}
-                    onChange={(e) => { setSelectedFileIdx(Number(e.target.value)); setSelectedSheet(''); }}
-                  >
-                    {files.map((f, i) => (
-                      <option key={i} value={i}>{f.name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="flex h-9 items-center rounded-md px-3 text-sm" style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
-                    请先上传文件
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>Sheet</label>
-                <select
-                  className="h-9 w-full rounded-md px-3 text-sm"
-                  style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                  value={selectedSheet}
-                  onChange={(e) => setSelectedSheet(e.target.value)}
-                  disabled={sheets.length === 0}
-                >
-                  <option value="">选择 Sheet</option>
-                  {sheets.map((s) => (
-                    <option key={s.name} value={s.name}>{s.name} ({s.rowCount}行)</option>
-                  ))}
-                </select>
-              </div>
+          {/* Inline selectors */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className="text-[9px] font-medium shrink-0" style={{ color: 'var(--muted)' }}>文件</span>
+              {files.length > 0 ? (
+                <SearchableSelect
+                  className="flex-1 min-w-0"
+                  options={files.map((f, i) => ({ value: String(i), label: f.name }))}
+                  value={String(selectedFileIdx)}
+                  onChange={(v) => { setSelectedFileIdx(Number(v)); setSelectedSheet(''); }}
+                  mode="single"
+                  placeholder="选择文件"
+                  searchPlaceholder="搜索文件..."
+                />
+              ) : (
+                <div className="h-7 flex-1 flex items-center rounded px-2 text-[11px]" style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
+                  暂无文件
+                </div>
+              )}
             </div>
-
-            {/* Script Editor */}
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Python 脚本</label>
-                {currentFile && selectedSheet && (
-                  <button
-                    onClick={generateTemplateScript}
-                    className="text-xs underline"
-                    style={{ color: 'var(--primary)' }}
-                  >
-                    生成模板
-                  </button>
-                )}
-              </div>
-              <textarea
-                className="w-full resize-none rounded-md px-3 py-2 text-sm font-mono leading-relaxed"
-                rows={12}
-                placeholder={`import pandas as pd\n\n# 读取 Excel\npath = r"文件路径"\ndf = pd.read_excel(path, sheet_name="Sheet1")\n\n# 处理数据\nprint(df.head())`}
-                value={script}
-                onChange={(e) => setScript(e.target.value)}
-                style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)', fontFamily: 'ui-monospace, monospace' }}
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className="text-[9px] font-medium shrink-0" style={{ color: 'var(--muted)' }}>Sheet</span>
+              <SearchableSelect
+                className="flex-1 min-w-0"
+                options={sheets.map((s) => ({ value: s.name, label: `${s.name} (${s.rowCount}行)` }))}
+                value={selectedSheet}
+                onChange={(v) => setSelectedSheet(typeof v === 'string' ? v : '')}
+                mode="single"
+                placeholder="选择"
+                searchPlaceholder="搜索 Sheet..."
+                disabled={sheets.length === 0}
               />
             </div>
-
-            {/* Actions */}
-            <button
-              onClick={handleRun}
-              disabled={!script.trim() || running}
-              className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
-              style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-            >
-              <Play className="h-4 w-4" />
-              {running ? '执行中...' : '执行脚本'}
-            </button>
           </div>
+        </div>
 
-          {/* Error */}
-          {error && (
-            <div className="flex items-center gap-2 rounded-lg border p-3" style={{ borderColor: 'var(--error)', background: 'oklch(0.6 0.12 20 / 0.1)' }}>
-              <AlertCircle className="h-4 w-4" style={{ color: 'var(--error)' }} />
-              <span className="text-sm" style={{ color: 'var(--error)' }}>{error}</span>
-              <button onClick={() => setError(null)} className="ml-auto text-sm" style={{ color: 'var(--muted)' }}>关闭</button>
-            </div>
-          )}
-
-          {/* Output */}
-          {output !== null && (
-            <div className="rounded-lg border" style={{ borderColor: 'var(--border)' }}>
-              <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-                <Terminal className="h-4 w-4" style={{ color: 'var(--primary)' }} />
-                <span className="text-sm font-medium">执行输出</span>
+        {/* Full-height script editor */}
+        {currentFile ? (
+          <div className="flex-1 flex flex-col min-h-0 p-3 gap-2">
+            <div className="flex-1 flex flex-col border rounded-lg overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex items-center px-3 py-1 text-[9px] font-semibold border-b justify-between select-none" style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+                <span>script.py</span>
+                <span className="font-mono">pandas & openpyxl</span>
               </div>
-              <pre className="max-h-80 overflow-auto p-4 text-sm font-mono leading-relaxed" style={{ color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>
-                {output}
-              </pre>
+              <textarea
+                className="flex-1 w-full resize-none p-3 font-mono text-[11px] leading-relaxed focus-visible:outline-none select-text"
+                placeholder={`# 导入 pandas 开始处理数据...\nimport pandas as pd\n\n# 点击"生成模板"自动填充`}
+                value={script}
+                onChange={(e) => setScript(e.target.value)}
+                style={{ background: 'var(--bg)', color: 'var(--ink)' }}
+              />
+            </div>
+            
+            <div className="flex items-center justify-end shrink-0">
+              <button
+                onClick={handleRun}
+                disabled={!script.trim() || running}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                style={{ background: 'var(--primary)' }}
+              >
+                <Play className="h-3 w-3" />
+                {running ? '执行中...' : '运行脚本'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <FileSpreadsheet className="h-12 w-12 mb-3" style={{ color: 'var(--muted)' }} />
+            <h3 className="text-sm font-medium mb-1">请先上传 Excel 文件</h3>
+            <p className="text-xs max-w-xs" style={{ color: 'var(--muted)' }}>
+              在"数据"页面导入文件后，即可在此处编写并执行 Python 处理脚本。
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Right Column: Full-height Terminal Output */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-[360px]">
+        <div className="p-3 border-b shrink-0" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--muted)' }}>
+              <Terminal className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
+              控制台输出
+            </span>
+            {output !== null && (
+              <button
+                onClick={() => setOutput(null)}
+                className="text-[10px] hover:text-[var(--ink)] cursor-pointer"
+                style={{ color: 'var(--muted)' }}
+              >
+                清空
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div 
+          className="flex-1 overflow-y-auto p-4 font-mono text-[11px] leading-relaxed space-y-3"
+          style={{ background: '#0a0a0a' }}
+        >
+          {error && (
+            <div className="flex items-start gap-2 text-red-400 border border-red-950 bg-red-950/20 rounded-md p-3">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-xs mb-1">脚本执行发生错误</p>
+                <p className="break-all whitespace-pre-wrap">{error}</p>
+              </div>
             </div>
           )}
 
-          {/* Hint */}
-          {!currentFile && (
-            <div className="py-16 text-center">
-              <FileSpreadsheet className="mx-auto mb-4 h-12 w-12" style={{ color: 'var(--muted)' }} />
-              <h3 className="mb-1 text-base font-medium">请先上传 Excel 文件</h3>
-              <p className="text-sm" style={{ color: 'var(--muted)' }}>或在右栏通过 AI 对话生成 Python 处理脚本</p>
+          {output !== null ? (
+            <div className="text-slate-300">
+              <p className="text-[9px] font-sans font-semibold mb-2 text-slate-500 border-b border-zinc-800 pb-1 select-none">STDOUT & LOGS</p>
+              <pre className="break-all whitespace-pre-wrap">{output}</pre>
+            </div>
+          ) : !error && (
+            <div className="h-full flex items-center justify-center text-xs opacity-35 select-none text-slate-500 font-sans">
+              控制台输出为空，等待运行脚本...
             </div>
           )}
         </div>

@@ -1,9 +1,44 @@
+import { useState } from 'react';
 import type { AgentMessage } from '../../types/agent';
 import { useAgentStore } from '../../stores/agentStore';
 import { ContextPreview } from './ContextPreview';
 
 interface MessageListProps {
   messages: AgentMessage[];
+}
+
+function UserMessage({ message }: { message: AgentMessage }) {
+  const [expanded, setExpanded] = useState(false);
+  const display = message.displayContent ?? message.content;
+  const full = message.fullContent;
+
+  if (!full || display === full) {
+    return <div className="whitespace-pre-wrap text-sm leading-relaxed">{display}</div>;
+  }
+
+  return (
+    <div>
+      <div className="whitespace-pre-wrap text-sm leading-relaxed">{display}</div>
+      {!expanded && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="mt-1 text-xs underline opacity-60 hover:opacity-100"
+          style={{ color: 'var(--muted)' }}
+        >
+          展开完整 Prompt
+        </button>
+      )}
+      {expanded && (
+        <div
+          className="mt-2 whitespace-pre-wrap rounded border p-2 text-xs leading-relaxed"
+          style={{ borderColor: 'var(--border)', color: 'var(--ink-light)' }}
+        >
+          {full}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function MessageList({ messages }: MessageListProps) {
@@ -36,13 +71,19 @@ export function MessageList({ messages }: MessageListProps) {
               color: 'var(--ink)',
             }}
           >
-            {message.content}
-            {message.isStreaming && (
-              <span
-                aria-hidden="true"
-                className="streaming-cursor ml-1 inline-block h-4 w-1.5 align-[-2px]"
-                style={{ background: 'var(--primary)' }}
-              />
+            {message.role === 'user' ? (
+              <UserMessage message={message} />
+            ) : (
+              <>
+                {message.content}
+                {message.isStreaming && (
+                  <span
+                    aria-hidden="true"
+                    className="streaming-cursor ml-1 inline-block h-4 w-1.5 align-[-2px]"
+                    style={{ background: 'var(--primary)' }}
+                  />
+                )}
+              </>
             )}
           </div>
         </article>

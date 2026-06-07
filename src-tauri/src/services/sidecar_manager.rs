@@ -14,7 +14,7 @@ use tokio::{
 
 use crate::{
     error::{AppError, AppResult},
-    models::agent::AgentStatus,
+    models::agent::{AgentStatus, DirectLlmRequest},
 };
 
 const HEARTBEAT_TIMEOUT: Duration = Duration::from_secs(15);
@@ -127,6 +127,22 @@ impl SidecarManager {
 
         self.write_json_line(payload).await.ok();
         Ok(())
+    }
+
+    pub async fn send_direct_llm_message(&self, req: DirectLlmRequest) -> AppResult<()> {
+        let payload = json!({
+            "id": req.request_id,
+            "type": "direct_llm_message",
+            "action": req.action,
+            "content": req.content,
+            "context": {
+                "fileName": req.context.file_name,
+                "sheets": req.context.sheets,
+                "samplePreview": req.context.sample_preview,
+            },
+        });
+        *self.is_streaming.write().await = true;
+        self.write_json_line(payload).await
     }
 
     pub async fn send_batch_command(

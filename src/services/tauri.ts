@@ -174,6 +174,24 @@ export function stopAgentStream() {
   return invoke<void>('stop_agent_stream');
 }
 
+// Direct LLM
+export interface DirectLlmContext {
+  fileName: string;
+  sheets: Array<{ sheet: string; columns: string[] }>;
+  samplePreview?: string;
+}
+
+export interface DirectLlmRequest {
+  requestId: string;
+  action: 'formula_generation' | 'prompt_generation';
+  content: string;
+  context: DirectLlmContext;
+}
+
+export function sendDirectLlmMessage(req: DirectLlmRequest) {
+  return invoke<void>('send_direct_llm_message', { req });
+}
+
 // Events
 export function onAgentEvent(handler: (event: SidecarEvent) => void) {
   return listen<SidecarEvent>('agent-event', (event) => handler(event.payload));

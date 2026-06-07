@@ -5,6 +5,7 @@ import type { AgentSession } from '@earendil-works/pi-coding-agent';
 import { BatchRunner } from './batch/runner.js';
 import type { RowCompleteUpdate } from './batch/progress.js';
 import type { TextContent } from '@earendil-works/pi-ai';
+import { runDirectLlmStream, abortDirectLlm } from './direct-llm.js';
 
 const args = parseArgs();
 const bridgePort = args.bridgePort;
@@ -199,6 +200,14 @@ async function handleBatchStart(params: Extract<SidecarCommand, { type: 'batch_s
   });
 }
 
+async function handleDirectLlmMessage(command: Extract<SidecarCommand, { type: 'direct_llm_message' }>) {
+  if (!bridge) {
+    emit({ type: 'agent_error', id: command.id, message: 'Bridge 未初始化' });
+    return;
+  }
+  await runDirectLlmStream(bridge, command, emit);
+}
+
 async function handleCommand(command: SidecarCommand) {
   switch (command.type) {
     case 'ping':
@@ -206,6 +215,9 @@ async function handleCommand(command: SidecarCommand) {
       break;
     case 'user_message':
       await handleUserMessage(command);
+      break;
+    case 'direct_llm_message':
+      await handleDirectLlmMessage(command);
       break;
     case 'steer':
       await handleSteer(command);
@@ -235,6 +247,7 @@ async function handleCommand(command: SidecarCommand) {
       break;
     }
     case 'stop':
+      abortDirectLlm();
       break;
   }
 }

@@ -1,6 +1,10 @@
 use tauri::{AppHandle, State};
 
-use crate::{error::AppError, models::agent::AgentStatus, AppState};
+use crate::{
+    error::AppError,
+    models::agent::{AgentStatus, DirectLlmRequest},
+    AppState,
+};
 
 #[tauri::command]
 pub async fn get_agent_status(state: State<'_, AppState>) -> Result<AgentStatus, String> {
@@ -31,4 +35,12 @@ pub async fn steer_agent(
 #[tauri::command]
 pub async fn stop_agent_stream(state: State<'_, AppState>) -> Result<(), AppError> {
     state.sidecar_manager.stop_stream().await
+}
+
+#[tauri::command]
+pub async fn send_direct_llm_message(
+    state: State<'_, AppState>,
+    req: DirectLlmRequest,
+) -> Result<(), AppError> {
+    state.sidecar_manager.send_direct_llm_message(req).await
 }

@@ -7,11 +7,11 @@ export type ResolvedTheme = 'light' | 'dark';
 
 export const SIDEBAR_LEFT_MIN = 48;
 export const SIDEBAR_LEFT_MAX = 400;
-export const SIDEBAR_LEFT_DEFAULT = 256;
+export const SIDEBAR_LEFT_DEFAULT = 192;
 
 export const SIDEBAR_RIGHT_MIN = 200;
 export const SIDEBAR_RIGHT_MAX = 600;
-export const SIDEBAR_RIGHT_DEFAULT = 384;
+export const SIDEBAR_RIGHT_DEFAULT = 440;
 
 const THEME_STORAGE_KEY = 'ai-sheet:theme-mode';
 const AGENT_MODEL_STORAGE_KEY = 'ai-sheet:agent-model';

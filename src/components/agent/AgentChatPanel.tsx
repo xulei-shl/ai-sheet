@@ -5,12 +5,12 @@ import { useAgentStore } from '../../stores/agentStore';
 import { ErrorState } from '../ui/ErrorState';
 import { AgentInput } from './AgentInput';
 import { MessageList } from './MessageList';
+import { QuickActionBar } from './QuickActionBar';
 
 export function AgentChatPanel() {
   const {
     error,
     handleEvent,
-    isSending,
     markOffline,
     messages,
     refreshStatus,
@@ -18,6 +18,8 @@ export function AgentChatPanel() {
     sendMessage,
     status,
   } = useAgentStore();
+
+  const agentStreamingRequestId = useAgentStore((s) => s.agentStreamingRequestId);
 
   useEffect(() => {
     void refreshStatus();
@@ -41,6 +43,7 @@ export function AgentChatPanel() {
   }, [handleEvent, markOffline, refreshStatus]);
 
   const isReady = status?.ready ?? false;
+  const isAgentStreaming = agentStreamingRequestId !== null;
 
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label="AI-Sheet Agent">
@@ -80,7 +83,8 @@ export function AgentChatPanel() {
         <MessageList messages={messages} />
       </div>
 
-      <AgentInput disabled={!isReady} isStreaming={isSending} onSend={sendMessage} />
+      <QuickActionBar />
+      <AgentInput disabled={!isReady} isStreaming={isAgentStreaming} onSend={sendMessage} />
     </section>
   );
 }

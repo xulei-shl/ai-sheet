@@ -389,6 +389,8 @@ Excel 读写是 CPU 密集 + 内存密集操作，calamine / rust_xlsxwriter
 | `agent_delta` | `agent-event` | 流式文本片段 |
 | `agent_done` | `agent-event` | 一轮回复结束 |
 | `agent_tool_start` / `agent_tool_end` | `agent-event` | 工具调用 |
+| `direct_llm_message`（stdin） | — | 直接 LLM 调用，绕过 AgentSession |
+| `agent_delta/done/error` + `id=direct-...` | `agent-event` | 路由到 Direct LLM 流 |
 | `agent_error` | `agent-event` | 错误 |
 | `batch_progress` | `batch-progress` | 批量进度 |
 | `batch_row_complete` | `batch-row-complete` | 单行完成 |
@@ -705,6 +707,41 @@ const { session } = await createAgentSession({
 - 公式页面在应用成功后自动 `saveFormulaCache()`。
 - LLM 页面从 promptStore 拉取列表（下拉选择）。
 
+### 8.7 快捷 LLM 触发
+
+右栏 AgentChatPanel 底部输入框上方新增 <QuickActionBar />，提供两
+个固定按钮：「公式生成」「提示词生成」。点击后**不进入** pi-agent 的
+AgentSession / tool loop，而是走独立 Direct LLM 流：
+
+```
+QuickActionBar 按钮点击
+   │
+   ▼
+前端构建完整 prompt（模板 + header + Excel 上下文）
+   │  agentQuickActions.ts: findPromptTemplate + buildExcelContext + buildDirectPrompt
+   ▼
+agentStore.sendDirectLlmMessage(action, displaySummary, fullPrompt)
+   │  → 生成 requestId (direct-...)
+   │  → 添加 user & assistant message（assistant 标记 isStreaming）
+   ▼
+invoke('send_direct_llm_message', { requestId, action, content, context })
+   │
+   ▼
+Rust → stdin → Node runDirectLlmStream → pi-ai stream()
+   │
+   ▼
+agent_delta/done → agentStore.handleEvent (按 event.id 前缀路由)
+```
+
+**关键设计**：
+- Agent 流与 Direct LLM 流可并发（`agentStreamingRequestId` 与 `directStreamingRequestId` 分离）。
+- prompt 拼接全在前端（`agentQuickActions.ts`），Node 只做 `stream()` 调用。
+- 模板从 `promptStore` 取（按 `name` 精确匹配 `Excel公式生成` / `提示词生成`），
+  无匹配时 fallback 到 `FALLBACK_TEMPLATES` 硬编码。
+- Excel 上下文优先用 `agentStore.loadedContext`，仅 sample preview 从 `excelStore` 补。
+- `{}` 占位符表示行号替换（`apply_formula` 实际行为）。
+- `stop` 命令修复：现在调用 `abortDirectLlm()` 可停止 Direct LLM 流。
+
 ---
 
 ## 9. 双模式设计原则
@@ -712,9 +749,10 @@ const { session } = await createAgentSession({
 每个核心功能同时支持**直接执行**和 **Agent 辅助**两种模式。
 
 | 模式 | 触发 | 适用 | 位置 |
-|---|---|---|---|
+|---|---|---|---|---|
 | 直接执行 | 中栏表单 | 已有提示词/公式的重复任务 | 中栏页面 + Rust Tauri Commands → Sidecar |
 | Agent 辅助 | 右栏对话 | 首次生成、迭代优化、复杂需求 | `AgentChatPanel` + pi-agent |
+| 快捷 LLM | 右栏快捷按钮（QuickActionBar） | 固定模板 + Excel 上下文的一次性流式生成 | Right sidebar QuickActionBar + `direct-llm.ts` stream() |
 
 **核心原则**：
 - Agent 是"生成器"（首次创作、迭代优化）。

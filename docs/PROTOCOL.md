@@ -145,6 +145,7 @@ Tauri Builder
 type SidecarCommand =
   | { id: string; type: 'ping' }
   | { id: string; type: 'user_message'; content: string }
+  | { id: string; type: 'direct_llm_message'; action: string; content: string; context: DirectLlmContext }
   | { id: string; type: 'steer'; context: AgentContext }
   | { id: string; type: 'batch_start'; params: BatchParams }
   | { id: string; type: 'batch_pause'; batchId: string }
@@ -154,8 +155,23 @@ type SidecarCommand =
   | { id: string; type: 'stop' };
 ```
 
-`id` 由 Rust 端生成 `msg-<millis>` / `steer-<millis>` / `batch-<millis>`，
+`id` 由 Rust/前端生成：Agent 流用 `msg-<millis>`，Direct LLM 流用 `direct-<millis>-<rand>`，
+steer 用 `steer-<millis>`，batch 用 `batch-<millis>`。
 Node.js 在对应事件中带回（便于关联）。
+
+> **注意**：`id` 前缀用于前端 store 路由 —— `msg-` 前缀的 `agent_delta/done/error`
+> 路由到 Agent 流状态（`agentStreamingRequestId`），`direct-` 前缀路由到 Direct LLM
+> 流状态（`directStreamingRequestId`）。两者互不阻塞，可并发。
+
+#### DirectLlmContext
+
+```ts
+interface DirectLlmContext {
+  fileName: string;
+  sheets: Array<{ sheet: string; columns: string[] }>;
+  samplePreview?: string;  // Markdown 表格，<= 5 行
+}
+```
 
 #### AgentContext
 
@@ -442,6 +458,48 @@ emit('batch_done' | 'batch_error')
 - 启动时：`_getCheckpoint()` 读取，决定 `resumeFrom`。
 - 运行时：每行成功后 `_saveCheckpoint(i+1)`。
 - 双保险：每行处理前还查 `processing-status` 跳过已写行。
+
+### 6.6 Direct LLM 生命周期
+
+直接 LLM 调用绕过 AgentSession，由 `runDirectLlmStream`（`direct-llm.ts`）
+通过 `pi-ai` 的 `stream()` 发起单轮 LLM 调用。
+
+```
+前端 QuickActionBar 点击
+   │
+   ▼
+agentStore.sendDirectLlmMessage()
+   │   userMsg + assistantMsg(empty, streaming) → messages
+   │   requestId = `direct-{millis}-{rand}`
+   ▼
+invoke('send_direct_llm_message', { requestId, action, content, context })
+   │
+   ▼
+Sidecar stdin: { type:'direct_llm_message', id, action, content, context }
+   │
+   ▼
+runDirectLlmStream(bridge, command, emit)
+   │   getDefaultModel() → getModel() → applyApiKeyEnv()
+   │   new AbortController()
+   │   stream(model, { systemPrompt, messages:[{role:'user', content}] }, { signal })
+   │
+   ├─► text_delta → emit('agent_delta', { id: 'direct-...', delta })
+   ├─► err → emit('agent_error', { id: 'direct-...', message })
+   └─► done/abort → emit('agent_done', { id: 'direct-...' })
+   │
+   ▼
+Rust Event Bridge → Tauri Events → agentStore.handleEvent
+   │   按 event.id 前缀路由到 directStreamingRequestId
+   │   匹配已有 assistant message（requestId === event.id）追加 delta
+   ▼
+完成 → directStreamingRequestId = null
+```
+
+**约束**：
+- 仅单轮（不进入 AgentSession 的多轮上下文）。
+- 支持 AbortController 取消（`stop` 命令触发 `abortDirectLlm()`）。
+- API Key 通过 `applyApiKeyEnv` 注入环境变量，与 Agent/BatchRunner 一致。
+- `id` 前缀为 `direct-`，前端按此区分 Agent 流与 Direct LLM 流。
 
 ---
 

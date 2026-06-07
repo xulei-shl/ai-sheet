@@ -4,20 +4,28 @@ import {
   getAgentStatus,
   restartSidecar,
   sendAgentMessage,
+  sendDirectLlmMessage as sendDirectLlmMessageRust,
   setActiveAgentModel,
   type ActiveAgentModel,
+  type DirectLlmRequest,
 } from '../services/tauri';
 import type { AgentMessage, AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
 import { useConfigStore } from './configStore';
+
+function resolveRequestKind(id: string): 'agent' | 'direct' {
+  return id.startsWith('direct-') ? 'direct' : 'agent';
+}
 
 interface AgentStore {
   messages: AgentMessage[];
   status: AgentStatus | null;
   error: string | null;
-  isSending: boolean;
+  agentStreamingRequestId: string | null;
+  directStreamingRequestId: string | null;
   isApplyingModel: boolean;
   appliedModelName: string | null;
   loadedContext: AgentContext | null;
+
   refreshStatus: () => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
   restart: () => Promise<void>;
@@ -26,13 +34,15 @@ interface AgentStore {
   markOffline: (message: string) => void;
   setLoadedContext: (context: AgentContext | null) => void;
   clearMessages: () => void;
+  sendDirectLlmMessage: (action: 'formula_generation' | 'prompt_generation', userDisplay: string, fullPrompt: string) => Promise<void>;
 }
 
 export const useAgentStore = create<AgentStore>((set, get) => ({
   messages: [],
   status: null,
   error: null,
-  isSending: false,
+  agentStreamingRequestId: null,
+  directStreamingRequestId: null,
   isApplyingModel: false,
   appliedModelName: null,
   loadedContext: null,
@@ -46,6 +56,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     const trimmed = content.trim();
     if (!trimmed) return;
 
+    const pendingId = `msg-pending-${Date.now()}`;
+
     const userMessage: AgentMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -54,7 +66,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
     set((state) => ({
       messages: [...state.messages, userMessage],
-      isSending: true,
+      agentStreamingRequestId: pendingId,
       error: null,
     }));
 
@@ -63,7 +75,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : String(error),
-        isSending: false,
+        agentStreamingRequestId: null,
       });
     }
   },
@@ -111,46 +123,53 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   handleEvent: (event) => {
     if (event.type === 'agent_error') {
-      set({ error: event.message, isSending: false });
+      set({ error: event.message });
+      if (event.id) {
+        const kind = resolveRequestKind(event.id);
+        set((s) => ({
+          messages: s.messages.map((m) =>
+            m.requestId === event.id ? { ...m, isStreaming: false } : m,
+          ),
+          [kind === 'agent'
+            ? 'agentStreamingRequestId'
+            : 'directStreamingRequestId']: null,
+        }));
+      }
       return;
     }
 
-    if (event.type === 'agent_delta') {
-      set((state) => {
-        const last = state.messages[state.messages.length - 1];
-
-        if (last?.role === 'assistant' && last.isStreaming) {
+    if (event.type === 'agent_delta' && event.id && event.delta) {
+      set((s) => {
+        const idx = s.messages.findIndex((m) => m.requestId === event.id);
+        if (idx === -1) {
           return {
             messages: [
-              ...state.messages.slice(0, -1),
-              { ...last, content: `${last.content}${event.delta}` },
+              ...s.messages,
+              {
+                id: `assistant-${event.id}`,
+                requestId: event.id,
+                role: 'assistant' as const,
+                content: event.delta,
+                isStreaming: true,
+              },
             ],
           };
         }
-
-        return {
-          messages: [
-            ...state.messages,
-            {
-              id: `assistant-${event.id}`,
-              role: 'assistant',
-              content: event.delta,
-              isStreaming: true,
-            },
-          ],
-        };
+        const arr = [...s.messages];
+        arr[idx] = { ...arr[idx], content: arr[idx].content + event.delta };
+        return { messages: arr };
       });
       return;
     }
 
-    if (event.type === 'agent_done') {
-      set((state) => ({
-        isSending: false,
-        messages: state.messages.map((message) =>
-          message.role === 'assistant' && message.isStreaming
-            ? { ...message, isStreaming: false }
-            : message,
+    if (event.type === 'agent_done' && event.id) {
+      set((s) => ({
+        messages: s.messages.map((m) =>
+          m.requestId === event.id ? { ...m, isStreaming: false } : m,
         ),
+        [resolveRequestKind(event.id) === 'agent'
+          ? 'agentStreamingRequestId'
+          : 'directStreamingRequestId']: null,
       }));
     }
   },
@@ -158,7 +177,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   markOffline: (message) => {
     set((state) => ({
       error: message,
-      isSending: false,
+      agentStreamingRequestId: null,
+      directStreamingRequestId: null,
       status: state.status ? { ...state.status, ready: false, message } : null,
     }));
   },
@@ -169,5 +189,61 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   clearMessages: () => {
     set({ messages: [], error: null });
+  },
+
+  sendDirectLlmMessage: async (action, userDisplay, fullPrompt) => {
+    const { status, directStreamingRequestId } = get();
+    if (directStreamingRequestId) throw new Error('direct LLM 正在生成中');
+    if (!status?.ready) throw new Error('Sidecar 未就绪');
+
+    const { loadedContext } = get();
+    if (!loadedContext?.loadedFiles?.length) throw new Error('未加载 Excel 上下文');
+
+    const first = loadedContext.loadedFiles[0];
+    const context: DirectLlmRequest['context'] = {
+      fileName: first.name,
+      sheets: first.sheets.map((s) => ({ sheet: s.sheetName, columns: s.columns })),
+    };
+
+    const requestId = `direct-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+    const userMsg: AgentMessage = {
+      id: `user-${requestId}`,
+      requestId,
+      role: 'user',
+      content: userDisplay,
+      displayContent: userDisplay,
+      fullContent: fullPrompt,
+    };
+    const assistantMsg: AgentMessage = {
+      id: `assistant-${requestId}`,
+      requestId,
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+    };
+
+    set((s) => ({
+      messages: [...s.messages, userMsg, assistantMsg],
+      directStreamingRequestId: requestId,
+      error: null,
+    }));
+
+    try {
+      await sendDirectLlmMessageRust({
+        requestId,
+        action,
+        content: fullPrompt,
+        context,
+      });
+    } catch (error) {
+      set((s) => ({
+        error: error instanceof Error ? error.message : String(error),
+        messages: s.messages.map((m) =>
+          m.requestId === requestId ? { ...m, isStreaming: false } : m,
+        ),
+        directStreamingRequestId: null,
+      }));
+    }
   },
 }));

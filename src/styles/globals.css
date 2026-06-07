@@ -58,6 +58,16 @@
   --QYL-blockquote-svg: #515c63;
   --QYL-blockquote: #9ca6ac;
   --QYL-custom-primary-main: 123deg;
+
+  /* === Markdown preview palette (语义角色按色相区分) === */
+  --QYL-md-heading: #9db56d;                      /* 标题 h1-h6：橄榄绿 */
+  --QYL-md-link: #82b8c4;                         /* 链接 a：青蓝 */
+  --QYL-md-code: #d4b572;                         /* 行内 code / kbd：暖金 */
+  --QYL-md-strong: #e8a48a;                       /* strong 强调：桃红 */
+  --QYL-md-em: #b8a98a;                           /* em 斜体：沙黄 */
+  --QYL-md-blockquote: #a8a4c0;                   /* 引用：紫灰 */
+  --QYL-md-rule: #82b8c4;                         /* hr 分隔线：青蓝 */
+  --QYL-md-soft: rgba(130, 184, 196, 0.12);       /* 装饰背景：code / 引用 / 表头 */
 }
 
 [data-theme-mode="dark"] {
@@ -107,6 +117,16 @@
   --QYL-blockquote-svg: #515c63;
   --QYL-blockquote: #9ca6ac;
   --QYL-custom-primary-main: 123deg;
+
+  /* === Markdown preview palette (语义角色按色相区分) === */
+  --QYL-md-heading: #9db56d;                      /* 标题 h1-h6：橄榄绿 */
+  --QYL-md-link: #82b8c4;                         /* 链接 a：青蓝 */
+  --QYL-md-code: #d4b572;                         /* 行内 code / kbd：暖金 */
+  --QYL-md-strong: #e8a48a;                       /* strong 强调：桃红 */
+  --QYL-md-em: #b8a98a;                           /* em 斜体：沙黄 */
+  --QYL-md-blockquote: #a8a4c0;                   /* 引用：紫灰 */
+  --QYL-md-rule: #82b8c4;                         /* hr 分隔线：青蓝 */
+  --QYL-md-soft: rgba(130, 184, 196, 0.12);       /* 装饰背景：code / 引用 / 表头 */
 }
 
 [data-theme-mode="light"] {
@@ -153,6 +173,16 @@
   --QYL-blockquote: #858371;
   --QYL-inline-code: #3f50a3;
   --QYL-custom-primary-main: 105deg;
+
+  /* === Markdown preview palette (语义角色按色相区分) === */
+  --QYL-md-heading: #3f50a3;                      /* 标题 h1-h6：靛蓝 */
+  --QYL-md-link: #3d6e9a;                         /* 链接 a：中蓝 */
+  --QYL-md-code: #8a5a23;                         /* 行内 code / kbd：棕橙 */
+  --QYL-md-strong: #a14545;                       /* strong 强调：砖红 */
+  --QYL-md-em: #7a6a3a;                           /* em 斜体：橄榄黄 */
+  --QYL-md-blockquote: #6a5e7a;                   /* 引用：紫灰 */
+  --QYL-md-rule: #3d6e9a;                         /* hr 分隔线：中蓝 */
+  --QYL-md-soft: rgba(61, 110, 154, 0.1);         /* 装饰背景：code / 引用 / 表头 */
 }
 
 /* ============================================================
@@ -291,17 +321,19 @@ textarea:focus-visible {
 
 /* ============================================================
    Markdown body
+   Color tokens follow the Wilderness / WoodAsh spec in
+   docs/changelog/颜色升级/颜色设计升级.md.
    ============================================================ */
 
 .markdown-body {
   color: var(--ink);
-  line-height: 1.65;
-  font-size: 0.875rem;
+  line-height: 1.75;
+  font-size: 0.95rem;
   word-break: break-word;
 }
 
 .markdown-body > * + * {
-  margin-top: 0.85em;
+  margin-top: 0.95em;
 }
 
 .markdown-body h1,
@@ -311,18 +343,18 @@ textarea:focus-visible {
 .markdown-body h5,
 .markdown-body h6 {
   font-weight: 600;
-  color: var(--ink);
   line-height: 1.3;
-  margin-top: 1.2em;
-  margin-bottom: 0.3em;
+  margin-top: 1.4em;
+  margin-bottom: 0.4em;
+  color: var(--QYL-md-heading);
 }
 
-.markdown-body h1 { font-size: 1.5em; }
-.markdown-body h2 { font-size: 1.25em; }
-.markdown-body h3 { font-size: 1.1em; }
+.markdown-body h1 { font-size: 1.6em; }
+.markdown-body h2 { font-size: 1.35em; }
+.markdown-body h3 { font-size: 1.15em; }
 .markdown-body h4,
 .markdown-body h5,
-.markdown-body h6 { font-size: 1em; }
+.markdown-body h6 { font-size: 1.05em; }
 
 .markdown-body p { margin: 0; }
 
@@ -334,84 +366,96 @@ textarea:focus-visible {
 .markdown-body ul { list-style: disc; }
 .markdown-body ol { list-style: decimal; }
 
-.markdown-body li + li { margin-top: 0.25em; }
+.markdown-body li + li { margin-top: 0.3em; }
 
 .markdown-body code {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-  font-size: 0.85em;
-  background: var(--bg);
+  font-size: 0.875em;
+  background: var(--QYL-md-soft);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 0.1em 0.35em;
-  color: var(--ink);
+  padding: 0.1em 0.4em;
+  color: var(--QYL-md-code);
 }
 
 .markdown-body pre {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 0.75em 1em;
+  padding: 0.85em 1.1em;
   overflow-x: auto;
   margin: 0;
+  line-height: 1.65;
 }
 
 .markdown-body pre code {
   background: transparent;
   border: none;
   padding: 0;
-  font-size: 0.85em;
+  font-size: inherit;
   color: var(--ink);
 }
 
 .markdown-body a {
-  color: var(--primary);
+  color: var(--QYL-md-link);
   text-decoration: underline;
   text-underline-offset: 2px;
+  text-decoration-color: var(--QYL-md-link);
+  text-decoration-thickness: 1px;
+  text-decoration-style: solid;
 }
 
 .markdown-body a:hover {
   text-decoration: none;
+  color: var(--QYL-md-link);
 }
 
 .markdown-body blockquote {
-  border-left: 3px solid var(--border);
-  padding-left: 0.85em;
+  border-left: 3px solid var(--QYL-md-blockquote);
+  background: var(--QYL-md-soft);
+  padding: 0.25em 1em;
+  border-radius: 0 4px 4px 0;
   color: var(--muted);
   margin: 0;
 }
 
+.markdown-body blockquote > :first-child { margin-top: 0; }
+.markdown-body blockquote > :last-child { margin-bottom: 0; }
+
 .markdown-body hr {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--QYL-md-rule);
   margin: 0;
 }
 
 .markdown-body table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 0.85em;
+  font-size: 0.875em;
 }
 
 .markdown-body th,
 .markdown-body td {
   border: 1px solid var(--border);
-  padding: 0.4em 0.6em;
+  padding: 0.45em 0.7em;
   text-align: left;
   vertical-align: top;
 }
 
 .markdown-body th {
-  background: var(--surface);
+  background: var(--QYL-md-soft);
+  color: var(--QYL-md-heading);
   font-weight: 600;
 }
 
 .markdown-body strong {
   font-weight: 600;
-  color: var(--ink);
+  color: var(--QYL-md-strong);
 }
 
 .markdown-body em {
   font-style: italic;
+  color: var(--QYL-md-em);
 }
 
 .markdown-body input[type="checkbox"] {

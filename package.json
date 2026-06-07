@@ -1,0 +1,38 @@
+{
+  "name": "ai-sheet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --noEmit",
+    "tauri": "tauri",
+    "agent:build": "npm --prefix src-agent run build",
+    "tauri:dev": "npm run agent:build && tauri dev"
+  },
+  "dependencies": {
+    "@ant-design/icons": "latest",
+    "@tauri-apps/api": "latest",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-fs": "^2.5.1",
+    "@tauri-apps/plugin-store": "^2.4.3",
+    "@tauri-apps/plugin-updater": "^2.10.1",
+    "antd": "^5.26.0",
+    "lucide-react": "latest",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@tauri-apps/cli": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "^5.2.0",
+    "tailwindcss": "^4.3.0",
+    "typescript": "latest",
+    "vite": "^6.3.5"
+  }
+}

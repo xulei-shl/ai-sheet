@@ -1,0 +1,71 @@
+{
+  "models": [
+    {
+      "name": "DeepSeek-V3.1",
+      "api_key": "7bcc3c2a-f2a3-4138-b4c2-39436cfbf1e3",
+      "base_url": "https://api.sambanova.ai/v1",
+      "model_id": "DeepSeek-V3.1",
+      "created_at": "2025-09-05 11:30:57",
+      "updated_at": "2025-09-05 21:29:09"
+    },
+    {
+      "name": "DeepSeek-R1",
+      "api_key": "7bcc3c2a-f2a3-4138-b4c2-39436cfbf1e3",
+      "base_url": "https://api.sambanova.ai/v1",
+      "model_id": "DeepSeek-R1-0528",
+      "created_at": "2025-09-05 11:30:57",
+      "updated_at": "2025-09-05 21:29:04"
+    },
+    {
+      "name": "glm-4.5-flash",
+      "api_key": "c00ae8a7cc20c9641c53d5e8de48778a.zVcwR6EloiQZqW7u",
+      "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+      "model_id": "glm-4.5-flash",
+      "created_at": "2025-09-05 21:13:35",
+      "updated_at": "2025-09-05 21:13:35"
+    },
+    {
+      "name": "qwen-3-thinking",
+      "api_key": "csk-84fkd95r6wmdr9fpc656p4vrd2d3vrcpwhv9whr88tj8e2vm",
+      "base_url": "https://api.cerebras.ai/v1",
+      "model_id": "qwen-3-235b-a22b-thinking-2507",
+      "created_at": "2025-09-06 10:07:11",
+      "updated_at": "2025-09-06 10:18:45"
+    },
+    {
+      "name": "kimi-k2",
+      "api_key": "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",
+      "base_url": "https://api.groq.com/openai/v1",
+      "model_id": "moonshotai/kimi-k2-instruct",
+      "created_at": "2025-09-06 10:28:40",
+      "updated_at": "2025-09-06 10:28:40"
+    },
+    {
+      "name": "DeepSeek-V3.2-Exp",
+      "api_key": "sk-bzWZNV4Rts4Wrgp743Fd075aDb0c401a885aF27523C19dF5",
+      "base_url": "http://47.103.50.106:3000/v1",
+      "model_id": "DeepSeek-V3.2-Exp",
+      "created_at": "2025-10-28 09:39:20",
+      "updated_at": "2025-10-28 09:54:42"
+    }
+  ],
+  "default_paths": {
+    "excel_path": "test.xlsx",
+    "output_dir": "output"
+  },
+  "settings": {
+    "default_model_index": 0,
+    "auto_save": true
+  },
+  "excel": {
+    "supported_formats": [
+      ".xlsx"
+    ],
+    "max_rows": 5000,
+    "max_file_size_mb": 50,
+    "preview_rows": 10
+  },
+  "ui": {
+    "theme": "default"
+  }
+}

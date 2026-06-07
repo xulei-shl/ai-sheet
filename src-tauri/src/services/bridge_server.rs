@@ -149,6 +149,7 @@ impl BridgeServer {
                             sheet: String::new(),
                             column: String::new(),
                             formula: String::new(),
+                            strategy: "overwrite".to_string(),
                         }
                     });
                 match crate::services::excel_service::ExcelService::apply_formula(&req) {

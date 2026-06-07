@@ -222,15 +222,22 @@ impl ExcelService {
 
         let mut all_rows = range.rows();
 
-        let headers: Vec<String> = all_rows
+        let mut headers: Vec<String> = all_rows
             .next()
             .map(|row| row.iter().map(|c| c.to_string()).collect())
             .unwrap_or_default();
 
-        let col_idx = headers
-            .iter()
-            .position(|h| h == &req.column)
-            .ok_or_else(|| AppError::Service(format!("Column '{}' not found", req.column)))?;
+        let col_idx = match headers.iter().position(|h| h == &req.column) {
+            Some(idx) => idx,
+            None => {
+                if req.strategy == "append" {
+                    headers.push(req.column.clone());
+                    headers.len() - 1
+                } else {
+                    return Err(AppError::Service(format!("Column '{}' not found", req.column)));
+                }
+            }
+        };
 
         let data_rows: Vec<Vec<String>> = all_rows
             .map(|row| row.iter().map(|c| cell_to_string(c)).collect())

@@ -64,6 +64,12 @@ pub struct ApplyFormulaRequest {
     pub sheet: String,
     pub column: String,
     pub formula: String,
+    #[serde(default = "default_strategy")]
+    pub strategy: String,
+}
+
+fn default_strategy() -> String {
+    "overwrite".to_string()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

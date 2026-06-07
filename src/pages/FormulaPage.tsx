@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Clock, History, Play, Sigma, Eye, FileSpreadsheet, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useExcelStore } from '../stores/excelStore';
-import { getColumnData, applyExcelFormula, getFormulaHistory, saveFormulaCache } from '../services/tauri';
+import { getColumnData, getColumnNames, applyExcelFormula, getFormulaHistory, saveFormulaCache } from '../services/tauri';
 import { ExcelTable } from '../components/excel/ExcelTable';
 import type { PreviewData, ApplyFormulaRequest } from '../types/excel';
 import type { FormulaCacheEntry } from '../types/formula';
@@ -10,10 +10,13 @@ export function FormulaPage() {
   const { files, selections } = useExcelStore();
   const [selectedFileIdx, setSelectedFileIdx] = useState(0);
   const [selectedSheet, setSelectedSheet] = useState('');
+  const [strategy, setStrategy] = useState<'overwrite' | 'append'>('overwrite');
   const [selectedColumn, setSelectedColumn] = useState('');
+  const [newColumnName, setNewColumnName] = useState('');
   const [formula, setFormula] = useState('');
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [columnsLoading, setColumnsLoading] = useState(false);
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -24,28 +27,59 @@ export function FormulaPage() {
     getFormulaHistory().then(setHistoryEntries).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!selectedSheet || !currentFile) return;
+    if (currentSel?.columnInfo[selectedSheet]) return;
+    setColumnsLoading(true);
+    getColumnNames(currentFile.path, selectedSheet)
+      .then((cols) => {
+        useExcelStore.setState((s) => {
+          const updated = [...s.selections];
+          updated[selectedFileIdx] = {
+            ...updated[selectedFileIdx],
+            columnInfo: { ...updated[selectedFileIdx].columnInfo, [selectedSheet]: cols },
+          };
+          return { selections: updated };
+        });
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setColumnsLoading(false));
+  }, [selectedSheet, selectedFileIdx]);
+
   const currentFile = files[selectedFileIdx];
   const currentSel = selections[selectedFileIdx];
   const sheets = currentSel?.sheetInfo ?? [];
   const columns = selectedSheet ? (currentSel?.columnInfo[selectedSheet] ?? []) : [];
+  const effectiveColumn = strategy === 'overwrite' ? selectedColumn : newColumnName;
 
   const handlePreview = async () => {
-    if (!currentFile || !selectedSheet || !selectedColumn || !formula) return;
+    if (!currentFile || !selectedSheet || !effectiveColumn || !formula) return;
     setPreviewLoading(true);
     setError(null);
     try {
-      const data = await getColumnData(currentFile.path, selectedSheet, [selectedColumn]);
-      const colLabel = `${selectedColumn}(公式结果)`;
-      const previewRows: Record<string, string>[] = data.rows.slice(0, 3).map((row: string[], i: number) => ({
-        [selectedColumn]: row[0],
-        [colLabel]: `= ${formula.replace(/\{\}/g, String(i + 2))}`,
-      }));
-      const preview: PreviewData = {
-        columns: [...data.columns, colLabel],
-        rows: previewRows,
-        totalRows: data.rows.length,
-      };
-      setPreviewData(preview);
+      const colLabel = `${effectiveColumn}(公式结果)`;
+      if (strategy === 'overwrite' && columns.some((c) => c.name === selectedColumn)) {
+        const data = await getColumnData(currentFile.path, selectedSheet, [selectedColumn]);
+        const previewRows: Record<string, string>[] = data.rows.slice(0, 3).map((row: string[], i: number) => ({
+          [selectedColumn]: row[0],
+          [colLabel]: `= ${formula.replace(/\{\}/g, String(i + 2))}`,
+        }));
+        setPreviewData({
+          columns: [...data.columns, colLabel],
+          rows: previewRows,
+          totalRows: data.rows.length,
+        });
+      } else {
+        const rows = sheets.find((s) => s.name === selectedSheet);
+        const totalRows = rows?.rowCount ?? 0;
+        setPreviewData({
+          columns: [colLabel],
+          rows: Array.from({ length: Math.min(3, totalRows) }, (_, i) => ({
+            [colLabel]: `= ${formula.replace(/\{\}/g, String(i + 2))}`,
+          })),
+          totalRows,
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -54,7 +88,7 @@ export function FormulaPage() {
   };
 
   const handleApply = async () => {
-    if (!currentFile || !selectedSheet || !selectedColumn || !formula) return;
+    if (!currentFile || !selectedSheet || !effectiveColumn || !formula) return;
     setApplying(true);
     setError(null);
     setSuccess(null);
@@ -62,14 +96,14 @@ export function FormulaPage() {
       const req: ApplyFormulaRequest = {
         path: currentFile.path,
         sheet: selectedSheet,
-        column: selectedColumn,
+        column: effectiveColumn,
         formula,
+        strategy,
       };
       await applyExcelFormula(req);
-      setSuccess(`公式已成功应用到 ${selectedColumn} 列`);
+      setSuccess(`公式已成功应用到 ${effectiveColumn} 列`);
 
-      // Auto-save to formula cache
-      const columnsKey = `${selectedSheet}:${selectedColumn}`;
+      const columnsKey = `${selectedSheet}:${effectiveColumn}`;
       saveFormulaCache(formula, columnsKey, formula).catch(() => {});
       getFormulaHistory().then(setHistoryEntries).catch(() => {});
 
@@ -93,7 +127,7 @@ export function FormulaPage() {
 
           {/* File/Sheet/Column Selection */}
           <div className="rounded-lg border p-4 space-y-4" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               {/* File Select */}
               <div>
                 <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>Excel 文件</label>
@@ -102,7 +136,7 @@ export function FormulaPage() {
                     className="h-9 w-full rounded-md px-3 text-sm"
                     style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
                     value={selectedFileIdx}
-                    onChange={(e) => { setSelectedFileIdx(Number(e.target.value)); setSelectedSheet(''); setSelectedColumn(''); setPreviewData(null); }}
+                    onChange={(e) => { setSelectedFileIdx(Number(e.target.value)); setSelectedSheet(''); setSelectedColumn(''); setNewColumnName(''); setPreviewData(null); }}
                   >
                     {files.map((f, i) => (
                       <option key={i} value={i}>{f.name}</option>
@@ -122,7 +156,7 @@ export function FormulaPage() {
                   className="h-9 w-full rounded-md px-3 text-sm"
                   style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
                   value={selectedSheet}
-                  onChange={(e) => { setSelectedSheet(e.target.value); setSelectedColumn(''); setPreviewData(null); }}
+                  onChange={(e) => { setSelectedSheet(e.target.value); setSelectedColumn(''); setNewColumnName(''); setPreviewData(null); }}
                   disabled={sheets.length === 0}
                 >
                   <option value="">选择 Sheet</option>
@@ -131,23 +165,63 @@ export function FormulaPage() {
                   ))}
                 </select>
               </div>
+            </div>
 
-              {/* Column Select */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>目标列</label>
+            {/* Target Column */}
+            <div className="space-y-2">
+              <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--muted)' }}>目标列</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setStrategy('overwrite'); setSelectedColumn(''); setNewColumnName(''); setPreviewData(null); }}
+                  className="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                  style={{
+                    background: strategy === 'overwrite' ? 'var(--primary)' : 'var(--bg)',
+                    color: strategy === 'overwrite' ? 'var(--primary-foreground)' : 'var(--muted)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  覆盖现有列
+                </button>
+                <button
+                  onClick={() => { setStrategy('append'); setSelectedColumn(''); setNewColumnName(''); setPreviewData(null); }}
+                  className="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                  style={{
+                    background: strategy === 'append' ? 'var(--primary)' : 'var(--bg)',
+                    color: strategy === 'append' ? 'var(--primary-foreground)' : 'var(--muted)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  新增列
+                </button>
+              </div>
+              {strategy === 'overwrite' ? (
                 <select
                   className="h-9 w-full rounded-md px-3 text-sm"
                   style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
                   value={selectedColumn}
                   onChange={(e) => { setSelectedColumn(e.target.value); setPreviewData(null); }}
-                  disabled={columns.length === 0}
+                  disabled={columns.length === 0 || columnsLoading}
                 >
-                  <option value="">选择列</option>
+                  {columnsLoading ? (
+                    <option value="">加载列信息中...</option>
+                  ) : columns.length === 0 ? (
+                    <option value="">{selectedSheet ? '该 Sheet 暂无列信息' : '请先选择 Sheet'}</option>
+                  ) : (
+                    <option value="">选择列</option>
+                  )}
                   {columns.map((c) => (
                     <option key={c.name} value={c.name}>{c.name}</option>
                   ))}
                 </select>
-              </div>
+              ) : (
+                <input
+                  className="h-9 w-full rounded-md px-3 text-sm"
+                  style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
+                  placeholder="输入新列名称"
+                  value={newColumnName}
+                  onChange={(e) => { setNewColumnName(e.target.value); setPreviewData(null); }}
+                />
+              )}
             </div>
 
             {/* Formula Input */}
@@ -167,7 +241,7 @@ export function FormulaPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handlePreview}
-                disabled={!currentFile || !selectedSheet || !selectedColumn || !formula || previewLoading}
+                disabled={!currentFile || !selectedSheet || !effectiveColumn || !formula || previewLoading}
                 className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--surface-hover)] disabled:opacity-50"
                 style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
               >
@@ -176,7 +250,7 @@ export function FormulaPage() {
               </button>
               <button
                 onClick={handleApply}
-                disabled={!currentFile || !selectedSheet || !selectedColumn || !formula || applying}
+                disabled={!currentFile || !selectedSheet || !effectiveColumn || !formula || applying}
                 className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
                 style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
               >

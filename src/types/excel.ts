@@ -54,6 +54,7 @@ export interface ApplyFormulaRequest {
   sheet: string;
   column: string;
   formula: string;
+  strategy?: 'overwrite' | 'append';
 }
 
 export interface ProcessingStatus {

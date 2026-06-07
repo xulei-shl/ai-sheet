@@ -100,7 +100,7 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
           updated[fileIndex] = {
             ...updated[fileIndex],
             columnInfo: { ...updated[fileIndex].columnInfo, [sheets[0]]: cols },
-            selectedColumns: { ...updated[fileIndex].selectedColumns, [sheets[0]]: [] },
+            selectedColumns: { ...updated[fileIndex].selectedColumns, [sheets[0]]: updated[fileIndex].selectedColumns[sheets[0]] ?? [] },
           };
           return { selections: updated };
         });

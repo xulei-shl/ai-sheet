@@ -118,7 +118,7 @@ export function DataPage() {
           updated[fileIndex] = {
             ...updated[fileIndex],
             columnInfo: { ...updated[fileIndex].columnInfo, [sheet]: cols },
-            selectedColumns: { ...updated[fileIndex].selectedColumns, [sheet]: [] },
+            selectedColumns: { ...updated[fileIndex].selectedColumns, [sheet]: updated[fileIndex].selectedColumns[sheet] ?? [] },
           };
           return { selections: updated };
         });
@@ -432,7 +432,7 @@ export function DataPage() {
                   title="清空 Agent 上下文与消息"
                 >
                   <Eraser className="h-3.5 w-3.5" />
-                  清空
+                  清空上下文
                 </button>
               </div>
             </div>

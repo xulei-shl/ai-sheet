@@ -2,6 +2,9 @@ import { create } from 'zustand';
 
 export type AppTab = 'data' | 'formula' | 'ai' | 'config' | 'prompts';
 
+export type ThemeMode = 'system' | 'light' | 'dark';
+export type ResolvedTheme = 'light' | 'dark';
+
 export const SIDEBAR_LEFT_MIN = 48;
 export const SIDEBAR_LEFT_MAX = 400;
 export const SIDEBAR_LEFT_DEFAULT = 256;
@@ -9,6 +12,27 @@ export const SIDEBAR_LEFT_DEFAULT = 256;
 export const SIDEBAR_RIGHT_MIN = 200;
 export const SIDEBAR_RIGHT_MAX = 600;
 export const SIDEBAR_RIGHT_DEFAULT = 384;
+
+const THEME_STORAGE_KEY = 'ai-sheet:theme-mode';
+
+function loadThemeMode(): ThemeMode {
+  if (typeof window === 'undefined') return 'system';
+  const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (raw === 'light' || raw === 'dark' || raw === 'system') return raw;
+  return 'system';
+}
+
+function persistThemeMode(mode: ThemeMode) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(THEME_STORAGE_KEY, mode);
+}
+
+export const THEME_MODES: ReadonlyArray<ThemeMode> = ['system', 'light', 'dark'];
+
+export function nextThemeMode(current: ThemeMode): ThemeMode {
+  const idx = THEME_MODES.indexOf(current);
+  return THEME_MODES[(idx + 1) % THEME_MODES.length];
+}
 
 interface UiStore {
   currentTab: AppTab;
@@ -24,9 +48,13 @@ interface UiStore {
   setLeftSidebarWidth: (width: number) => void;
   setRightSidebarWidth: (width: number) => void;
   setRightSidebarCollapsed: (collapsed: boolean) => void;
+
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
+  cycleThemeMode: () => void;
 }
 
-export const useUiStore = create<UiStore>((set) => ({
+export const useUiStore = create<UiStore>((set, get) => ({
   currentTab: 'data',
   setCurrentTab: (tab) => set({ currentTab: tab }),
 
@@ -42,4 +70,15 @@ export const useUiStore = create<UiStore>((set) => ({
   setLeftSidebarWidth: (width) => set({ leftSidebarWidth: width }),
   setRightSidebarWidth: (width) => set({ rightSidebarWidth: width }),
   setRightSidebarCollapsed: (collapsed) => set({ rightSidebarCollapsed: collapsed }),
+
+  themeMode: loadThemeMode(),
+  setThemeMode: (mode) => {
+    persistThemeMode(mode);
+    set({ themeMode: mode });
+  },
+  cycleThemeMode: () => {
+    const next = nextThemeMode(get().themeMode);
+    persistThemeMode(next);
+    set({ themeMode: next });
+  },
 }));

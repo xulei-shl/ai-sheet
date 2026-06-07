@@ -19,7 +19,9 @@ import {
   SIDEBAR_RIGHT_MAX,
 } from '../stores/uiStore';
 import { AgentChatPanel } from '../components/agent/AgentChatPanel';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useTheme } from '../hooks/useTheme';
 import { DataPage } from '../pages/DataPage';
 import { FormulaPage } from '../pages/FormulaPage';
 import { AiPage } from '../pages/AiPage';
@@ -115,6 +117,7 @@ export function AppLayout() {
     SIDEBAR_LEFT_MIN, SIDEBAR_LEFT_MAX,
   );
   useKeyboardShortcuts();
+  useTheme();
 
   const handleRightResize = useSidebarResize(
     rightSidebarCollapsed, rightSidebarWidth, setRightSidebarWidth,
@@ -207,19 +210,22 @@ export function AppLayout() {
                   </span>
                 </div>
               </div>
-          <button
-            type="button"
-            onClick={toggleRightSidebar}
-            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded transition-colors hover:bg-[var(--surface-hover)]"
-            style={{ color: 'var(--muted)' }}
-            aria-label={rightSidebarCollapsed ? '显示 AI 面板' : '隐藏 AI 面板'}
-          >
-            {rightSidebarCollapsed ? (
-              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <PanelRightClose className="h-4 w-4" aria-hidden="true" />
-            )}
-          </button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={toggleRightSidebar}
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded transition-colors hover:bg-[var(--surface-hover)]"
+              style={{ color: 'var(--muted)' }}
+              aria-label={rightSidebarCollapsed ? '显示 AI 面板' : '隐藏 AI 面板'}
+            >
+              {rightSidebarCollapsed ? (
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <PanelRightClose className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           {showSmallScreenWarning && (

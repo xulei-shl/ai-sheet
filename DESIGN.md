@@ -37,45 +37,102 @@
 
 > 视觉体系的基础原语。本节与 `src/styles/globals.css` 中的 CSS 变量一一对应。
 
-### 1.1 色彩策略：克制（Monochrome + Accent）
+### 1.1 色彩策略：克制（Monochrome + Accent）+ 双模式
 
-整个 UI 建立在**纯无彩色灰阶**之上，让数据本身成为视觉中心。
-品牌色（极光紫 / Klein 蓝）仅在 AI 交互、主操作和聚焦高亮时出现。
+整个 UI 建立在**低饱和度灰阶**之上，让数据本身成为视觉中心。
+品牌色仅在 AI 交互、主操作和聚焦高亮时出现。
+
+应用支持**深色 / 浅色双模式**，由用户手动选择或跟随系统。
+模式通过 `<html data-theme-mode="dark|light">` 切换，对应 CSS 中
+`[data-theme-mode="dark"]` 和 `[data-theme-mode="light"]` 两个
+独立的 token 块。token 选用 Wilderness（深色）与 WoodAsh（浅色）
+两套色板，定义在 `src/styles/globals.css` 中，详细规范见
+`docs/changelog/颜色升级/颜色设计升级.md`。
+
+#### 1.1.1 模式色板速览
+
+| 语义 | 暗色 Wilderness | 浅色 WoodAsh |
+|------|-----------------|---------------|
+| 主色 | `#9db56d` 橄榄绿 | `#3f50a3` 靛蓝 |
+| 强背景 | `#2d353b` 深灰绿 | `#dddbc7` 暖灰 |
+| 面板层 | `#232a2e` 深石板 | `rgb(206,205,180)` 豆沙 |
+| 主文本 | `#ece4d0` 暖米白 | `#343250` 深靛蓝 |
+| 次级文本 | `#dfd6bf` 米色 | `#455a67` 蓝灰 |
+| 浅文本 | `#d1c8b4` 浅米 | `#516979` 浅蓝灰 |
+| 代码块 | `#232a2e` | `rgb(206,205,180)` |
+| 工具栏 | `#444e54` | `#e7e6d3` |
+| 悬停 | `rgba(115,132,81,0.5)` | `rgba(190,187,153,0.5)` |
+| 引述 | `#9ca6ac` | `#858371` |
+
+#### 1.1.2 双层 Token 架构
+
+`globals.css` 维护两套 token，互为别名，因此旧组件无需迁移：
+
+1. **B3 / QYL 语义层**（`--b3-theme-primary`、`--b3-theme-background`、
+   `--b3-list-hover`、`--QYL-Aero-background` 等 30+ 变量）：完整
+   覆盖 B3 笔记主题的语义角色，可被新组件直接引用。
+2. **Legacy 简写层**（`--bg`、`--surface`、`--primary`、`--ink`、
+   `--success` 等）：通过 `var(--b3-theme-*)` 别名指向 B3 层，保留
+   `var(--bg)`、`var(--primary)` 等历史用法。
 
 ```css
-:root {
-  /* 暗色基调（Linear / Vercel 风格） */
-  --bg:            oklch(0.120 0.000 0);   /* 近黑背景 */
-  --surface:       oklch(0.160 0.000 0);   /* 略亮，用于卡片/面板 */
-  --surface-hover: oklch(0.200 0.000 0);   /* 极轻 hover */
-  --border:        oklch(1.000 0.000 0 / 0.1); /* 1px 极细透明边 */
-
-  /* 文本 */
-  --ink:   oklch(0.950 0.000 0);           /* 主文本（极高对比） */
-  --muted: oklch(0.650 0.000 0);           /* 次级文本、标签 */
-
-  /* 品牌强调：极光紫 */
-  --primary:            oklch(0.550 0.220 290);
-  --primary-foreground: oklch(1.000 0.000 0);
-  --primary-glow:       oklch(0.550 0.220 290 / 0.2);
-
-  /* 语义反馈（去饱和） */
-  --success: oklch(0.650 0.100 150);       /* 柔绿 */
-  --error:   oklch(0.600 0.120 20);        /* 柔粉 */
+[data-theme-mode="dark"] {
+  --b3-theme-primary: #9db56d;
+  --b3-theme-background: #2d353b;
+  --b3-theme-surface: #232a2e;
+  /* ... */
+  --b3-theme-on-background: #ece4d0;
+  --b3-theme-on-surface: #dfd6bf;
+  --b3-list-hover: rgba(115,132,81,0.5);
+  --b3-tooltips-shadow: 0 13px 25px -2px rgba(175,214,98,0.12), 0 0 10px 0 rgba(175,214,98,0.12);
+  /* ... */
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg:            oklch(1.000 0.000 0);
-    --surface:       oklch(0.970 0.000 0);
-    --surface-hover: oklch(0.930 0.000 0);
-    --border:        oklch(0.000 0.000 0 / 0.08);
-    --ink:           oklch(0.100 0.000 0);
-    --muted:         oklch(0.450 0.000 0);
-    --primary:       oklch(0.500 0.200 290);
-  }
+[data-theme-mode="light"] {
+  --b3-theme-primary: #3f50a3;
+  --b3-theme-background: #dddbc7;
+  --b3-theme-surface: rgb(206,205,180);
+  /* ... */
+}
+
+:root,
+[data-theme-mode="dark"] {
+  --bg: var(--b3-theme-background);
+  --surface: var(--b3-theme-surface);
+  --ink: var(--b3-theme-on-background);
+  --primary: var(--b3-theme-primary);
+  --primary-glow: rgba(175, 214, 98, 0.18);
+  /* ... */
 }
 ```
+
+#### 1.1.3 状态语义色
+
+`--success` / `--error` / `--warning` 不在 B3 色板中，由项目按
+两套模式分别定义，确保对当前背景有 ≥ 4.5:1 对比度：
+
+| Token | 暗色 | 浅色 |
+|-------|------|------|
+| `--success` | `#9bc28f` 鼠尾草绿 | `#5a8259` 森林绿 |
+| `--error`   | `#e08c8c` 柔玫瑰   | `#a14d4d` 砖红   |
+| `--warning` | `#d8b66e` 暖琥珀   | `#a87a2c` 深赭   |
+
+### 1.1.4 主题切换机制
+
+- **状态**：`uiStore.themeMode: 'system' | 'light' | 'dark'`，持久化
+  到 `localStorage['ai-sheet:theme-mode']`。
+- **解析**：`useTheme()` 钩子订阅 store + `matchMedia`，
+  将 `"system"` 实时解析为 `"dark"` / `"light"`，并写入
+  `<html data-theme-mode="...">`。
+- **预挂载防闪烁**：`index.html` 在 React 挂载前以同步脚本
+  从 `localStorage` + `matchMedia` 预解析并设置 `data-theme-mode`，
+  避免出现亮↔暗的瞬时闪烁。
+- **用户控件**：标题栏右侧的 `ThemeToggle` 按钮（太阳 / 月亮 / 显示器
+  图标）按 `system → light → dark → system` 顺序循环切换，
+  `title` 与 `aria-label` 显示当前模式名称。
+- **Tailwind `color-scheme`**：原生表单控件（`<input>`、滚动条等）
+  的系统色阶由 `[data-theme-mode]` 上的 `color-scheme: dark|light`
+  控制，确保 native widget 与 UI 一致。
 
 ### 1.2 字体
 

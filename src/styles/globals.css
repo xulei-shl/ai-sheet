@@ -1,32 +1,215 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Theme tokens — Dark (Wilderness) + Light (WoodAsh)
+   Source spec: docs/changelog/颜色升级/颜色设计升级.md
+
+   Token system: B3 (SiYuan) semantic layer + legacy aliases
+   for the existing simple variables used in inline styles.
+   ============================================================ */
+
+/* Default to dark (Wilderness). The pre-mount script in
+   index.html sets [data-theme-mode] before React loads, so
+   this fallback only matters in dev SSR / preview. */
 :root {
   color-scheme: dark;
-  --bg: oklch(0.12 0 0);
-  --surface: oklch(0.16 0 0);
-  --surface-hover: oklch(0.2 0 0);
-  --border: oklch(1 0 0 / 0.1);
-  --ink: oklch(0.95 0 0);
-  --muted: oklch(0.65 0 0);
-  --primary: oklch(0.55 0.22 290);
-  --primary-foreground: oklch(1 0 0);
-  --primary-glow: oklch(0.55 0.22 290 / 0.2);
-  --success: oklch(0.65 0.1 150);
-  --error: oklch(0.6 0.12 20);
+  --b3-theme-primary: #9db56d;
+  --b3-theme-primary-light: rgba(175, 214, 98, 0.5);
+  --b3-theme-primary-lighter: rgba(175, 214, 98, 0.3);
+  --b3-theme-primary-lightest: rgba(175, 214, 98, 0.12);
+
+  --b3-theme-background: #2d353b;
+  --b3-theme-background-light: #465057;
+  --b3-theme-surface: #232a2e;
+  --b3-theme-surface-light: rgba(35, 42, 46, 0.8);
+  --b3-theme-surface-lighter: rgba(189, 229, 255, 0.15);
+
+  --b3-theme-on-primary: rgba(255, 255, 255, 0.9);
+  --b3-theme-on-error: var(--b3-theme-on-primary);
+  --b3-theme-on-secondary: var(--b3-theme-on-primary);
+  --b3-theme-on-background: #ece4d0;
+  --b3-theme-on-surface: #dfd6bf;
+  --b3-theme-on-surface-light: #d1c8b4;
+
+  --b3-toolbar-blur-background: #444e54;
+  --b3-toolbar-color: #d1c8b4;
+  --b3-toolbar-hover: rgba(115, 132, 81, 0.5);
+  --b3-scroll-color: #4f5a67;
+
+  --b3-list-hover: rgba(115, 132, 81, 0.5);
+  --b3-list-icon-hover: rgba(115, 132, 81, 0.5);
+  --b3-menu-background: #2d353b;
+  --b3-tooltips-background: #2d353b;
+  --b3-tooltips-color: #dfd6bf;
+  --b3-tooltips-second-color: #d1c8b4;
+  --b3-tooltips-shadow:
+    0px 13px 25px -2px rgba(175, 214, 98, 0.12),
+    0px 0px 10px 0px rgba(175, 214, 98, 0.12);
+  --b3-mask-background: rgba(20, 23, 25, 0.4);
+
+  --b3-switch-background: #54636d;
+  --b3-protyle-code-background: #232a2e;
+
+  --QYL-tab-item: rgba(158, 195, 83, 0.15);
+  --QYL-tab-item-focus: rgba(158, 195, 83, 0.35);
+  --QYL-Aero-background: rgba(34, 39, 38, 0.7);
+  --QYL-Aero-background-wrap: rgba(56, 65, 65, 0.7);
+  --QYL-blockquote-background: #3d474d;
+  --QYL-blockquote-svg: #515c63;
+  --QYL-blockquote: #9ca6ac;
+  --QYL-custom-primary-main: 123deg;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color-scheme: light;
-    --bg: oklch(1 0 0);
-    --surface: oklch(0.97 0 0);
-    --surface-hover: oklch(0.93 0 0);
-    --border: oklch(0 0 0 / 0.08);
-    --ink: oklch(0.1 0 0);
-    --muted: oklch(0.45 0 0);
-    --primary: oklch(0.5 0.2 290);
-  }
+[data-theme-mode="dark"] {
+  color-scheme: dark;
+  --b3-theme-primary: #9db56d;
+  --b3-theme-primary-light: rgba(175, 214, 98, 0.5);
+  --b3-theme-primary-lighter: rgba(175, 214, 98, 0.3);
+  --b3-theme-primary-lightest: rgba(175, 214, 98, 0.12);
+
+  --b3-theme-background: #2d353b;
+  --b3-theme-background-light: #465057;
+  --b3-theme-surface: #232a2e;
+  --b3-theme-surface-light: rgba(35, 42, 46, 0.8);
+  --b3-theme-surface-lighter: rgba(189, 229, 255, 0.15);
+
+  --b3-theme-on-primary: rgba(255, 255, 255, 0.9);
+  --b3-theme-on-error: var(--b3-theme-on-primary);
+  --b3-theme-on-secondary: var(--b3-theme-on-primary);
+  --b3-theme-on-background: #ece4d0;
+  --b3-theme-on-surface: #dfd6bf;
+  --b3-theme-on-surface-light: #d1c8b4;
+
+  --b3-toolbar-blur-background: #444e54;
+  --b3-toolbar-color: #d1c8b4;
+  --b3-toolbar-hover: rgba(115, 132, 81, 0.5);
+  --b3-scroll-color: #4f5a67;
+
+  --b3-list-hover: rgba(115, 132, 81, 0.5);
+  --b3-list-icon-hover: rgba(115, 132, 81, 0.5);
+  --b3-menu-background: #2d353b;
+  --b3-tooltips-background: #2d353b;
+  --b3-tooltips-color: #dfd6bf;
+  --b3-tooltips-second-color: #d1c8b4;
+  --b3-tooltips-shadow:
+    0px 13px 25px -2px rgba(175, 214, 98, 0.12),
+    0px 0px 10px 0px rgba(175, 214, 98, 0.12);
+  --b3-mask-background: rgba(20, 23, 25, 0.4);
+
+  --b3-switch-background: #54636d;
+  --b3-protyle-code-background: #232a2e;
+
+  --QYL-tab-item: rgba(158, 195, 83, 0.15);
+  --QYL-tab-item-focus: rgba(158, 195, 83, 0.35);
+  --QYL-Aero-background: rgba(34, 39, 38, 0.7);
+  --QYL-Aero-background-wrap: rgba(56, 65, 65, 0.7);
+  --QYL-blockquote-background: #3d474d;
+  --QYL-blockquote-svg: #515c63;
+  --QYL-blockquote: #9ca6ac;
+  --QYL-custom-primary-main: 123deg;
 }
+
+[data-theme-mode="light"] {
+  color-scheme: light;
+  --b3-theme-primary: #3f50a3;
+  --b3-theme-primary-light: rgba(74, 61, 139, 0.5);
+  --b3-theme-primary-lighter: rgba(74, 61, 139, 0.3);
+  --b3-theme-primary-lightest: rgba(74, 61, 139, 0.12);
+
+  --b3-theme-background: #dddbc7;
+  --b3-theme-background-light: #c6c4aa;
+  --b3-theme-surface: rgb(206, 205, 180);
+  --b3-theme-surface-light: rgba(198, 197, 179, 0.8);
+  --b3-theme-surface-lighter: rgba(164, 162, 127, 0.68);
+
+  --b3-theme-on-primary: rgba(255, 255, 255, 0.9);
+  --b3-theme-on-error: var(--b3-theme-on-primary);
+  --b3-theme-on-secondary: var(--b3-theme-on-primary);
+  --b3-theme-on-background: #343250;
+  --b3-theme-on-surface: #455a67;
+  --b3-theme-on-surface-light: #516979;
+
+  --b3-toolbar-blur-background: #e7e6d3;
+  --b3-toolbar-color: #516979;
+  --b3-toolbar-hover: rgba(190, 187, 153, 0.5);
+  --b3-scroll-color: #b9b8a3;
+
+  --b3-list-hover: rgba(190, 187, 153, 0.5);
+  --b3-list-icon-hover: rgba(190, 187, 153, 0.5);
+  --b3-menu-background: #dddbc7;
+  --b3-tooltips-background: #dddbc7;
+  --b3-tooltips-color: #455a67;
+  --b3-tooltips-second-color: #516979;
+  --b3-mask-background: rgba(220, 220, 220, 0.4);
+
+  --b3-switch-background: #bfc4ab;
+  --b3-protyle-code-background: rgb(206, 205, 180);
+
+  --QYL-tab-item: rgba(183, 179, 136, 0.15);
+  --QYL-tab-item-focus: rgba(183, 179, 136, 0.5);
+  --QYL-Aero-background: rgba(225, 225, 219, 0.7);
+  --QYL-blockquote-background: #d4d2b9;
+  --QYL-blockquote-svg: #bcbaa2;
+  --QYL-blockquote: #858371;
+  --QYL-inline-code: #3f50a3;
+  --QYL-custom-primary-main: 105deg;
+}
+
+/* ============================================================
+   Legacy alias layer — maps the simple tokens used by inline
+   styles in existing components to the B3 layer above.
+   ============================================================ */
+
+:root,
+[data-theme-mode="dark"] {
+  --bg: var(--b3-theme-background);
+  --surface: var(--b3-theme-surface);
+  --surface-hover: #2a3135;
+  --border: rgba(236, 228, 208, 0.1);
+  --ink: var(--b3-theme-on-background);
+  --muted: var(--b3-theme-on-surface-light);
+  --primary: var(--b3-theme-primary);
+  --primary-foreground: var(--b3-theme-on-primary);
+  --primary-glow: rgba(175, 214, 98, 0.18);
+  --primary-soft: rgba(175, 214, 98, 0.12);
+  --success: #9bc28f;
+  --error: #e08c8c;
+  --warning: #d8b66e;
+  --scrollbar: var(--b3-scroll-color);
+}
+
+[data-theme-mode="light"] {
+  --bg: var(--b3-theme-background);
+  --surface: var(--b3-theme-surface);
+  --surface-hover: #bdb99c;
+  --border: rgba(52, 50, 80, 0.12);
+  --ink: var(--b3-theme-on-background);
+  --muted: var(--b3-theme-on-surface-light);
+  --primary: var(--b3-theme-primary);
+  --primary-foreground: var(--b3-theme-on-primary);
+  --primary-glow: rgba(74, 61, 139, 0.15);
+  --primary-soft: rgba(74, 61, 139, 0.1);
+  --success: #5a8259;
+  --error: #a14d4d;
+  --warning: #a87a2c;
+  --scrollbar: var(--b3-scroll-color);
+}
+
+/* Reduce h1/h2 brightness on light mode (per WoodAsh spec). */
+[data-theme-mode="light"] .b3-typography h1,
+[data-theme-mode="light"] .b3-typography .h1,
+[data-theme-mode="light"] .protyle-wysiwyg h1,
+[data-theme-mode="light"] .protyle-wysiwyg .h1,
+[data-theme-mode="light"] .b3-typography h2,
+[data-theme-mode="light"] .b3-typography .h2,
+[data-theme-mode="light"] .protyle-wysiwyg h2,
+[data-theme-mode="light"] .protyle-wysiwyg .h2 {
+  filter: brightness(0.8);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
 
 * {
   box-sizing: border-box;
@@ -44,6 +227,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 button,
@@ -78,18 +262,17 @@ textarea:focus-visible {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: oklch(1 0 0 / 0.12);
+  background: var(--scrollbar);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(1 0 0 / 0.2);
+  background: var(--muted);
 }
 
-/* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: oklch(1 0 0 / 0.12) transparent;
+  scrollbar-color: var(--scrollbar) transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -101,9 +284,15 @@ textarea:focus-visible {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+  body {
+    transition: none;
+  }
 }
 
-/* ── Markdown body ── */
+/* ============================================================
+   Markdown body
+   ============================================================ */
+
 .markdown-body {
   color: var(--ink);
   line-height: 1.65;

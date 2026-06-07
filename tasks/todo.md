@@ -89,11 +89,26 @@
 
 ## 待办 (Future)
 
+## Phase 10 - 主题系统升级：双模式支持 (已完成)
+
+- [x] Wilderness / WoodAsh 双色板（B3 语义层 + Legacy 简写层）
+  - `[data-theme-mode="dark"]` / `[data-theme-mode="light"]` 两套独立 token 块
+  - Legacy token（`--bg` / `--surface` / `--primary` 等）通过 `var(--b3-theme-*)` 别名复用
+- [x] `uiStore.themeMode` + localStorage 持久化
+- [x] `useTheme()` 钩子：解析 `system` 模式 + 监听 `prefers-color-scheme` 变化
+- [x] 标题栏 `ThemeToggle` 三态循环按钮（系统 ↔ 浅色 ↔ 深色）
+- [x] `index.html` 预挂载脚本：避免 React 挂载前主题闪烁
+- [x] 硬编码颜色清理（`#16a34a` → `var(--success)`）
+- [x] `prefers-reduced-motion` 下禁用 `body` 颜色过渡
+
+## 待办 (Future)
+
 - [ ] End-to-end batch processing test with real pi-agent
 - [ ] Cross-file formula references design and implementation
 
 ## 验证记录
 
 - `npm run typecheck` — passed (0 errors)
+- `npm run build` — passed (488 kB JS, 41.8 kB CSS)
 - `cargo check` — passed (0 errors, 0 warnings)
 - `cargo test` — 28 passed (0 failed)

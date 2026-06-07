@@ -4,6 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI-Sheet</title>
+    <script>
+      // Resolve theme synchronously before React mounts to avoid
+      // a flash of the wrong palette. Mirrors the logic in
+      // src/hooks/useTheme.ts.
+      (function () {
+        try {
+          var stored = window.localStorage.getItem('ai-sheet:theme-mode');
+          var mode = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+          var resolved = mode;
+          if (mode === 'system' && window.matchMedia) {
+            resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme-mode', resolved);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme-mode', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

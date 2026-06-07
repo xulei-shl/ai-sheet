@@ -4,10 +4,22 @@ import { mergeModels, useConfigStore, type DisplayModel } from '../stores/config
 import type { ModelConfig } from '../types/config';
 
 const PROVIDER_OPTIONS = [
-  { value: 'openai-completions', label: 'OpenAI Compatible' },
-  { value: 'openai-chat', label: 'OpenAI Chat' },
-  { value: 'anthropic-messages', label: 'Anthropic Messages' },
+  { value: 'openai-completions', label: 'openai-completions' },
+  { value: 'openai-responses', label: 'openai-responses' },
+  { value: 'anthropic-messages', label: 'anthropic-messages' },
 ];
+
+const BASE_URL_PLACEHOLDERS: Record<string, string> = {
+  'openai-completions': 'https://api.openai.com/v1',
+  'openai-responses': 'https://api.openai.com/v1',
+  'anthropic-messages': 'https://api.anthropic.com',
+};
+
+const MODEL_ID_PLACEHOLDERS: Record<string, string> = {
+  'openai-completions': 'gpt-4o-mini',
+  'openai-responses': 'gpt-4o',
+  'anthropic-messages': 'claude-sonnet-4-20250514',
+};
 
 interface ModelFormData {
   name: string;
@@ -44,6 +56,8 @@ export function ConfigPage() {
   const [form, setForm] = useState<ModelFormData>(emptyForm);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [detailTesting, setDetailTesting] = useState(false);
+  const [detailTestResult, setDetailTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
     fetchModels();
@@ -78,6 +92,7 @@ export function ConfigPage() {
   const handleSelect = (name: string) => {
     setSelectedName(name);
     setMode('view');
+    setDetailTestResult(null);
     const m = merged.find((x) => x.name === name);
     if (m) loadIntoForm(m);
   };
@@ -161,6 +176,23 @@ export function ConfigPage() {
     });
     setTestResult({ ok: !err, message: err || '连接成功' });
     setTesting(false);
+  };
+
+  const handleDetailTest = async () => {
+    if (!selected) return;
+    setDetailTesting(true);
+    setDetailTestResult(null);
+    const err = await testConnection({
+      name: selected.name,
+      apiKey: selected.apiKey,
+      baseUrl: selected.baseUrl,
+      modelId: selected.modelId,
+      providerType: selected.providerType,
+      isDefault: false,
+      source: 'user',
+    });
+    setDetailTestResult({ ok: !err, message: err || '连接成功' });
+    setDetailTesting(false);
   };
 
   const isEditing = mode === 'create' || mode === 'edit';
@@ -324,6 +356,9 @@ export function ConfigPage() {
             isUser={selected.displaySource === 'user'}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onTest={handleDetailTest}
+            testing={detailTesting}
+            testResult={detailTestResult}
           />
         )}
 
@@ -351,11 +386,17 @@ function DetailView({
   isUser,
   onEdit,
   onDelete,
+  onTest,
+  testing,
+  testResult,
 }: {
   model: DisplayModel;
   isUser: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  onTest: () => void;
+  testing: boolean;
+  testResult: { ok: boolean; message: string } | null;
 }) {
   let hostname = '';
   try {
@@ -413,6 +454,16 @@ function DetailView({
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <button
+            onClick={onTest}
+            disabled={testing}
+            className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+            style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
+            title="测试 API 连通性"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${testing ? 'animate-spin' : ''}`} />
+            {testing ? '测试中…' : '测试'}
+          </button>
+          <button
             onClick={onEdit}
             className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium"
             style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
@@ -444,6 +495,21 @@ function DetailView({
           label="API Key"
           value={model.apiKey ? '••••••••' : '（未设置）'}
         />
+
+        {testResult && (
+          <div
+            className="flex items-center gap-2 rounded-md p-3 text-sm"
+            style={{
+              background: testResult.ok
+                ? 'oklch(0.65 0.1 150 / 0.1)'
+                : 'oklch(0.6 0.12 20 / 0.1)',
+              color: testResult.ok ? 'var(--success)' : 'var(--error)',
+            }}
+          >
+            {testResult.ok ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            {testResult.message}
+          </div>
+        )}
 
         {!isUser && (
           <div
@@ -542,13 +608,32 @@ function FormPanel({
       </div>
 
       <div className="flex-1 overflow-auto p-5 space-y-4">
+        <div>
+          <label
+            className="mb-1 block text-xs font-medium"
+            style={{ color: 'var(--muted)' }}
+          >
+            名称
+          </label>
+          <input
+            className="h-9 w-full rounded-md px-3 text-sm"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--ink)',
+            }}
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="如: 我的模型"
+          />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label
               className="mb-1 block text-xs font-medium"
               style={{ color: 'var(--muted)' }}
             >
-              名称
+              Model ID
             </label>
             <input
               className="h-9 w-full rounded-md px-3 text-sm"
@@ -557,9 +642,9 @@ function FormPanel({
                 border: '1px solid var(--border)',
                 color: 'var(--ink)',
               }}
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="如: 我的模型"
+              value={form.modelId}
+              onChange={(e) => setForm({ ...form, modelId: e.target.value })}
+              placeholder={MODEL_ID_PLACEHOLDERS[form.providerType] ?? 'model-id'}
             />
           </div>
           <div>
@@ -567,7 +652,7 @@ function FormPanel({
               className="mb-1 block text-xs font-medium"
               style={{ color: 'var(--muted)' }}
             >
-              Provider 类型
+              Provider
             </label>
             <select
               className="h-9 w-full rounded-md px-3 text-sm"
@@ -586,64 +671,45 @@ function FormPanel({
               ))}
             </select>
           </div>
-          <div className="col-span-2">
-            <label
-              className="mb-1 block text-xs font-medium"
-              style={{ color: 'var(--muted)' }}
-            >
-              API Base URL
-            </label>
-            <input
-              className="h-9 w-full rounded-md px-3 text-sm"
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                color: 'var(--ink)',
-              }}
-              value={form.baseUrl}
-              onChange={(e) => setForm({ ...form, baseUrl: e.target.value })}
-              placeholder="https://api.openai.com/v1"
-            />
-          </div>
-          <div>
-            <label
-              className="mb-1 block text-xs font-medium"
-              style={{ color: 'var(--muted)' }}
-            >
-              Model ID
-            </label>
-            <input
-              className="h-9 w-full rounded-md px-3 text-sm"
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                color: 'var(--ink)',
-              }}
-              value={form.modelId}
-              onChange={(e) => setForm({ ...form, modelId: e.target.value })}
-              placeholder="gpt-4o"
-            />
-          </div>
-          <div>
-            <label
-              className="mb-1 block text-xs font-medium"
-              style={{ color: 'var(--muted)' }}
-            >
-              API Key
-            </label>
-            <input
-              type="password"
-              className="h-9 w-full rounded-md px-3 text-sm"
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                color: 'var(--ink)',
-              }}
-              value={form.apiKey}
-              onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-              placeholder="sk-..."
-            />
-          </div>
+        </div>
+        <div>
+          <label
+            className="mb-1 block text-xs font-medium"
+            style={{ color: 'var(--muted)' }}
+          >
+            API Base URL
+          </label>
+          <input
+            className="h-9 w-full rounded-md px-3 text-sm"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--ink)',
+            }}
+            value={form.baseUrl}
+            onChange={(e) => setForm({ ...form, baseUrl: e.target.value })}
+            placeholder={BASE_URL_PLACEHOLDERS[form.providerType] ?? 'https://...'}
+          />
+        </div>
+        <div>
+          <label
+            className="mb-1 block text-xs font-medium"
+            style={{ color: 'var(--muted)' }}
+          >
+            API Key
+          </label>
+          <input
+            type="password"
+            className="h-9 w-full rounded-md px-3 text-sm"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--ink)',
+            }}
+            value={form.apiKey}
+            onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+            placeholder="sk-..."
+          />
         </div>
 
         {testResult && (
@@ -653,7 +719,7 @@ function FormPanel({
               background: testResult.ok
                 ? 'oklch(0.65 0.1 150 / 0.1)'
                 : 'oklch(0.6 0.12 20 / 0.1)',
-              color: testResult.ok ? '#16a34a' : 'var(--error)',
+              color: testResult.ok ? 'var(--success)' : 'var(--error)',
             }}
           >
             {testResult.ok ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}

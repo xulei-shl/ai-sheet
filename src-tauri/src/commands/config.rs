@@ -1,13 +1,40 @@
 use std::sync::Arc;
 
-use tauri::State;
+use tauri::{AppHandle, State};
 
 use crate::db::{models_repo, Database};
-use crate::{models::config::ModelConfig, AppState};
+use crate::error::AppError;
+use crate::models::config::{ActiveModel, ModelConfig};
+use crate::AppState;
 
 #[tauri::command]
 pub async fn get_active_model(state: State<'_, AppState>) -> Result<ModelConfig, String> {
     Ok(state.config_service.get_active_model())
+}
+
+#[tauri::command]
+pub async fn set_active_model(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    model: ActiveModel,
+) -> Result<(), AppError> {
+    {
+        let mut guard = state.active_model.write().await;
+        *guard = Some(model);
+    }
+    state.sidecar_manager.restart(app).await
+}
+
+#[tauri::command]
+pub async fn clear_active_model(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), AppError> {
+    {
+        let mut guard = state.active_model.write().await;
+        *guard = None;
+    }
+    state.sidecar_manager.restart(app).await
 }
 
 #[tauri::command]

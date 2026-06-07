@@ -1,17 +1,30 @@
 import { create } from 'zustand';
-import { getAgentStatus, restartSidecar, sendAgentMessage } from '../services/tauri';
-import type { AgentMessage, AgentStatus, SidecarEvent } from '../types/agent';
+import {
+  clearActiveAgentModel,
+  getAgentStatus,
+  restartSidecar,
+  sendAgentMessage,
+  setActiveAgentModel,
+  type ActiveAgentModel,
+} from '../services/tauri';
+import type { AgentMessage, AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
+import { useConfigStore } from './configStore';
 
 interface AgentStore {
   messages: AgentMessage[];
   status: AgentStatus | null;
   error: string | null;
   isSending: boolean;
+  isApplyingModel: boolean;
+  appliedModelName: string | null;
+  loadedContext: AgentContext | null;
   refreshStatus: () => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
   restart: () => Promise<void>;
+  applyModel: (name: string | null) => Promise<void>;
   handleEvent: (event: SidecarEvent) => void;
   markOffline: (message: string) => void;
+  setLoadedContext: (context: AgentContext | null) => void;
 }
 
 export const useAgentStore = create<AgentStore>((set, get) => ({
@@ -19,6 +32,9 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   status: null,
   error: null,
   isSending: false,
+  isApplyingModel: false,
+  appliedModelName: null,
+  loadedContext: null,
 
   refreshStatus: async () => {
     const status = await getAgentStatus();
@@ -55,6 +71,41 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     set({ error: null });
     await restartSidecar();
     await get().refreshStatus();
+  },
+
+  applyModel: async (name) => {
+    const { appliedModelName, isApplyingModel } = get();
+    if (isApplyingModel) return;
+    if (appliedModelName === name) return;
+    set({ isApplyingModel: true, error: null });
+    try {
+      if (name === null) {
+        await clearActiveAgentModel();
+      } else {
+        const merged = useConfigStore.getState().getMergedModels();
+        const target = merged.find((m) => m.name === name);
+        if (!target) {
+          throw new Error(`未找到模型: ${name}`);
+        }
+        const payload: ActiveAgentModel = {
+          name: target.name,
+          providerType: target.providerType,
+          modelId: target.modelId,
+          apiKey: target.apiKey,
+          baseUrl: target.baseUrl,
+        };
+        await setActiveAgentModel(payload);
+      }
+      set({ appliedModelName: name });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : String(error),
+        isApplyingModel: false,
+      });
+      return;
+    }
+    set({ isApplyingModel: false });
+    void get().refreshStatus();
   },
 
   handleEvent: (event) => {
@@ -109,5 +160,9 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       isSending: false,
       status: state.status ? { ...state.status, ready: false, message } : null,
     }));
+  },
+
+  setLoadedContext: (context) => {
+    set({ loadedContext: context });
   },
 }));

@@ -170,11 +170,22 @@ impl BridgeServer {
             }
             "/api/config/default" => {
                 let state = app.state::<crate::AppState>();
-                let model = state.config_service.get_active_model();
-                serde_json::json!({
-                    "providerType": model.provider_type,
-                    "modelId": model.model_id
-                })
+                let active = state.active_model.read().await.clone();
+                if let Some(m) = active {
+                    serde_json::json!({
+                        "name": m.name,
+                        "providerType": m.provider_type,
+                        "modelId": m.model_id,
+                        "apiKey": m.api_key,
+                        "baseUrl": m.base_url,
+                    })
+                } else {
+                    let model = state.config_service.get_active_model();
+                    serde_json::json!({
+                        "providerType": model.provider_type,
+                        "modelId": model.model_id
+                    })
+                }
             }
             "/api/config/models" => {
                 let state = app.state::<crate::AppState>();

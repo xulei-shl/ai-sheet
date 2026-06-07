@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
 use tauri::{Emitter, Manager};
+use tokio::sync::RwLock;
 
 use crate::db::Database;
+use crate::models::config::ActiveModel;
 use crate::services::{
     bridge_server::BridgeServer, config_service::ConfigService,
     sidecar_manager::SidecarManager,
@@ -19,6 +21,7 @@ pub struct AppState {
     pub config_service: ConfigService,
     pub sidecar_manager: Arc<SidecarManager>,
     pub bridge_server: Arc<BridgeServer>,
+    pub active_model: Arc<RwLock<Option<ActiveModel>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -91,6 +94,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::config::get_active_model,
             commands::config::get_fallback_models,
+            commands::config::set_active_model,
+            commands::config::clear_active_model,
             commands::excel::get_excel_info,
             commands::excel::get_sheet_names,
             commands::excel::get_column_names,

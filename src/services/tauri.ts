@@ -35,6 +35,22 @@ export function getActiveModel() {
   return invoke<ModelConfig>('get_active_model');
 }
 
+export interface ActiveAgentModel {
+  name: string;
+  providerType: string;
+  modelId: string;
+  apiKey: string;
+  baseUrl: string;
+}
+
+export function setActiveAgentModel(model: ActiveAgentModel) {
+  return invoke<void>('set_active_model', { model });
+}
+
+export function clearActiveAgentModel() {
+  return invoke<void>('clear_active_model');
+}
+
 export function getFallbackModels() {
   return invoke<ModelConfig[]>('get_fallback_models');
 }

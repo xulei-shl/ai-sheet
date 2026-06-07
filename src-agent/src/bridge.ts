@@ -37,7 +37,13 @@ export class BridgeClient {
     return this.request<T>('POST', path, body);
   }
 
-  async getDefaultModel(): Promise<{ providerType: string; modelId: string }> {
+  async getDefaultModel(): Promise<{
+    providerType: string;
+    modelId: string;
+    name?: string;
+    apiKey?: string;
+    baseUrl?: string;
+  }> {
     return this.post('/api/config/default');
   }
 

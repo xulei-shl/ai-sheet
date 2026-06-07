@@ -14,6 +14,7 @@ export const SIDEBAR_RIGHT_MAX = 600;
 export const SIDEBAR_RIGHT_DEFAULT = 384;
 
 const THEME_STORAGE_KEY = 'ai-sheet:theme-mode';
+const AGENT_MODEL_STORAGE_KEY = 'ai-sheet:agent-model';
 
 function loadThemeMode(): ThemeMode {
   if (typeof window === 'undefined') return 'system';
@@ -25,6 +26,21 @@ function loadThemeMode(): ThemeMode {
 function persistThemeMode(mode: ThemeMode) {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(THEME_STORAGE_KEY, mode);
+}
+
+function loadAgentModelName(): string | null {
+  if (typeof window === 'undefined') return null;
+  const raw = window.localStorage.getItem(AGENT_MODEL_STORAGE_KEY);
+  return raw && raw.length > 0 ? raw : null;
+}
+
+function persistAgentModelName(name: string | null) {
+  if (typeof window === 'undefined') return;
+  if (name) {
+    window.localStorage.setItem(AGENT_MODEL_STORAGE_KEY, name);
+  } else {
+    window.localStorage.removeItem(AGENT_MODEL_STORAGE_KEY);
+  }
 }
 
 export const THEME_MODES: ReadonlyArray<ThemeMode> = ['system', 'light', 'dark'];
@@ -52,6 +68,9 @@ interface UiStore {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   cycleThemeMode: () => void;
+
+  selectedAgentModelName: string | null;
+  setSelectedAgentModelName: (name: string | null) => void;
 }
 
 export const useUiStore = create<UiStore>((set, get) => ({
@@ -80,5 +99,11 @@ export const useUiStore = create<UiStore>((set, get) => ({
     const next = nextThemeMode(get().themeMode);
     persistThemeMode(next);
     set({ themeMode: next });
+  },
+
+  selectedAgentModelName: loadAgentModelName(),
+  setSelectedAgentModelName: (name) => {
+    persistAgentModelName(name);
+    set({ selectedAgentModelName: name });
   },
 }));

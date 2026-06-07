@@ -1,20 +1,28 @@
 import type { AgentMessage } from '../../types/agent';
+import { useAgentStore } from '../../stores/agentStore';
+import { ContextPreview } from './ContextPreview';
 
 interface MessageListProps {
   messages: AgentMessage[];
 }
 
 export function MessageList({ messages }: MessageListProps) {
+  const { loadedContext } = useAgentStore();
+
   if (messages.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center p-6 text-center text-sm" style={{ color: 'var(--muted)' }}>
-        与 AI-Sheet Agent 对话，后续可生成公式、提示词和数据处理流程。
+      <div className="p-4">
+        {loadedContext && <ContextPreview context={loadedContext} />}
+        <div className="flex h-full items-center justify-center p-6 text-center text-sm" style={{ color: 'var(--muted)' }}>
+          与 AI-Sheet Agent 对话，后续可生成公式、提示词和数据处理流程。
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4 p-4" aria-live="polite">
+      {loadedContext && <ContextPreview context={loadedContext} />}
       {messages.map((message) => (
         <article key={message.id} className="space-y-1">
           <div className="text-xs uppercase tracking-wide" style={{ color: 'var(--muted)' }}>

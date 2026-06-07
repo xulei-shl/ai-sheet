@@ -1,14 +1,17 @@
 import type { AgentContext } from '../protocol.js';
 
 export function buildSystemPrompt(context?: AgentContext): string {
-  let files = '';
-  let columns = '';
-  let samplePreview = '';
+  let filesBlock = '';
 
-  if (context) {
-    files = context.loadedFiles.length > 0 ? context.loadedFiles.join(', ') : '（无）';
-    columns = context.selectedColumns.length > 0 ? context.selectedColumns.join(', ') : '（无）';
-    samplePreview = context.sampleDataPreview || '（无）';
+  if (context?.loadedFiles && context.loadedFiles.length > 0) {
+    filesBlock = context.loadedFiles
+      .map((f) => {
+        const sheetLines = f.sheets
+          .map((sh) => `    - Sheet: ${sh.sheetName}, 列: ${sh.columns.join(', ') || '（无）'}`)
+          .join('\n');
+        return `  - 文件: ${f.name}\n${sheetLines}`;
+      })
+      .join('\n');
   }
 
   return `你是 AI-Sheet，一个专业的 Excel 智能数据处理助手。
@@ -26,10 +29,7 @@ export function buildSystemPrompt(context?: AgentContext): string {
 - 使用 save_prompt 工具保存提示词模板
 
 ## 当前上下文
-- 当前功能：${context?.currentTab ?? '未知'}
-- 已加载文件：${files}
-- 选中列：${columns}
-- 样本数据预览：${samplePreview}
+${filesBlock || '（未加载数据上下文）'}
 
 ## 注意事项
 - 生成公式前先确认数据列和 Sheet 名称

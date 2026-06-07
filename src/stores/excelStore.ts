@@ -18,6 +18,8 @@ import type {
   WriteResult,
   ApplyFormulaRequest,
 } from '../types/excel';
+import type { AgentContext } from '../types/agent';
+import { useAgentStore } from './agentStore';
 
 interface ExcelStore {
   files: ExcelFileInfo[];
@@ -34,6 +36,7 @@ interface ExcelStore {
   applyFormula: (req: ApplyFormulaRequest) => Promise<void>;
   writeResults: (path: string, sheet: string, column: string, results: WriteResult[]) => Promise<void>;
   notifyContextChange: () => void;
+  clearAllContext: () => void;
   clearError: () => void;
 }
 
@@ -177,15 +180,54 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
 
   notifyContextChange: () => {
     const { files, selections } = get();
-    const loadedFiles = files.map((f) => f.path);
-    const selectedCols = selections.flatMap((s) =>
-      Object.values(s.selectedColumns).flat()
-    );
-    steerAgent({
-      currentTab: 'data',
-      loadedFiles,
-      selectedColumns: selectedCols,
-    }).catch(() => {});
+
+    // Only include files that have at least one sheet selected
+    const loadedFiles = selections
+      .filter((sel) => sel.selectedSheets.length > 0)
+      .map((sel) => {
+        // For each selected sheet in this file, collect the selected columns
+        const sheets = sel.selectedSheets.map((sheetName) => ({
+          sheetName,
+          columns: sel.selectedColumns[sheetName] || [],
+        }));
+        return {
+          name: sel.file.name,
+          path: sel.file.path,
+          sheets,
+        };
+      });
+
+    // Only update context if there's actually loaded content
+    if (loadedFiles.length === 0) {
+      useAgentStore.getState().setLoadedContext(null);
+      return;
+    }
+
+    const context: AgentContext = { loadedFiles };
+
+    // Update agentStore with the context (for Agent UI preview)
+    useAgentStore.getState().setLoadedContext(context);
+
+    // Send to backend (for Rust/Node.js agent)
+    steerAgent(context).catch(() => {});
+  },
+
+  clearAllContext: () => {
+    // Clear all sheet selections and column selections for every file
+    // NOTE: Do NOT clear previewData — it's for the DataPage preview panel,
+    // which is unrelated to the Agent context.
+    set((state) => ({
+      selections: state.selections.map((sel) => ({
+        ...sel,
+        selectedSheets: [],
+        selectedColumns: {},
+      })),
+    }));
+    // Clear UI preview — skip steerAgent() since empty context would trigger
+    // an unwanted "上下文已更新" message in the agent conversation.
+    // The next notifyContextChange() call (when user loads new context) will
+    // re-establish the backpack state.
+    useAgentStore.getState().setLoadedContext(null);
   },
 
   clearError: () => set({ error: null }),

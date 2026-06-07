@@ -27,11 +27,19 @@ export interface ToolResult {
   success: boolean;
 }
 
+export interface LoadedSheet {
+  sheetName: string;
+  columns: string[];
+}
+
+export interface LoadedFile {
+  name: string;
+  path: string;
+  sheets: LoadedSheet[];
+}
+
 export interface AgentContext {
-  currentTab: string;
-  loadedFiles: string[];
-  selectedColumns: string[];
-  sampleDataPreview?: string;
+  loadedFiles?: LoadedFile[];
 }
 
 export type SidecarEvent =

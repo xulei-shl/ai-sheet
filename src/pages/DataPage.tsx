@@ -1,25 +1,28 @@
 import { useState, useEffect, type DragEvent } from 'react';
-import { FileSpreadsheet, Upload, X, Table, ChevronDown, ChevronRight, Check } from 'lucide-react';
+import { FileSpreadsheet, Upload, X, Table, ChevronDown, ChevronRight, Check, Eraser } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useExcelStore } from '../stores/excelStore';
+import { useAgentStore } from '../stores/agentStore';
 import { getColumnNames } from '../services/tauri';
 import { ExcelTable } from '../components/excel/ExcelTable';
 import { ColumnSelector } from '../components/excel/ColumnSelector';
 
 export function DataPage() {
-  const { 
-    files, 
-    selections, 
-    loading, 
-    error, 
-    addFile, 
-    removeFile, 
-    selectSheets, 
-    selectColumns, 
-    loadPreview, 
-    notifyContextChange, 
-    clearError 
+  const {
+    files,
+    selections,
+    loading,
+    error,
+    addFile,
+    removeFile,
+    selectSheets,
+    selectColumns,
+    loadPreview,
+    notifyContextChange,
+    clearError
   } = useExcelStore();
+
+  const clearMessages = useAgentStore((s) => s.clearMessages);
   
   const [dragging, setDragging] = useState(false);
   const [expandedFiles, setExpandedFiles] = useState<number[]>([0]);
@@ -417,6 +420,19 @@ export function DataPage() {
                 >
                   <Check className="h-3.5 w-3.5" />
                   加载到上下文
+                </button>
+
+                <button
+                  onClick={() => {
+                    useExcelStore.getState().clearAllContext();
+                    clearMessages();
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border"
+                  style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+                  title="清空 Agent 上下文与消息"
+                >
+                  <Eraser className="h-3.5 w-3.5" />
+                  清空
                 </button>
               </div>
             </div>

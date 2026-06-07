@@ -25,6 +25,7 @@ interface AgentStore {
   handleEvent: (event: SidecarEvent) => void;
   markOffline: (message: string) => void;
   setLoadedContext: (context: AgentContext | null) => void;
+  clearMessages: () => void;
 }
 
 export const useAgentStore = create<AgentStore>((set, get) => ({
@@ -164,5 +165,9 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   setLoadedContext: (context) => {
     set({ loadedContext: context });
+  },
+
+  clearMessages: () => {
+    set({ messages: [], error: null });
   },
 }));

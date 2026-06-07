@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Network, Plus, ShieldCheck, Pencil, Trash2, RefreshCw, X, Check } from 'lucide-react';
-import { useConfigStore } from '../stores/configStore';
+import { useEffect, useMemo, useState } from 'react';
+import { Network, Plus, ShieldCheck, Pencil, Trash2, RefreshCw, X, Check, ChevronRight } from 'lucide-react';
+import { mergeModels, useConfigStore, type DisplayModel } from '../stores/configStore';
 import type { ModelConfig } from '../types/config';
 
 const PROVIDER_OPTIONS = [
@@ -25,19 +25,46 @@ const emptyForm: ModelFormData = {
   providerType: 'openai-completions',
 };
 
+type Mode = 'view' | 'create' | 'edit';
+
 export function ConfigPage() {
-  const { fallbackModels, userModels, loading, fetchModels, addModel, updateModel, deleteModel, testConnection } = useConfigStore();
-  const [showForm, setShowForm] = useState(false);
-  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const {
+    userModels,
+    fallbackModels,
+    loading,
+    fetchModels,
+    addModel,
+    updateModel,
+    deleteModel,
+    testConnection,
+  } = useConfigStore();
+
+  const [selectedName, setSelectedName] = useState<string | null>(null);
+  const [mode, setMode] = useState<Mode>('view');
   const [form, setForm] = useState<ModelFormData>(emptyForm);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
-  useEffect(() => { fetchModels(); }, []);
+  useEffect(() => {
+    fetchModels();
+  }, []);
 
-  const resetForm = () => { setForm(emptyForm); setEditIdx(null); setShowForm(false); setTestResult(null); };
+  const merged: DisplayModel[] = useMemo(
+    () => mergeModels(userModels, fallbackModels),
+    [userModels, fallbackModels],
+  );
 
-  const handleEdit = (model: ModelConfig, idx: number) => {
+  const selected: DisplayModel | null = useMemo(
+    () => (selectedName ? merged.find((m) => m.name === selectedName) ?? null : null),
+    [selectedName, merged],
+  );
+
+  const resetForm = () => {
+    setForm(emptyForm);
+    setTestResult(null);
+  };
+
+  const loadIntoForm = (model: ModelConfig) => {
     setForm({
       name: model.name,
       apiKey: model.apiKey || '',
@@ -45,28 +72,78 @@ export function ConfigPage() {
       modelId: model.modelId,
       providerType: model.providerType,
     });
-    setEditIdx(idx);
-    setShowForm(true);
     setTestResult(null);
   };
 
-  const handleSave = () => {
-    if (!form.name || !form.baseUrl || !form.modelId) return;
-    const model: ModelConfig = {
-      name: form.name,
+  const handleSelect = (name: string) => {
+    setSelectedName(name);
+    setMode('view');
+    const m = merged.find((x) => x.name === name);
+    if (m) loadIntoForm(m);
+  };
+
+  const handleNew = () => {
+    setSelectedName(null);
+    resetForm();
+    setMode('create');
+  };
+
+  const handleEdit = () => {
+    if (!selected) return;
+    loadIntoForm(selected);
+    setMode('edit');
+  };
+
+  const handleCancel = () => {
+    if (mode === 'edit' && selected) {
+      loadIntoForm(selected);
+      setMode('view');
+    } else {
+      setSelectedName(null);
+      resetForm();
+      setMode('view');
+    }
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.baseUrl.trim() || !form.modelId.trim()) return;
+    const next: ModelConfig = {
+      name: form.name.trim(),
       apiKey: form.apiKey,
-      baseUrl: form.baseUrl,
-      modelId: form.modelId,
+      baseUrl: form.baseUrl.trim(),
+      modelId: form.modelId.trim(),
       providerType: form.providerType,
       isDefault: false,
       source: 'user',
     };
-    if (editIdx !== null) {
-      updateModel(editIdx, model);
-    } else {
-      addModel(model);
+
+    if (mode === 'edit' && selected) {
+      if (selected.displaySource === 'user') {
+        const idx = userModels.findIndex((m) => m.name === selected.name);
+        if (idx >= 0) {
+          await updateModel(idx, next);
+        }
+      } else {
+        await addModel(next);
+      }
+      setSelectedName(next.name);
+      setMode('view');
+    } else if (mode === 'create') {
+      await addModel(next);
+      setSelectedName(next.name);
+      setMode('view');
     }
+  };
+
+  const handleDelete = async () => {
+    if (!selected || selected.displaySource !== 'user') return;
+    const idx = userModels.findIndex((m) => m.name === selected.name);
+    if (idx >= 0) {
+      await deleteModel(idx);
+    }
+    setSelectedName(null);
     resetForm();
+    setMode('view');
   };
 
   const handleTest = async () => {
@@ -86,197 +163,534 @@ export function ConfigPage() {
     setTesting(false);
   };
 
-  const renderModelCard = (model: ModelConfig, idx: number, isUser: boolean) => (
-    <div key={`${isUser ? 'user' : 'builtin'}-${idx}`} className="rounded-lg p-4" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-xs font-bold" style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}>
-          {model.name.slice(0, 2).toUpperCase()}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
-              {model.name}{model.isDefault ? '（默认）' : ''}
-            </p>
-            <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}>
-              {isUser ? '用户配置' : '内置免费'}
-            </span>
+  const isEditing = mode === 'create' || mode === 'edit';
+
+  return (
+    <div className="flex h-full flex-row overflow-hidden bg-[var(--bg)]">
+      {/* Left Sidebar: List + New */}
+      <div
+        className="w-80 shrink-0 border-r flex flex-col overflow-hidden"
+        style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+      >
+        <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Network className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+              <span className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>模型列表</span>
+              <span
+                className="rounded px-1.5 py-0.5 text-[10px] font-mono"
+                style={{ background: 'var(--bg)', color: 'var(--muted)' }}
+              >
+                {merged.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={fetchModels}
+                disabled={loading}
+                className="inline-flex items-center justify-center rounded-md p-1.5"
+                style={{ color: 'var(--muted)' }}
+                title="刷新"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+              <button
+                onClick={handleNew}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium"
+                style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+              >
+                <Plus className="h-3 w-3" />
+                新增
+              </button>
+            </div>
           </div>
-          <p className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>
-            {model.modelId} · {new URL(model.baseUrl).hostname} · {model.providerType}
-          </p>
         </div>
-        {isUser && (
-          <div className="flex gap-1">
-            <button onClick={() => handleEdit(model, idx)} className="rounded p-1.5 transition-colors hover:bg-[var(--surface-hover)]" style={{ color: 'var(--muted)' }} title="编辑">
-              <Pencil className="h-3.5 w-3.5" />
+
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          {merged.length > 0 ? (
+            merged.map((m) => {
+              const isSelected = selectedName === m.name;
+              const isUser = m.displaySource === 'user';
+              return (
+                <div
+                  key={`${m.displaySource}-${m.name}`}
+                  onClick={() => handleSelect(m.name)}
+                  className={`group rounded-md px-2.5 py-2 cursor-pointer transition-colors border ${
+                    isSelected
+                      ? 'border-[var(--primary)]'
+                      : 'border-transparent hover:bg-[var(--surface-hover)]'
+                  }`}
+                  style={isSelected ? { background: 'var(--primary-glow)' } : undefined}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-[10px] font-bold"
+                      style={{
+                        background: isUser ? 'var(--primary-glow)' : 'var(--bg)',
+                        color: isUser ? 'var(--primary)' : 'var(--muted)',
+                      }}
+                    >
+                      {m.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <h3
+                          className="truncate text-xs font-medium"
+                          style={{ color: 'var(--ink)' }}
+                        >
+                          {m.name}
+                        </h3>
+                        {m.isDefault && (
+                          <span
+                            className="shrink-0 rounded-full px-1.5 py-0 text-[10px]"
+                            style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
+                          >
+                            默认
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--muted)' }}>
+                        {m.modelId}
+                      </p>
+                    </div>
+                    <ChevronRight
+                      className="h-3.5 w-3.5 shrink-0"
+                      style={{ color: 'var(--muted)' }}
+                    />
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+              <Network className="mb-2 h-8 w-8" style={{ color: 'var(--muted)' }} />
+              <p className="text-xs" style={{ color: 'var(--muted)' }}>暂无模型</p>
+              <button
+                onClick={handleNew}
+                className="mt-3 inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium"
+                style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+              >
+                <Plus className="h-3 w-3" />
+                新增模型
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right Content: Detail / Form */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Empty state */}
+        {mode === 'view' && !selected && (
+          <div className="flex flex-1 items-center justify-center p-8">
+            <div className="max-w-md text-center">
+              <div
+                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              >
+                <Network className="h-7 w-7" style={{ color: 'var(--primary)' }} />
+              </div>
+              <h3 className="mb-2 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+                模型配置管理
+              </h3>
+              <p className="mb-4 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
+                管理 LLM API 配置，支持多模型配置和自动降级。从左侧选择一个模型查看详情，或点击"新增"添加新的模型配置。
+              </p>
+              <div
+                className="flex items-start gap-3 rounded-lg p-4 text-left"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              >
+                <ShieldCheck
+                  className="mt-0.5 h-5 w-5 flex-shrink-0"
+                  style={{ color: 'var(--success)' }}
+                />
+                <div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
+                    API Key 加密存储
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
+                    所有 API Key 使用本地存储加密保存。添加新模型配置后，若调用失败将自动降级至内置免费模型。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* View */}
+        {mode === 'view' && selected && (
+          <DetailView
+            model={selected}
+            isUser={selected.displaySource === 'user'}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
+
+        {/* Create / Edit */}
+        {isEditing && (
+          <FormPanel
+            mode={mode}
+            builtinName={mode === 'edit' && selected?.displaySource === 'builtin' ? selected.name : null}
+            form={form}
+            setForm={setForm}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            onTest={handleTest}
+            testing={testing}
+            testResult={testResult}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DetailView({
+  model,
+  isUser,
+  onEdit,
+  onDelete,
+}: {
+  model: DisplayModel;
+  isUser: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  let hostname = '';
+  try {
+    hostname = new URL(model.baseUrl).hostname;
+  } catch {
+    hostname = model.baseUrl;
+  }
+  const providerLabel =
+    PROVIDER_OPTIONS.find((o) => o.value === model.providerType)?.label ?? model.providerType;
+
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div
+        className="flex items-start justify-between gap-4 border-b p-5"
+        style={{ borderColor: 'var(--border)' }}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <div
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-sm font-bold"
+            style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
+          >
+            {model.name.slice(0, 2).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2
+                className="truncate text-base font-semibold"
+                style={{ color: 'var(--ink)' }}
+              >
+                {model.name}
+              </h2>
+              <span
+                className="shrink-0 rounded-full px-2 py-0.5 text-xs"
+                style={{
+                  background: isUser ? 'var(--primary-glow)' : 'var(--surface)',
+                  color: isUser ? 'var(--primary)' : 'var(--muted)',
+                  border: isUser ? 'none' : '1px solid var(--border)',
+                }}
+              >
+                {isUser ? '用户配置' : '内置免费'}
+              </span>
+              {model.isDefault && (
+                <span
+                  className="shrink-0 rounded-full px-2 py-0.5 text-xs"
+                  style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
+                >
+                  默认
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
+              {model.modelId} · {hostname} · {providerLabel}
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={onEdit}
+            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium"
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            编辑
+          </button>
+          {isUser && (
+            <button
+              onClick={onDelete}
+              className="inline-flex items-center justify-center rounded-md p-1.5 hover:bg-[var(--surface-hover)]"
+              style={{ color: 'var(--error)' }}
+              title="删除"
+            >
+              <Trash2 className="h-4 w-4" />
             </button>
-            <button onClick={() => deleteModel(idx)} className="rounded p-1.5 transition-colors hover:bg-[var(--surface-hover)]" style={{ color: 'var(--error)' }} title="删除">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto p-5 space-y-4">
+        <Field label="名称" value={model.name} />
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Model ID" value={model.modelId} />
+          <Field label="Provider" value={providerLabel} />
+        </div>
+        <Field label="API Base URL" value={model.baseUrl} mono />
+        <Field
+          label="API Key"
+          value={model.apiKey ? '••••••••' : '（未设置）'}
+        />
+
+        {!isUser && (
+          <div
+            className="flex items-start gap-3 rounded-lg p-4"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
+            <ShieldCheck
+              className="mt-0.5 h-5 w-5 flex-shrink-0"
+              style={{ color: 'var(--success)' }}
+            />
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
+                内置免费模型
+              </p>
+              <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
+                任何编辑都会保存为你的用户配置。删除用户配置后，将恢复显示内置默认配置。
+              </p>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
+}
 
+function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-2xl p-8">
-          <div className="mb-8">
-            <div className="mb-4 flex items-center gap-3">
-              <Network className="h-6 w-6" style={{ color: 'var(--primary)' }} />
-              <h2 className="text-lg font-semibold" style={{ color: 'var(--ink)' }}>模型配置管理</h2>
-            </div>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
-              管理 LLM API 配置，支持多模型配置和自动降级。当用户配置不可用时，自动使用内置默认模型。
+    <div>
+      <label
+        className="mb-1 block text-xs font-medium"
+        style={{ color: 'var(--muted)' }}
+      >
+        {label}
+      </label>
+      <div
+        className="rounded-md px-3 py-2 text-sm"
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          color: 'var(--ink)',
+          fontFamily: mono ? 'ui-monospace, monospace' : undefined,
+          wordBreak: 'break-all',
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function FormPanel({
+  mode,
+  builtinName,
+  form,
+  setForm,
+  onSave,
+  onCancel,
+  onTest,
+  testing,
+  testResult,
+}: {
+  mode: Mode;
+  builtinName: string | null;
+  form: ModelFormData;
+  setForm: (f: ModelFormData) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onTest: () => void;
+  testing: boolean;
+  testResult: { ok: boolean; message: string } | null;
+}) {
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div
+        className="flex items-center justify-between border-b p-5"
+        style={{ borderColor: 'var(--border)' }}
+      >
+        <div>
+          <h2 className="text-base font-semibold" style={{ color: 'var(--ink)' }}>
+            {mode === 'create' ? '新增模型' : '编辑模型'}
+          </h2>
+          {builtinName && (
+            <p className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>
+              正在编辑内置模型「{builtinName}」，保存后将作为用户配置生效
             </p>
-          </div>
-
-          <div className="mb-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium" style={{ color: 'var(--ink)' }}>已配置的模型</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick={fetchModels}
-                  disabled={loading}
-                  className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium"
-                  style={{ color: 'var(--muted)' }}
-                >
-                  <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-                  刷新
-                </button>
-                <button
-                  onClick={() => { resetForm(); setShowForm(true); }}
-                  className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium"
-                  style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  新增模型
-                </button>
-              </div>
-            </div>
-
-            {/* User Models */}
-            {userModels.map((model, i) => renderModelCard(model, i, true))}
-
-            {/* Built-in Fallback Models */}
-            {fallbackModels.map((model, i) => renderModelCard(model, i, false))}
-
-            {userModels.length === 0 && fallbackModels.length === 0 && (
-              <div className="rounded-lg p-8 text-center text-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
-                暂无模型配置，将使用内置默认模型
-              </div>
-            )}
-          </div>
-
-          {/* Add/Edit Form */}
-          {showForm && (
-            <div className="mb-6 rounded-lg border p-4 space-y-4" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">{editIdx !== null ? '编辑模型' : '新增模型'}</h3>
-                <button onClick={resetForm} className="rounded p-1 hover:bg-[var(--surface-hover)]">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--muted)' }}>名称</label>
-                  <input
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="如: 我的模型"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--muted)' }}>Provider 类型</label>
-                  <select
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={form.providerType}
-                    onChange={(e) => setForm({ ...form, providerType: e.target.value })}
-                  >
-                    {PROVIDER_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--muted)' }}>API Base URL</label>
-                  <input
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={form.baseUrl}
-                    onChange={(e) => setForm({ ...form, baseUrl: e.target.value })}
-                    placeholder="https://api.openai.com/v1"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--muted)' }}>Model ID</label>
-                  <input
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={form.modelId}
-                    onChange={(e) => setForm({ ...form, modelId: e.target.value })}
-                    placeholder="gpt-4o"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--muted)' }}>API Key</label>
-                  <input
-                    type="password"
-                    className="h-9 w-full rounded-md px-3 text-sm"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                    value={form.apiKey}
-                    onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-                    placeholder="sk-..."
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleSave}
-                  disabled={!form.name || !form.baseUrl || !form.modelId}
-                  className="inline-flex items-center gap-1 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
-                  style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-                >
-                  <Check className="h-4 w-4" />
-                  {editIdx !== null ? '更新' : '保存'}
-                </button>
-                <button
-                  onClick={handleTest}
-                  disabled={!form.baseUrl || testing}
-                  className="inline-flex items-center gap-1 rounded-md border px-4 py-2 text-sm font-medium"
-                  style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
-                >
-                  {testing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                  测试连接
-                </button>
-                <button onClick={resetForm} className="rounded-md px-4 py-2 text-sm" style={{ color: 'var(--muted)' }}>取消</button>
-              </div>
-
-              {testResult && (
-                <div className={`flex items-center gap-2 rounded-md p-3 text-sm ${testResult.ok ? 'text-green-600' : 'text-red-500'}`} style={{ background: testResult.ok ? 'oklch(0.65 0.1 150 / 0.1)' : 'oklch(0.6 0.12 20 / 0.1)' }}>
-                  {testResult.ok ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                  {testResult.message}
-                </div>
-              )}
-            </div>
           )}
+        </div>
+        <button
+          onClick={onCancel}
+          className="rounded p-1 hover:bg-[var(--surface-hover)]"
+          style={{ color: 'var(--muted)' }}
+          title="取消"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
 
-          <div className="flex items-start gap-3 rounded-lg p-4" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0" style={{ color: 'var(--success)' }} />
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>API Key 加密存储</p>
-              <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
-                所有 API Key 使用本地存储加密保存。添加新模型配置后，若调用失败将自动降级至内置免费模型。
-              </p>
-            </div>
+      <div className="flex-1 overflow-auto p-5 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label
+              className="mb-1 block text-xs font-medium"
+              style={{ color: 'var(--muted)' }}
+            >
+              名称
+            </label>
+            <input
+              className="h-9 w-full rounded-md px-3 text-sm"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--ink)',
+              }}
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="如: 我的模型"
+            />
+          </div>
+          <div>
+            <label
+              className="mb-1 block text-xs font-medium"
+              style={{ color: 'var(--muted)' }}
+            >
+              Provider 类型
+            </label>
+            <select
+              className="h-9 w-full rounded-md px-3 text-sm"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--ink)',
+              }}
+              value={form.providerType}
+              onChange={(e) => setForm({ ...form, providerType: e.target.value })}
+            >
+              {PROVIDER_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label
+              className="mb-1 block text-xs font-medium"
+              style={{ color: 'var(--muted)' }}
+            >
+              API Base URL
+            </label>
+            <input
+              className="h-9 w-full rounded-md px-3 text-sm"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--ink)',
+              }}
+              value={form.baseUrl}
+              onChange={(e) => setForm({ ...form, baseUrl: e.target.value })}
+              placeholder="https://api.openai.com/v1"
+            />
+          </div>
+          <div>
+            <label
+              className="mb-1 block text-xs font-medium"
+              style={{ color: 'var(--muted)' }}
+            >
+              Model ID
+            </label>
+            <input
+              className="h-9 w-full rounded-md px-3 text-sm"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--ink)',
+              }}
+              value={form.modelId}
+              onChange={(e) => setForm({ ...form, modelId: e.target.value })}
+              placeholder="gpt-4o"
+            />
+          </div>
+          <div>
+            <label
+              className="mb-1 block text-xs font-medium"
+              style={{ color: 'var(--muted)' }}
+            >
+              API Key
+            </label>
+            <input
+              type="password"
+              className="h-9 w-full rounded-md px-3 text-sm"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--ink)',
+              }}
+              value={form.apiKey}
+              onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+              placeholder="sk-..."
+            />
           </div>
         </div>
+
+        {testResult && (
+          <div
+            className="flex items-center gap-2 rounded-md p-3 text-sm"
+            style={{
+              background: testResult.ok
+                ? 'oklch(0.65 0.1 150 / 0.1)'
+                : 'oklch(0.6 0.12 20 / 0.1)',
+              color: testResult.ok ? '#16a34a' : 'var(--error)',
+            }}
+          >
+            {testResult.ok ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            {testResult.message}
+          </div>
+        )}
+      </div>
+
+      <div
+        className="flex items-center gap-3 border-t p-4"
+        style={{ borderColor: 'var(--border)' }}
+      >
+        <button
+          onClick={onSave}
+          disabled={!form.name.trim() || !form.baseUrl.trim() || !form.modelId.trim()}
+          className="inline-flex items-center gap-1 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+          style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+        >
+          <Check className="h-4 w-4" />
+          {mode === 'edit' ? '更新' : '保存'}
+        </button>
+        <button
+          onClick={onTest}
+          disabled={!form.baseUrl.trim() || testing}
+          className="inline-flex items-center gap-1 rounded-md border px-4 py-2 text-sm font-medium disabled:opacity-50"
+          style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
+        >
+          <RefreshCw className={`h-4 w-4 ${testing ? 'animate-spin' : ''}`} />
+          测试连接
+        </button>
+        <button
+          onClick={onCancel}
+          className="rounded-md px-4 py-2 text-sm hover:bg-[var(--surface-hover)]"
+          style={{ color: 'var(--muted)' }}
+        >
+          取消
+        </button>
       </div>
     </div>
   );

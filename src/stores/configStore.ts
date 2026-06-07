@@ -36,6 +36,20 @@ interface ConfigStore {
   deleteModel: (index: number) => Promise<void>;
   testConnection: (model: ModelConfig) => Promise<string | null>;
   getAllModels: () => ModelConfig[];
+  getMergedModels: () => ModelConfig[];
+}
+
+export type DisplayModel = ModelConfig & { displaySource: 'user' | 'builtin' };
+
+export function mergeModels(userModels: ModelConfig[], fallbackModels: ModelConfig[]): DisplayModel[] {
+  const byName = new Map<string, DisplayModel>();
+  for (const m of fallbackModels) {
+    byName.set(m.name, { ...m, displaySource: 'builtin' });
+  }
+  for (const m of userModels) {
+    byName.set(m.name, { ...m, displaySource: 'user' });
+  }
+  return Array.from(byName.values());
 }
 
 export const useConfigStore = create<ConfigStore>((set, get) => ({
@@ -119,5 +133,10 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
   getAllModels: () => {
     const { fallbackModels, userModels } = get();
     return [...userModels, ...fallbackModels];
+  },
+
+  getMergedModels: () => {
+    const { fallbackModels, userModels } = get();
+    return mergeModels(userModels, fallbackModels);
   },
 }));

@@ -1,4 +1,4 @@
-import { defineTool, type ExtensionContext, type AgentToolResult, type AgentToolUpdateCallback } from '@earendil-works/pi-coding-agent';
+import { defineTool } from '@earendil-works/pi-coding-agent';
 import { Type } from '@sinclair/typebox';
 import type { BridgeClient } from '../bridge.js';
 
@@ -9,10 +9,10 @@ export function configTools(bridge: BridgeClient) {
       label: '获取配置',
       description: '获取当前模型配置列表和默认模型信息',
       parameters: Type.Object({}),
-      execute: async (_toolCallId: string, _params: Record<string, never>, _signal: AbortSignal | undefined, _onUpdate: AgentToolUpdateCallback<unknown> | undefined, _ctx: ExtensionContext): Promise<AgentToolResult<unknown>> => {
+      execute: async (_toolCallId, _params, _signal, _onUpdate, _ctx) => {
         const defaultModel = await bridge.post<{ providerType: string; modelId: string }>('/api/config/default');
         return {
-          content: [{ type: 'text', text: JSON.stringify({ defaultModel }, null, 2) }],
+          content: [{ type: 'text' as const, text: JSON.stringify({ defaultModel }, null, 2) }],
           details: { defaultModel },
         };
       },
@@ -26,13 +26,13 @@ export function configTools(bridge: BridgeClient) {
         providerType: Type.String({ description: 'Provider 类型' }),
         modelId: Type.String({ description: '模型 ID' }),
       }),
-      execute: async (_toolCallId: string, params, _signal: AbortSignal | undefined, _onUpdate: AgentToolUpdateCallback<unknown> | undefined, _ctx: ExtensionContext): Promise<AgentToolResult<unknown>> => {
+      execute: async (_toolCallId, params, _signal, _onUpdate, _ctx) => {
         const result = await bridge.post<{ success?: boolean; error?: string }>('/api/config/test', params);
         return {
-          content: [{ type: 'text', text: result.success ? '连接成功' : `连接失败: ${result.error ?? '未知错误'}` }],
+          content: [{ type: 'text' as const, text: result.success ? '连接成功' : `连接失败: ${result.error ?? '未知错误'}` }],
           details: result,
         };
-      }),
+      },
     }),
   ];
 }

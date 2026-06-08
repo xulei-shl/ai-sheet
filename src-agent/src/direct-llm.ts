@@ -2,6 +2,7 @@ import { stream } from '@earendil-works/pi-ai';
 import type { BridgeClient } from './bridge.js';
 import type { SidecarCommand } from './protocol.js';
 import type { SidecarEvent } from './protocol.js';
+import { buildModel } from './provider-map.js';
 
 const SYSTEM_PROMPT =
   '你是一名 AI 助手。基于用户提供的 Excel 上下文（文件、Sheet、列名、样例数据），' +
@@ -44,20 +45,8 @@ export async function runDirectLlmStream(
     return;
   }
 
-  // 完全按用户配置的 providerType 构造模型
-  // providerType 就是 API 类型（如 'openai-completions', 'anthropic-messages'）
-  const model = {
-    id: modelInfo.modelId,
-    name: modelInfo.name ?? modelInfo.modelId,
-    api: modelInfo.providerType,
-    provider: modelInfo.providerType,
-    baseUrl: modelInfo.baseUrl || '',
-    reasoning: false,
-    input: ['text'],
-    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-    contextWindow: 128000,
-    maxTokens: 4096,
-  } as any;
+  // 使用 provider-map 正确拆分 provider 和 api
+  const model = buildModel(modelInfo);
 
   const controller = new AbortController();
   currentAbort = controller;
@@ -82,14 +71,19 @@ export async function runDirectLlmStream(
 
     for await (const ev of eventStream as AsyncIterable<any>) {
       if (controller.signal.aborted) break;
-      if (ev?.type === 'error') {
-        llmError = ev?.error?.errorMessage ?? 'LLM 返回错误';
+
+      if (ev.type === 'text_delta') {
+        // pi-ai 的文本增量事件，delta 字段包含增量文本
+        const delta: string = ev.delta ?? '';
+        if (delta) {
+          emit({ type: 'agent_delta', id: command.id, delta });
+        }
+      } else if (ev.type === 'error') {
+        // pi-ai 的错误事件，error 是 AssistantMessage，含 errorMessage 字段
+        llmError = ev.error?.errorMessage ?? 'LLM 返回错误';
         break;
       }
-      const delta = ev?.delta ?? ev?.text ?? '';
-      if (delta) {
-        emit({ type: 'agent_delta', id: command.id, delta });
-      }
+      // 其他事件类型（start, text_start, text_end, thinking_*, toolcall_*, done）忽略
     }
 
     if (llmError) {

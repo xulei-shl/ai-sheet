@@ -2,6 +2,7 @@ import { createAgentSession, SessionManager, AuthStorage, ModelRegistry, Setting
 import type { BridgeClient } from './bridge.js';
 import { createCustomTools } from './tools/mod.js';
 import { buildSystemPrompt } from './prompts/system.js';
+import { buildModel } from './provider-map.js';
 import type { AgentContext } from './protocol.js';
 
 export async function createSheetAgent(bridge: BridgeClient) {
@@ -26,42 +27,21 @@ export async function createSheetAgent(bridge: BridgeClient) {
 
   const log = (msg: string) => process.stderr.write(`[agent] ${msg}\n`);
 
-  let model: any = undefined;
+  let model: ReturnType<typeof buildModel> | undefined = undefined;
   if (defaultModel) {
     log(`defaultModel: providerType=${defaultModel.providerType}, modelId=${defaultModel.modelId}, baseUrl=${defaultModel.baseUrl}, hasApiKey=${!!defaultModel.apiKey}`);
-    // 完全按用户配置的 providerType 构造模型，不搜索内置模型
-    // providerType 就是 API 类型（如 'openai-completions', 'anthropic-messages', 'mistral-conversations'）
-    const providerName = defaultModel.providerType;
 
-    model = {
-      id: defaultModel.modelId,
-      name: defaultModel.name ?? defaultModel.modelId,
-      api: defaultModel.providerType,
-      provider: providerName,
-      baseUrl: defaultModel.baseUrl || '',
-      reasoning: false,
-      input: ['text'],
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: 128000,
-      maxTokens: 4096,
-    } as any;
+    // 使用 provider-map 正确拆分 provider 和 api
+    model = buildModel(defaultModel);
+    log(`resolved model: provider=${model.provider}, api=${model.api}`);
 
-    // 通过 registerProvider 注册 API key
+    // 通过 registerProvider 注册 API key（使用正确的 provider 名）
     if (defaultModel.apiKey) {
-      modelRegistry.registerProvider(providerName, {
-        api: defaultModel.providerType,
+      modelRegistry.registerProvider(model.provider, {
+        api: model.api,
         apiKey: defaultModel.apiKey,
         baseUrl: defaultModel.baseUrl,
-        models: [{
-          id: defaultModel.modelId,
-          name: defaultModel.name ?? defaultModel.modelId,
-          api: defaultModel.providerType,
-          reasoning: false,
-          input: ['text'],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 128000,
-          maxTokens: 4096,
-        }],
+        models: [model],
       } as any);
     }
   }

@@ -72,6 +72,8 @@ export interface BatchParams {
   prompt: string;
   modelId?: string;
   providerType?: string;
+  apiKey?: string;
+  baseUrl?: string;
   temperature?: number;
   savePrompt?: boolean;
   promptName?: string;

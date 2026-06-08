@@ -1,10 +1,9 @@
 import { createInterface } from 'node:readline';
-import type { SidecarCommand, SidecarEvent, BatchStats } from './protocol.js';
+import type { SidecarCommand, SidecarEvent, BatchStats, BatchParams } from './protocol.js';
 import type { BridgeClient } from './bridge.js';
 import type { AgentSession } from '@earendil-works/pi-coding-agent';
 import { BatchRunner } from './batch/runner.js';
 import type { RowCompleteUpdate } from './batch/progress.js';
-import type { TextContent } from '@earendil-works/pi-ai';
 import { runDirectLlmStream, abortDirectLlm } from './direct-llm.js';
 
 const args = parseArgs();
@@ -37,13 +36,22 @@ async function initialize() {
   const undici = createRequire(import.meta.url)('undici');
   const customDispatcher = new undici.EnvHttpProxyAgent({
     allowH2: false,
-    bodyTimeout: 60_000,
-    headersTimeout: 60_000,
+    bodyTimeout: 300_000,     // 5 分钟（LLM 可能生成很长的回复）
+    headersTimeout: 120_000,  // 2 分钟（等待首个响应头）
   });
   undici.setGlobalDispatcher(customDispatcher);
-  // 覆盖 globalThis.fetch 使用自定义 dispatcher，使 bodyTimeout 对 SSE 流生效
-  globalThis.fetch = (url, init) => undici.fetch(url, { ...init, dispatcher: customDispatcher });
-  log('fetch overridden with custom undici dispatcher (bodyTimeout=60s)');
+
+  // 保存原始 fetch，对本地请求使用原始实现
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (url: any, init: any) => {
+    const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : String(url);
+    // 本地 bridge 请求使用原始 fetch，避免受 SSE 超时设置影响
+    if (urlStr.startsWith('http://127.0.0.1') || urlStr.startsWith('http://localhost')) {
+      return originalFetch(url, init);
+    }
+    return undici.fetch(url, { ...init, dispatcher: customDispatcher });
+  };
+  log('fetch overridden with custom undici dispatcher (bodyTimeout=300s, headersTimeout=120s)');
 
   if (bridgePort > 0) {
     const { BridgeClient } = await import('./bridge.js');
@@ -243,16 +251,19 @@ async function handleBatchStart(params: Extract<SidecarCommand, { type: 'batch_s
 
   activeBatches.set(batchId, runner);
 
-  runner.run({
-    filePath: params.filePath,
-    sheet: params.sheet,
-    inputColumns: params.inputColumns,
-    outputColumn: params.outputColumn,
-    prompt: params.prompt,
-    modelId: params.modelId,
-    providerType: params.providerType,
-    temperature: params.temperature,
-  }).catch((error) => {
+  // 从 bridge 获取默认模型配置，补充 apiKey 等信息
+  const enrichedParams: BatchParams = { ...params };
+  try {
+    const defaultModel = await bridge.getDefaultModel();
+    if (defaultModel.apiKey) enrichedParams.apiKey = defaultModel.apiKey;
+    if (defaultModel.baseUrl) enrichedParams.baseUrl = defaultModel.baseUrl;
+    if (!enrichedParams.providerType) enrichedParams.providerType = defaultModel.providerType;
+    if (!enrichedParams.modelId) enrichedParams.modelId = defaultModel.modelId;
+  } catch {
+    // 无默认模型，使用 params 原始值
+  }
+
+  runner.run(enrichedParams).catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     emit({ type: 'batch_error', batchId, message });
     activeBatches.delete(batchId);

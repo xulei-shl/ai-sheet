@@ -4,21 +4,30 @@ import { useConfigStore } from '../stores/configStore';
 import type { ModelConfig } from '../types/config';
 
 const PROVIDER_OPTIONS = [
-  { value: 'openai-completions', label: 'openai-completions' },
-  { value: 'openai-responses', label: 'openai-responses' },
-  { value: 'anthropic-messages', label: 'anthropic-messages' },
+  { value: 'openai-completions', label: 'OpenAI Completions' },
+  { value: 'openai-responses', label: 'OpenAI Responses' },
+  { value: 'anthropic-messages', label: 'Anthropic Messages' },
+  { value: 'deepseek', label: 'DeepSeek' },
+  { value: 'mistral-conversations', label: 'Mistral Conversations' },
+  { value: 'google-generative-ai', label: 'Google Generative AI' },
 ];
 
 const BASE_URL_PLACEHOLDERS: Record<string, string> = {
   'openai-completions': 'https://api.openai.com/v1',
   'openai-responses': 'https://api.openai.com/v1',
   'anthropic-messages': 'https://api.anthropic.com',
+  'deepseek': 'https://api.deepseek.com/v1',
+  'mistral-conversations': 'https://api.mistral.ai/v1',
+  'google-generative-ai': 'https://generativelanguage.googleapis.com',
 };
 
 const MODEL_ID_PLACEHOLDERS: Record<string, string> = {
   'openai-completions': 'gpt-4o-mini',
   'openai-responses': 'gpt-4o',
   'anthropic-messages': 'claude-sonnet-4-20250514',
+  'deepseek': 'deepseek-chat',
+  'mistral-conversations': 'mistral-large-latest',
+  'google-generative-ai': 'gemini-2.0-flash',
 };
 
 interface ModelFormData {

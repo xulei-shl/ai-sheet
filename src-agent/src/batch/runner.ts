@@ -1,9 +1,9 @@
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join } from 'node:path';
 import type { BridgeClient } from '../bridge.js';
 import { ProgressTracker, type ProgressCallback, type RowCompleteUpdate } from './progress.js';
 import { stream } from '@earendil-works/pi-ai';
-import { getModel } from '@earendil-works/pi-ai';
+import { buildModel } from '../provider-map.js';
 
 interface BatchRunParams {
   filePath: string;
@@ -13,6 +13,8 @@ interface BatchRunParams {
   prompt: string;
   modelId?: string;
   providerType?: string;
+  apiKey?: string;
+  baseUrl?: string;
   temperature?: number;
 }
 
@@ -74,6 +76,7 @@ export class BatchRunner {
       const resumeFrom = await this._getCheckpoint(tracker);
       const model = this._resolveModel(params);
       const temperature = params.temperature ?? 0.3;
+      const apiKey = params.apiKey;
 
       for (let i = resumeFrom; i < data.rows.length; i++) {
         if (this.abortController.signal.aborted) break;
@@ -107,6 +110,7 @@ export class BatchRunner {
             row,
             combined,
             temperature,
+            apiKey,
             3,
           );
 
@@ -171,23 +175,11 @@ export class BatchRunner {
 
   private _resolveModel(params: BatchRunParams) {
     if (params.providerType && params.modelId) {
-      try {
-        return getModel(params.providerType as any, params.modelId as any);
-      } catch {
-        // fallback to direct model construction for custom providerTypes
-      }
-      // construct model directly for custom providerTypes (e.g. 'openai-completions')
-      return {
-        id: params.modelId,
-        api: params.providerType,
-        provider: params.providerType,
-        baseUrl: '',
-        reasoning: false,
-        input: ['text'],
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: 128000,
-        maxTokens: 4096,
-      } as any;
+      return buildModel({
+        providerType: params.providerType,
+        modelId: params.modelId,
+        baseUrl: params.baseUrl,
+      });
     }
     return null;
   }
@@ -199,6 +191,7 @@ export class BatchRunner {
     row: Record<string, string>,
     combined: string,
     temperature: number,
+    apiKey: string | undefined,
     maxRetries: number,
   ): Promise<string> {
     let lastError: Error | undefined;
@@ -206,7 +199,7 @@ export class BatchRunner {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         const finalPrompt = promptTemplate.replace(/\{combined\}/g, combined);
-        const result = await this._callLLM(model, finalPrompt, temperature);
+        const result = await this._callLLM(model, finalPrompt, temperature, apiKey);
         return result;
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
@@ -220,12 +213,15 @@ export class BatchRunner {
     throw lastError ?? new Error('处理失败');
   }
 
-  private async _callLLM(model: any, prompt: string, temperature: number): Promise<string> {
+  private async _callLLM(model: any, prompt: string, temperature: number, apiKey?: string): Promise<string> {
     if (model) {
+      const options: any = { temperature };
+      if (apiKey) options.apiKey = apiKey;
+
       const eventStream = stream(model, {
         systemPrompt: '你是一个数据处理助手。根据用户指令处理数据，只返回处理结果，不要解释。',
         messages: [{ role: 'user', content: [{ type: 'text', text: prompt }], timestamp: Date.now() }],
-      }, { temperature });
+      }, options);
 
       let text = '';
       for await (const event of eventStream) {

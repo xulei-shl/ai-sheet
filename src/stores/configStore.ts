@@ -36,6 +36,8 @@ interface ConfigStore {
   deleteModel: (index: number) => Promise<void>;
   testConnection: (model: ModelConfig) => Promise<string | null>;
   getAllModels: () => ModelConfig[];
+  /** Alias: returns user models enriched with API keys from secure store */
+  getMergedModels: () => ModelConfig[];
 }
 
 export const useConfigStore = create<ConfigStore>((set, get) => ({
@@ -123,6 +125,10 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
   },
 
   getAllModels: () => {
+    return get().userModels;
+  },
+
+  getMergedModels: () => {
     return get().userModels;
   },
 }));

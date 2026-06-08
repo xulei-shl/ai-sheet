@@ -1,5 +1,5 @@
 import { AlertTriangle, RotateCw, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AgentMessage } from '../../types/agent';
 import { useAgentStore } from '../../stores/agentStore';
 import { ContextPreview } from './ContextPreview';
@@ -107,6 +107,38 @@ function UserMessage({ message }: { message: AgentMessage }) {
 
 export function MessageList({ messages }: MessageListProps) {
   const { loadedContext } = useAgentStore();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const userInteractingRef = useRef(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = () => {
+      userInteractingRef.current = true;
+    };
+    const handleTouch = () => {
+      userInteractingRef.current = true;
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: true });
+    el.addEventListener('touchmove', handleTouch, { passive: true });
+
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+      el.removeEventListener('touchmove', handleTouch);
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || userInteractingRef.current) return;
+
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [messages]);
 
   if (messages.length === 0) {
     return (
@@ -120,7 +152,7 @@ export function MessageList({ messages }: MessageListProps) {
   }
 
   return (
-    <div className="space-y-4 p-4" aria-live="polite">
+    <div ref={containerRef} className="space-y-4 p-4" aria-live="polite">
       {loadedContext && <ContextPreview context={loadedContext} />}
       {messages.map((message) => (
         <article key={message.id} className="group space-y-1">

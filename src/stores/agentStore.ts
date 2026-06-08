@@ -51,7 +51,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   refreshStatus: async () => {
     const status = await getAgentStatus();
-    set({ status, error: status.ready ? null : status.message });
+    const { isApplyingModel } = get();
+    set({ status, error: isApplyingModel ? null : (status.ready ? null : status.message) });
   },
 
   sendMessage: async (content) => {
@@ -108,6 +109,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
           modelId: target.modelId,
           apiKey: target.apiKey,
           baseUrl: target.baseUrl,
+          useProxy: target.useProxy,
         };
         await setActiveAgentModel(payload);
       }
@@ -119,8 +121,9 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       });
       return;
     }
+    // isApplyingModel 保持 true，refreshStatus 才会跳过 sidecar 未就绪的错误
+    await get().refreshStatus();
     set({ isApplyingModel: false });
-    void get().refreshStatus();
   },
 
   handleEvent: (event) => {
@@ -196,8 +199,9 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   },
 
   markOffline: (message) => {
+    const { isApplyingModel } = get();
     set((state) => ({
-      error: message,
+      error: isApplyingModel ? state.error : message,
       agentStreamingRequestId: null,
       directStreamingRequestId: null,
       status: state.status ? { ...state.status, ready: false, message } : null,

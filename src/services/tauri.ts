@@ -41,6 +41,7 @@ export interface ActiveAgentModel {
   modelId: string;
   apiKey: string;
   baseUrl: string;
+  useProxy?: boolean;
 }
 
 export function setActiveAgentModel(model: ActiveAgentModel) {

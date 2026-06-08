@@ -4,7 +4,7 @@ import { config as loadDotenv } from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-loadDotenv({ path: join(__dirname, '..', '..', '.env') });
+loadDotenv({ path: join(__dirname, '..', '..', '.env'), quiet: true });
 
 import { createInterface } from 'node:readline';
 import type { SidecarCommand, SidecarEvent, BatchStats, BatchParams } from './protocol.js';
@@ -368,6 +368,7 @@ process.on('unhandledRejection', (reason) => {
 const reader = createInterface({ input: process.stdin });
 
 reader.on('line', (line) => {
+  if (!line.trim()) return; // 跳过管道关闭时的空行
   void (async () => {
     try {
       const command = JSON.parse(line) as SidecarCommand;

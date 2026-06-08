@@ -209,14 +209,14 @@ impl SidecarManager {
             let mut lines = BufReader::new(stdout).lines();
 
             while let Ok(Some(line)) = lines.next_line().await {
+                if line.trim().is_empty() {
+                    continue; // 跳过管道关闭时的空行
+                }
                 match serde_json::from_str::<Value>(&line) {
                     Ok(value) => manager.handle_sidecar_event(&app, value).await,
-                    Err(error) => {
-                        app.emit(
-                            "agent-event",
-                            json!({ "type": "agent_error", "message": error.to_string() }),
-                        )
-                        .ok();
+                    Err(_) => {
+                        // 非 JSON 行（如 dotenv 日志）静默跳过，避免干扰前端
+                        eprintln!("[sidecar] ignoring non-JSON stdout line: {line}");
                     }
                 }
             }

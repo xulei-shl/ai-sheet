@@ -1,4 +1,5 @@
 import { createAgentSession, SessionManager, AuthStorage, ModelRegistry, SettingsManager } from '@earendil-works/pi-coding-agent';
+import type { AgentSession } from '@earendil-works/pi-coding-agent';
 import type { BridgeClient } from './bridge.js';
 import { createCustomTools } from './tools/mod.js';
 import { buildSystemPrompt } from './prompts/system.js';
@@ -6,7 +7,13 @@ import { buildModel } from './provider-map.js';
 import { setUseProxy } from './proxy-state.js';
 import type { AgentContext } from './protocol.js';
 
-export async function createSheetAgent(bridge: BridgeClient) {
+export interface SheetAgentContext {
+  session: AgentSession;
+  modelRegistry: ModelRegistry;
+  authStorage: AuthStorage;
+}
+
+export async function createSheetAgent(bridge: BridgeClient): Promise<SheetAgentContext> {
   const customTools = createCustomTools(bridge);
 
   let defaultModel: {
@@ -73,5 +80,5 @@ export async function createSheetAgent(bridge: BridgeClient) {
 
   log(`session created, httpIdleTimeoutMs=${settingsManager.getHttpIdleTimeoutMs()}, retry.maxRetries=${settingsManager.getRetrySettings().maxRetries}`);
 
-  return session;
+  return { session, modelRegistry, authStorage };
 }

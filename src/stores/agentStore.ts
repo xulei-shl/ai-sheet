@@ -11,6 +11,7 @@ import {
 } from '../services/tauri';
 import type { AgentMessage, AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
 import { useConfigStore } from './configStore';
+import { useUiStore } from './uiStore';
 
 function resolveRequestKind(id: string): 'agent' | 'direct' {
   return id.startsWith('direct-') ? 'direct' : 'agent';
@@ -36,7 +37,7 @@ interface AgentStore {
   clearMessages: () => void;
   deleteMessage: (id: string) => void;
   retryMessage: (id: string) => Promise<void>;
-  sendDirectLlmMessage: (action: 'formula_generation' | 'prompt_generation', userDisplay: string, fullPrompt: string) => Promise<void>;
+  sendDirectLlmMessage: (action: string, userDisplay: string, fullPrompt: string) => Promise<void>;
 }
 
 export const useAgentStore = create<AgentStore>((set, get) => ({
@@ -97,6 +98,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     try {
       if (name === null) {
         await clearActiveAgentModel();
+        await get().refreshStatus();
+        set({ appliedModelName: null, isApplyingModel: false });
       } else {
         const merged = useConfigStore.getState().getMergedModels();
         const target = merged.find((m) => m.name === name);
@@ -112,18 +115,14 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
           useProxy: target.useProxy,
         };
         await setActiveAgentModel(payload);
+        // isApplyingModel 保持 true，等 model_switch_result 事件回来后再清除
       }
-      set({ appliedModelName: name });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : String(error),
         isApplyingModel: false,
       });
-      return;
     }
-    // isApplyingModel 保持 true，refreshStatus 才会跳过 sidecar 未就绪的错误
-    await get().refreshStatus();
-    set({ isApplyingModel: false });
   },
 
   handleEvent: (event) => {
@@ -195,6 +194,17 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
           ? 'agentStreamingRequestId'
           : 'directStreamingRequestId']: null,
       }));
+      return;
+    }
+
+    if (event.type === 'model_switch_result') {
+      if (event.success) {
+        set({ appliedModelName: event.modelName ?? null, isApplyingModel: false, error: null });
+      } else {
+        useUiStore.getState().setSelectedAgentModelName(get().appliedModelName);
+        set({ error: event.error ?? '模型切换失败', isApplyingModel: false });
+      }
+      return;
     }
   },
 

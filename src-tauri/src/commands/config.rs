@@ -40,7 +40,13 @@ pub async fn set_active_model(
         settings_repo::set_setting(&conn, "active_model", &json)
             .map_err(|e| AppError::Database(e.to_string()))?;
     }
-    state.sidecar_manager.restart(app).await
+    // 优先尝试原地切换模型（保留对话历史），sidecar 未就绪时回退到重启
+    let result = state.sidecar_manager.send_set_model(model).await;
+    match result {
+        Ok(()) => Ok(()),
+        Err(AppError::SidecarUnavailable) => state.sidecar_manager.restart(app).await,
+        Err(e) => Err(e),
+    }
 }
 
 #[tauri::command]

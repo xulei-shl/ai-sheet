@@ -504,25 +504,129 @@ pub use_proxy: bool,
 
 ---
 
-## 10. 参考文件
+## 10. 运行时模型切换（不重启 Sidecar）
+
+### 10.1 问题背景
+
+初始实现中，用户切换模型时 Rust 后端调用 `sidecar_manager.restart()`，杀掉整个 Node.js sidecar 进程再重启。这导致 `AgentSession` 的对话历史完全丢失。
+
+### 10.2 解决方案：set_model 协议命令
+
+pi-coding-agent SDK 的 `AgentSession` 已提供 `setModel(model)` 方法，支持运行时切换模型。我们通过新增 stdin 协议命令 `set_model`，让 sidecar 原地切换模型，保留对话历史。
+
+**数据流**：
+
+```
+前端 applyModel(name)
+   │
+   ▼
+Rust: set_active_model → send_set_model(payload) via stdin
+   │
+   ▼
+Node.js: handleSetModel
+   ├── setUseProxy(model.useProxy)
+   ├── modelRegistry.registerProvider(...)   // 注册/更新 provider（upsert 语义）
+   └── session.setModel(model)               // 原地切换，保留对话历史
+   │
+   ▼
+emit model_switch_result { success, modelName?, error? }
+   │
+   ▼
+Rust → agent-event → 前端 handleEvent
+   ├── success: true  → appliedModelName = modelName, isApplyingModel = false
+   └── success: false → 回滚 selectedAgentModelName, 显示错误
+```
+
+### 10.3 协议扩展
+
+```typescript
+// 新增命令
+export interface SetModelInfo {
+  name: string;
+  providerType: string;
+  modelId: string;
+  apiKey: string;
+  baseUrl: string;
+  useProxy?: boolean;
+}
+
+// SidecarCommand 新增变体
+| { id: string; type: 'set_model'; model: SetModelInfo }
+
+// SidecarEvent 新增变体
+| { type: 'model_switch_result'; id: string; success: boolean; error?: string; modelName?: string }
+```
+
+### 10.4 关键设计决策
+
+| 决策 | 理由 |
+|------|------|
+| 先 `registerProvider` 再 `setModel` | `setModel` 内部会校验 `hasConfiguredAuth`，必须先注册 provider |
+| `setUseProxy` 在 `registerProvider` 之前调用 | 确保 auth 校验时 fetch 路由到正确的代理/直连 |
+| `clear_active_model` 仍走 restart | AgentSession 无模型时无法响应 prompt，重启是正确行为 |
+| `send_set_model` 失败时 fallback 到 restart | 处理 sidecar 尚未就绪的边界情况 |
+| `model_switch_result` 通过 `agent-event` 流转 | 保持架构一致性，避免引入第二套事件通道 |
+| 切换失败时回滚 `selectedAgentModelName` | 下拉框显示必须与实际 active model 一致 |
+
+### 10.5 agent.ts 导出变更
+
+`createSheetAgent` 返回类型从 `AgentSession` 改为 `SheetAgentContext`，暴露 `modelRegistry` 和 `authStorage`：
+
+```typescript
+export interface SheetAgentContext {
+  session: AgentSession;
+  modelRegistry: ModelRegistry;
+  authStorage: AuthStorage;
+}
+```
+
+这是因为 `set_model` 处理中需要访问 `modelRegistry`（注册新 provider）和 `authStorage`（SDK 内部鉴权依赖）。
+
+### 10.6 常见陷阱
+
+```ts
+// ❌ 错误：直接调用 setModel 不先注册 provider
+await session.setModel(newModel);
+// → "No API key for provider/model" 抛出
+
+// ❌ 错误：切换失败后不回滚 UI 状态
+// selectedAgentModelName 指向新模型，但实际 active 的仍是旧模型
+// 用户看到的下拉框选中项与实际运行模型不一致
+
+// ✅ 正确：先注册 provider，再 setModel
+modelRegistry.registerProvider(model.provider, { api, apiKey, baseUrl, models: [model] } as any);
+await session.setModel(model);
+
+// ✅ 正确：失败时回滚 UI 选择状态
+useUiStore.getState().setSelectedAgentModelName(appliedModelName);
+```
+
+---
+
+## 11. 参考文件
 
 | 文件 | 说明 |
 |------|------|
 | `src-agent/src/provider-map.ts` | Provider/API 映射模块，providerType → { provider, api } |
 | `src-agent/src/proxy-state.ts` | 代理状态管理，与 fetch override 配合 |
-| `src-agent/src/main.ts` | Sidecar 入口，双 Dispatcher + .env 加载 |
-| `src-agent/src/agent.ts` | Agent Session 创建，含 SettingsManager 配置 |
+| `src-agent/src/protocol.ts` | Sidecar 协议定义，含 set_model 命令和 model_switch_result 事件 |
+| `src-agent/src/main.ts` | Sidecar 入口，双 Dispatcher + .env 加载 + set_model 处理 |
+| `src-agent/src/agent.ts` | Agent Session 创建，导出 SheetAgentContext（session + modelRegistry + authStorage） |
 | `src-agent/src/direct-llm.ts` | 直接 LLM 调用，stream() 事件处理范例 |
 | `src-agent/src/batch/runner.ts` | 批量处理，apiKey 透传范例 |
+| `src-tauri/src/services/sidecar_manager.rs` | Sidecar 进程管理，含 send_set_model 方法 |
+| `src-tauri/src/commands/config.rs` | 配置命令，set_active_model 使用 send_set_model + fallback |
+| `src/stores/agentStore.ts` | 前端 Agent 状态，处理 model_switch_result 事件 + 失败回滚 |
 | `pi-ai/dist/stream.js` | `stream()` 函数，支持 `options.apiKey` |
 | `pi-ai/dist/types.d.ts` | `Model<Api>` 类型定义 |
 | `pi-coding-agent/dist/core/sdk.js` | `createAgentSession()` 实现 |
+| `pi-coding-agent/dist/core/agent-session.d.ts` | AgentSession API，含 `setModel()` 方法 |
 | `pi-coding-agent/dist/core/auth-storage.d.ts` | AuthStorage API |
-| `pi-coding-agent/dist/core/model-registry.d.ts` | ModelRegistry API |
+| `pi-coding-agent/dist/core/model-registry.d.ts` | ModelRegistry API（`registerProvider` 有 upsert 语义） |
 | `pi-coding-agent/dist/core/settings-manager.d.ts` | SettingsManager API |
 
 ---
 
-**文档版本**：v2.0  
-**更新日期**：2026-06-08  
+**文档版本**：v3.0
+**更新日期**：2026-06-08
 **适用版本**：pi-ai 0.x, pi-coding-agent 0.78+

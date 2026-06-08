@@ -14,7 +14,7 @@ use tokio::{
 
 use crate::{
     error::{AppError, AppResult},
-    models::agent::{AgentStatus, DirectLlmRequest},
+    models::{agent::{AgentStatus, DirectLlmRequest}, config::ActiveModel},
 };
 
 const HEARTBEAT_TIMEOUT: Duration = Duration::from_secs(15);
@@ -142,6 +142,23 @@ impl SidecarManager {
             },
         });
         *self.is_streaming.write().await = true;
+        self.write_json_line(payload).await
+    }
+
+    pub async fn send_set_model(&self, model: ActiveModel) -> AppResult<()> {
+        let id = format!("set-model-{}", current_millis());
+        let payload = json!({
+            "id": id,
+            "type": "set_model",
+            "model": {
+                "name": model.name,
+                "providerType": model.provider_type,
+                "modelId": model.model_id,
+                "apiKey": model.api_key,
+                "baseUrl": model.base_url,
+                "useProxy": model.use_proxy,
+            },
+        });
         self.write_json_line(payload).await
     }
 

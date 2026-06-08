@@ -61,4 +61,5 @@ export type SidecarEvent =
   | { type: 'batch_progress'; batchId: string; current: number; total: number; speed: number }
   | { type: 'batch_row_complete'; batchId: string; row: number; result: string }
   | { type: 'batch_done'; batchId: string; stats: Record<string, unknown> }
-  | { type: 'batch_error'; batchId: string; message: string };
+  | { type: 'batch_error'; batchId: string; message: string }
+  | { type: 'model_switch_result'; id: string; success: boolean; error?: string; modelName?: string };

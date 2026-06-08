@@ -9,16 +9,19 @@ loadDotenv({ path: join(__dirname, '..', '..', '.env'), quiet: true });
 import { createInterface } from 'node:readline';
 import type { SidecarCommand, SidecarEvent, BatchStats, BatchParams } from './protocol.js';
 import type { BridgeClient } from './bridge.js';
-import type { AgentSession } from '@earendil-works/pi-coding-agent';
+import type { AgentSession, ModelRegistry, AuthStorage } from '@earendil-works/pi-coding-agent';
 import { BatchRunner } from './batch/runner.js';
 import type { RowCompleteUpdate } from './batch/progress.js';
 import { runDirectLlmStream, abortDirectLlm } from './direct-llm.js';
-import { getUseProxy } from './proxy-state.js';
+import { getUseProxy, setUseProxy } from './proxy-state.js';
+import { buildModel } from './provider-map.js';
 
 const args = parseArgs();
 const bridgePort = args.bridgePort;
 let bridge: BridgeClient | null = null;
 let session: AgentSession | null = null;
+let modelRegistry: ModelRegistry | null = null;
+let authStorage: AuthStorage | null = null;
 let batchRunner: BatchRunner | null = null;
 const activeBatches = new Map<string, BatchRunner>();
 
@@ -91,7 +94,10 @@ async function initialize() {
   try {
     const { createSheetAgent } = await import('./agent.js');
     if (bridge) {
-      session = await createSheetAgent(bridge);
+      const ctx = await createSheetAgent(bridge);
+      session = ctx.session;
+      modelRegistry = ctx.modelRegistry;
+      authStorage = ctx.authStorage;
       log('agent session created');
     }
   } catch (error) {
@@ -229,6 +235,39 @@ async function handleSteer(command: Extract<SidecarCommand, { type: 'steer' }>) 
   }
 }
 
+async function handleSetModel(command: Extract<SidecarCommand, { type: 'set_model' }>) {
+  if (!session || !modelRegistry || !authStorage) {
+    emit({ type: 'model_switch_result', id: command.id, success: false, error: 'Agent 未初始化' });
+    return;
+  }
+
+  const info = command.model;
+
+  try {
+    setUseProxy(info.useProxy ?? true);
+
+    const model = buildModel(info);
+
+    if (info.apiKey) {
+      modelRegistry.registerProvider(model.provider, {
+        api: model.api,
+        apiKey: info.apiKey,
+        baseUrl: info.baseUrl,
+        models: [model],
+      } as any);
+    }
+
+    await session.setModel(model);
+
+    emit({ type: 'model_switch_result', id: command.id, success: true, modelName: info.name });
+    log(`model switched to ${info.name} (${model.provider}/${model.id})`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    emit({ type: 'model_switch_result', id: command.id, success: false, error: message });
+    log(`model switch failed: ${message}`);
+  }
+}
+
 async function handleBatchStart(params: Extract<SidecarCommand, { type: 'batch_start' }>['params']) {
   if (!bridge || !batchRunner) {
     emit({ type: 'batch_error', batchId: 'unknown', message: 'Bridge 未初始化' });
@@ -323,6 +362,9 @@ async function handleCommand(command: SidecarCommand) {
       break;
     case 'steer':
       await handleSteer(command);
+      break;
+    case 'set_model':
+      await handleSetModel(command);
       break;
     case 'batch_start':
       await handleBatchStart(command.params);

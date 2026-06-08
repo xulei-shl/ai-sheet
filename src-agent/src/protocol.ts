@@ -1,8 +1,18 @@
+export interface SetModelInfo {
+  name: string;
+  providerType: string;
+  modelId: string;
+  apiKey: string;
+  baseUrl: string;
+  useProxy?: boolean;
+}
+
 export type SidecarCommand =
   | { id: string; type: 'ping' }
   | { id: string; type: 'user_message'; content: string }
   | { id: string; type: 'direct_llm_message'; action: string; content: string; context: DirectLlmContext }
   | { id: string; type: 'steer'; context: AgentContext }
+  | { id: string; type: 'set_model'; model: SetModelInfo }
   | { id: string; type: 'batch_start'; params: BatchParams }
   | { id: string; type: 'batch_pause'; batchId: string }
   | { id: string; type: 'batch_resume'; batchId: string }
@@ -39,7 +49,8 @@ export type SidecarEvent =
   | { type: 'batch_done'; batchId: string; stats: BatchStats }
   | { type: 'batch_error'; batchId: string; message: string }
   | { type: 'batch_paused'; batchId: string }
-  | { type: 'sidecar_ready' };
+  | { type: 'sidecar_ready' }
+  | { type: 'model_switch_result'; id: string; success: boolean; error?: string; modelName?: string };
 
 export interface LoadedColumn {
   name: string;

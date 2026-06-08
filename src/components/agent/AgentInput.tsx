@@ -56,13 +56,11 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
   const isApplyingModel = useAgentStore((s) => s.isApplyingModel);
 
   useEffect(() => {
-    if (userModels.length === 0 && fallbackModels.length === 0) {
-      void fetchModels();
-    }
+    void fetchModels();
     void getActiveModel()
       .then((m) => setDefaultModel(m))
       .catch(() => undefined);
-  }, [fetchModels, userModels.length, fallbackModels.length]);
+  }, [fetchModels]);
 
   useEffect(() => {
     if (bootstrapAppliedRef.current) return;
@@ -168,7 +166,10 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
           <div ref={modelRef} className="relative min-w-0 flex-1">
             <button
               type="button"
-              onClick={() => setModelOpen((o) => !o)}
+              onClick={() => {
+                if (!modelOpen) void fetchModels();
+                setModelOpen((o) => !o);
+              }}
               disabled={disabled || mergedModels.length === 0}
               className="flex h-7 max-w-full items-center gap-1.5 rounded-md px-2 text-xs transition-colors hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
               style={{ color: 'var(--ink)' }}

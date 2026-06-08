@@ -23,6 +23,8 @@ async function enrichWithApiKeys(models: ModelConfig[]): Promise<ModelConfig[]> 
   );
 }
 
+let fetchVersion = 0;
+
 interface ConfigStore {
   activeModel: ModelConfig | null;
   fallbackModels: ModelConfig[];
@@ -60,6 +62,7 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
   error: null,
 
   fetchModels: async () => {
+    const version = ++fetchVersion;
     set({ loading: true, error: null });
     try {
       const [active, fallbacks, rawUserModels] = await Promise.all([
@@ -67,14 +70,19 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
         getFallbackModels(),
         getUserModels(),
       ]);
+      if (version !== fetchVersion) return;
       const userModels = await enrichWithApiKeys(rawUserModels);
+      if (version !== fetchVersion) return;
       set({ activeModel: active, fallbackModels: fallbacks, userModels, loading: false });
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : String(e), loading: false });
+      if (version === fetchVersion) {
+        set({ error: e instanceof Error ? e.message : String(e), loading: false });
+      }
     }
   },
 
   addModel: async (model) => {
+    fetchVersion++;
     try {
       const key = model.apiKey;
       const meta = { ...model, apiKey: '' };
@@ -89,6 +97,7 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
   },
 
   updateModel: async (index, model) => {
+    fetchVersion++;
     try {
       await apiUpdateUserModel(index, { ...model, apiKey: '', source: 'user' });
       if (model.apiKey) {
@@ -105,6 +114,7 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
   },
 
   deleteModel: async (index) => {
+    fetchVersion++;
     try {
       const target = get().userModels[index];
       await apiDeleteUserModel(index);

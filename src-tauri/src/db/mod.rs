@@ -36,6 +36,7 @@ impl Database {
     pub async fn run_migrations(&self) -> AppResult<()> {
         let conn = self.conn.lock().await;
         migrations::run(&conn)?;
+        prompts_repo::seed_system_prompts(&conn)?;
         Ok(())
     }
 

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { FileText, Plus, Search, Pencil, Trash2, X, Check, Eye, Code2 } from 'lucide-react';
+import { FileText, Plus, Search, Pencil, Trash2, X, Check, Eye, Code2, Zap } from 'lucide-react';
 import { usePromptStore } from '../stores/promptStore';
 import { MarkdownRenderer } from '../components/ui/MarkdownRenderer';
+import { QUICK_ACTION_CATEGORY } from '../components/agent/agentQuickActions';
 
 type Mode = 'view' | 'create' | 'edit';
 type ViewTab = 'preview' | 'raw';
@@ -17,6 +18,7 @@ export function PromptsPage() {
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
+  const [isQuickAction, setIsQuickAction] = useState(false);
 
   const filtered = getFilteredPrompts();
   const selected = selectedId ? prompts.find((p) => p.id === selectedId) ?? null : null;
@@ -25,6 +27,7 @@ export function PromptsPage() {
     setName('');
     setContent('');
     setCategory('');
+    setIsQuickAction(false);
   };
 
   const loadIntoForm = (id: string) => {
@@ -32,7 +35,8 @@ export function PromptsPage() {
     if (!p) return;
     setName(p.name);
     setContent(p.content);
-    setCategory(p.category ?? '');
+    setCategory(p.category === QUICK_ACTION_CATEGORY ? '' : (p.category ?? ''));
+    setIsQuickAction(p.category === QUICK_ACTION_CATEGORY);
   };
 
   const handleSelect = (id: string) => {
@@ -67,12 +71,15 @@ export function PromptsPage() {
 
   const handleSave = () => {
     if (!name.trim() || !content.trim()) return;
+    const resolvedCategory = isQuickAction
+      ? QUICK_ACTION_CATEGORY
+      : (category.trim() || undefined);
     if (mode === 'edit' && selectedId) {
-      updatePrompt(selectedId, { name: name.trim(), content: content.trim(), category: category.trim() || undefined });
+      updatePrompt(selectedId, { name: name.trim(), content: content.trim(), category: resolvedCategory });
       setMode('view');
       setViewTab('preview');
     } else if (mode === 'create') {
-      savePrompt({ name: name.trim(), content: content.trim(), category: category.trim() || undefined });
+      savePrompt({ name: name.trim(), content: content.trim(), category: resolvedCategory });
       clearForm();
       setMode('view');
     }
@@ -145,13 +152,23 @@ export function PromptsPage() {
                     <h3 className="truncate text-xs font-medium" style={{ color: 'var(--ink)' }}>
                       {prompt.name}
                     </h3>
-                    {prompt.category && (
+                    {prompt.category && prompt.category !== QUICK_ACTION_CATEGORY && (
                       <span
                         className="shrink-0 rounded-full px-1.5 py-0 text-[10px] truncate max-w-[80px]"
                         style={{ background: 'var(--bg)', color: 'var(--muted)' }}
                         title={prompt.category}
                       >
                         {prompt.category}
+                      </span>
+                    )}
+                    {prompt.category === QUICK_ACTION_CATEGORY && (
+                      <span
+                        className="shrink-0 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[10px]"
+                        style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
+                        title="快捷操作"
+                      >
+                        <Zap className="h-2.5 w-2.5" />
+                        快捷
                       </span>
                     )}
                     {prompt.isSystem && (
@@ -222,12 +239,21 @@ export function PromptsPage() {
                   <h2 className="truncate text-base font-semibold" style={{ color: 'var(--ink)' }}>
                     {selected.name}
                   </h2>
-                  {selected.category && (
+                  {selected.category && selected.category !== QUICK_ACTION_CATEGORY && (
                     <span
                       className="shrink-0 rounded-full px-2 py-0.5 text-xs"
                       style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
                     >
                       {selected.category}
+                    </span>
+                  )}
+                  {selected.category === QUICK_ACTION_CATEGORY && (
+                    <span
+                      className="shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+                      style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
+                    >
+                      <Zap className="h-3 w-3" />
+                      快捷操作
                     </span>
                   )}
                   {selected.isSystem && (
@@ -371,13 +397,37 @@ export function PromptsPage() {
                   分类（可选）
                 </label>
                 <input
-                  className="h-9 w-full rounded-md px-3 text-sm"
+                  className="h-9 w-full rounded-md px-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-                  value={category}
+                  value={isQuickAction ? QUICK_ACTION_CATEGORY : category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="如: 翻译、摘要"
+                  disabled={isQuickAction}
                 />
               </div>
+            </div>
+
+            <div
+              className="flex items-center gap-2 border-b px-5 py-3"
+              style={{ borderColor: 'var(--border)' }}
+            >
+              <button
+                type="button"
+                role="checkbox"
+                aria-checked={isQuickAction}
+                onClick={() => setIsQuickAction((v) => !v)}
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors"
+                style={{
+                  borderColor: isQuickAction ? 'var(--primary)' : 'var(--border)',
+                  background: isQuickAction ? 'var(--primary)' : 'var(--surface)',
+                }}
+              >
+                {isQuickAction && <Check className="h-3 w-3" style={{ color: 'var(--primary-foreground)' }} />}
+              </button>
+              <Zap className="h-3.5 w-3.5 shrink-0" style={{ color: isQuickAction ? 'var(--primary)' : 'var(--muted)' }} />
+              <span className="text-xs" style={{ color: isQuickAction ? 'var(--ink)' : 'var(--muted)' }}>
+                显示为快捷操作按钮
+              </span>
             </div>
 
             <div className="flex flex-1 flex-col p-5 overflow-hidden gap-1.5">

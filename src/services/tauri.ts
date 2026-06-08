@@ -181,7 +181,7 @@ export interface DirectLlmContext {
 
 export interface DirectLlmRequest {
   requestId: string;
-  action: 'formula_generation' | 'prompt_generation';
+  action: string;
   content: string;
   context: DirectLlmContext;
 }

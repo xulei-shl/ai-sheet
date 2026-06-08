@@ -58,7 +58,7 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   previewData: null,
   loading: false,
   error: null,
-  includeSampleData: true,
+  includeSampleData: false,
 
   addFile: async (path: string) => {
     set({ loading: true, error: null });
@@ -279,5 +279,10 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
 
   setIncludeSampleData: (value: boolean) => {
     set({ includeSampleData: value });
+    // Re-notify agent context so sample data inclusion stays in sync
+    const { selections } = get();
+    if (selections.some((s) => s.selectedSheets.length > 0)) {
+      get().notifyContextChange();
+    }
   },
 }));

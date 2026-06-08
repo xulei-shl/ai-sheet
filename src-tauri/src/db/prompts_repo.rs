@@ -61,6 +61,42 @@ pub fn delete_prompt(conn: &Connection, id: &str) -> AppResult<()> {
     Ok(())
 }
 
+/// Seed system prompts for quick actions if they don't exist yet.
+/// Idempotent — skips if a prompt with the same name already exists.
+pub fn seed_system_prompts(conn: &Connection) -> AppResult<()> {
+    const QUICK_ACTION_CATEGORY: &str = "快捷操作";
+
+    let seeds: &[(&str, &str)] = &[
+        (
+            "Excel公式生成",
+            include_str!("../../seeds/formula_generation.md"),
+        ),
+        (
+            "提示词生成",
+            include_str!("../../seeds/prompt_generation.md"),
+        ),
+    ];
+
+    for &(name, content) in seeds {
+        let count: i64 = conn.query_row(
+            "SELECT COUNT(*) FROM prompts WHERE name = ?1",
+            rusqlite::params![name],
+            |row| row.get(0),
+        )?;
+        if count == 0 {
+            let now = chrono::Utc::now().to_rfc3339();
+            let id = format!("prompt-seed-{}", name);
+            conn.execute(
+                "INSERT INTO prompts (id, name, content, category, is_system, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6)",
+                rusqlite::params![id, name, content, QUICK_ACTION_CATEGORY, now, now],
+            )?;
+        }
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

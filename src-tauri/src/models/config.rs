@@ -9,6 +9,8 @@ pub struct ModelConfig {
     pub base_url: String,
     pub model_id: String,
     pub provider_type: String,
+    #[serde(default = "default_use_proxy")]
+    pub use_proxy: bool,
 }
 
 /// 用户在 Agent 面板上选中的当前模型（含明文 apiKey），仅驻留在进程内存。
@@ -21,4 +23,10 @@ pub struct ActiveModel {
     pub model_id: String,
     pub api_key: String,
     pub base_url: String,
+    #[serde(default = "default_use_proxy")]
+    pub use_proxy: bool,
+}
+
+fn default_use_proxy() -> bool {
+    true
 }

@@ -1,102 +1,156 @@
-# 修复 LLM 调用失败问题
+# 每模型代理开关（Per-Model Proxy Toggle）
 
 ## Context
 
-当前项目所有 LLM 调用均无法成功。根因是项目将 pi-ai 的 `provider`（身份标识，用于 API Key 查找）和 `api`（协议类型，如 `openai-completions`）两个概念混淆为一个 `providerType` 字段。导致：
+用户在中国网络环境下使用本应用时，部分 LLM API（如 OpenAI、Anthropic）需要通过 HTTP 代理才能访问，而另一些（如 DeepSeek）可以直接连接。当前项目的 undici `EnvHttpProxyAgent` 是全局生效的——所有 LLM 请求都走代理或都不走，无法针对不同模型独立控制。
 
-1. **Batch Runner 完全无 API Key** — `stream()` 调用时未传 `apiKey`，环境变量查找因 provider 名错误而失败
-2. **DeepSeek 用户无法使用** — `providerType='deepseek'` 被当作 `api` 类型，但 pi-ai 没有 `deepseek` 这个 API 协议，抛出 "No API provider registered for api: deepseek"
-3. **Direct LLM 事件处理有误** — 未区分 `text_delta` 事件与其他事件类型，`ev?.text` 在 pi-ai 中不存在
-4. **agentStore 调用了不存在的 `getMergedModels()`** — configStore 只有 `getAllModels()`
+目标：在每个模型配置中添加「启用代理」开关。开启时该模型的 API 请求走系统代理（HTTP_PROXY/HTTPS_PROXY），关闭时直连。不同模型可独立设置。
 
 ---
 
-## 修复方案
+## 修改计划
 
-### 1. 新建 `provider-map.ts` — provider/api 映射模块
+### 1. 数据库迁移 — 新增 `use_proxy` 列
 
-**文件**: `src-agent/src/provider-map.ts`（新建）
+**文件**: `src-tauri/src/db/migrations.rs`
 
-创建 `providerType → (provider, api)` 的映射表，统一解决三个文件中的 provider/api 混淆：
+在 `MIGRATIONS` 数组末尾添加 v6 迁移：
 
-```
-providerType              → { provider,           api }
-──────────────────────────────────────────────────────────
-'openai-completions'      → { 'openai',           'openai-completions' }
-'openai-responses'        → { 'openai',           'openai-responses' }
-'anthropic-messages'      → { 'anthropic',        'anthropic-messages' }
-'deepseek'                → { 'deepseek',         'openai-completions' }   ← 关键！
-'mistral-conversations'   → { 'mistral',          'mistral-conversations' }
-'google-generative-ai'   → { 'google',           'google-generative-ai' }
+```sql
+ALTER TABLE models ADD COLUMN use_proxy INTEGER NOT NULL DEFAULT 1;
 ```
 
-导出：
-- `resolveProviderApi(providerType: string): { provider: string; api: string }` — 未知类型 heuristic fallback
-- `buildModel(info: { providerType: string; modelId: string; name?: string; baseUrl?: string }): any` — 统一构造 model 对象
+默认值 1（启用代理），与当前全局行为一致，不破坏现有用户体验。
 
-### 2. 修复 `agent.ts` — 正确拆分 provider/api
+---
 
-**文件**: `src-agent/src/agent.ts`
+### 2. Rust 结构体 — 添加 `use_proxy` 字段
 
-- 用 `resolveProviderApi()` 替代 `provider: providerName` 的直接赋值
-- `model.api` = 解析后的 api（如 `'openai-completions'`）
-- `model.provider` = 解析后的 provider（如 `'deepseek'`）
-- `registerProvider()` 注册时使用正确的 `provider` 和 `api`
+**文件**: `src-tauri/src/models/config.rs`
 
-### 3. 修复 `direct-llm.ts` — 正确拆分 + 事件处理
+- `ModelConfig` 添加 `pub use_proxy: bool`
+- `ActiveModel` 添加 `pub use_proxy: bool`
 
-**文件**: `src-agent/src/direct-llm.ts`
+两者都使用 `#[serde(rename_all = "camelCase")]`，序列化后为 `useProxy`。
 
-- 用 `buildModel()` 替代手动构造 model 对象
-- 修复事件处理循环：只处理 `ev.type === 'text_delta'` 时提取 delta
-- 移除不存在的 `ev?.text` fallback
+---
 
-### 4. 修复 `batch/runner.ts` — 传递 apiKey + 正确拆分
+### 3. Rust 数据库查询 — 支持 `use_proxy`
 
-**文件**: `src-agent/src/batch/runner.ts`
+**文件**: `src-tauri/src/db/models_repo.rs`
 
-- `BatchRunParams` 接口增加 `apiKey?: string` 和 `baseUrl?: string`
-- `_resolveModel()` 使用 `resolveProviderApi()` 正确拆分
-- `_callLLM()` 传入 `apiKey` 到 `stream()` 的 options
-- `_processRowWithRetry()` 和 `run()` 方法透传 apiKey
+- `get_all_models`: SELECT 增加 `use_proxy` 列，映射到结构体
+- `insert_model`: INSERT 增加 `use_proxy` 列
+- `update_model`: UPDATE SET 增加 `use_proxy`
+- 测试中 `sample_model()` 添加 `use_proxy: true`
 
-### 5. 修复 `main.ts` — batch_start 时补充 apiKey
+---
 
-**文件**: `src-agent/src/main.ts`
+### 4. Rust Bridge — 下发 `useProxy`
 
-- `handleBatchStart()` 中从 `bridge.getDefaultModel()` 获取 apiKey 和 baseUrl，合并到 batch params
-- 修复 undici fetch override：对 `127.0.0.1` / `localhost` 请求使用原始 fetch，避免本地 HTTP 调用受不必要超时影响
+**文件**: `src-tauri/src/services/bridge_server.rs`
 
-### 6. 修复 `configStore.ts` — 添加 `getMergedModels` 方法
+`/api/config/default` 端点的 JSON 响应添加 `"useProxy": m.use_proxy`。
 
-**文件**: `src/stores/configStore.ts`
+---
 
-- 添加 `getMergedModels()` 方法（等同于 `getAllModels()` 的别名，名称更准确因为包含了 secure store 中的 API Key）
-- 或直接将 `getAllModels` 重命名为 `getMergedModels`
+### 5. Rust 命令 — 映射新字段
 
-### 7. 扩展 `ConfigPage.tsx` — 增加 provider 选项
+**文件**: `src-tauri/src/commands/config.rs`
+
+`get_active_model` 中 `ModelConfig` 构造添加 `use_proxy: m.use_proxy`。
+（`set_active_model` 接收 `ActiveModel`，serde 自动处理新字段，无需手动改。）
+
+---
+
+### 6. 前端类型 — `ModelConfig` 添加 `useProxy`
+
+**文件**: `src/types/config.ts`
+
+```typescript
+useProxy: boolean;  // 新增
+```
+
+---
+
+### 7. 前端表单 — 代理开关 UI
 
 **文件**: `src/pages/ConfigPage.tsx`
 
-- `PROVIDER_OPTIONS` 增加：`deepseek`、`mistral-conversations`、`google-generative-ai`
-- 对应更新 `BASE_URL_PLACEHOLDERS` 和 `MODEL_ID_PLACEHOLDERS`
+- `ModelFormData` 接口添加 `useProxy: boolean`
+- `emptyForm` 默认值 `useProxy: true`
+- `loadIntoForm` 映射 `useProxy: model.useProxy`
+- `handleSave` 构造 `ModelConfig` 时包含 `useProxy: form.useProxy`
+- `FormPanel` 中 API Key 字段下方添加 toggle 开关
+- `DetailView` 中在 API Key 字段下方展示代理状态（启用代理: 是/否）
+- `handleTest` / `handleDetailTest` 传入 `useProxy`
+
+---
+
+### 8. Sidecar — 代理状态管理模块
+
+**新建文件**: `src-agent/src/proxy-state.ts`
+
+```typescript
+let currentUseProxy = true;
+export function getUseProxy(): boolean { return currentUseProxy; }
+export function setUseProxy(value: boolean): void { currentUseProxy = value; }
+```
+
+---
+
+### 9. Sidecar — 双 Dispatcher 架构
+
+**文件**: `src-agent/src/main.ts`
+
+重构 `initialize()` 中的 fetch override，创建两个 dispatcher：
+
+- `proxyDispatcher`: `new undici.EnvHttpProxyAgent({ ... })` — 读取 HTTP_PROXY/HTTPS_PROXY
+- `directDispatcher`: `new undici.Agent({ ... })` — 直连，不读代理环境变量
+
+fetch override 中根据 `getUseProxy()` 返回值选择 dispatcher。直连 `Agent` 配置相同的 `bodyTimeout` / `headersTimeout` 保持超时保护一致。
+
+---
+
+### 10. Sidecar — 各 LLM 调用入口同步代理状态
+
+**文件**: `src-agent/src/agent.ts`
+在 `createSheetAgent()` 中获取 `defaultModel` 后调用 `setUseProxy(defaultModel.useProxy ?? true)`。
+
+**文件**: `src-agent/src/direct-llm.ts`
+在 `runDirectLlmStream()` 中获取 `modelInfo` 后调用 `setUseProxy(modelInfo.useProxy ?? true)`。
+
+**文件**: `src-agent/src/batch/runner.ts`
+在 `run()` 方法中获取 params 后调用 `setUseProxy(params.useProxy ?? true)`。
+
+**文件**: `src-agent/src/protocol.ts`
+`BatchParams` 接口添加 `useProxy?: boolean`。
+
+**文件**: `src-agent/src/bridge.ts`
+`getDefaultModel()` 返回类型添加 `useProxy?: boolean`。
+
+**文件**: `src-agent/src/main.ts`
+`handleBatchStart()` 中将 `useProxy` 从 bridge 获取并传递给 batch params。
 
 ---
 
 ## 实施顺序
 
-1. `provider-map.ts`（基础模块）
-2. `agent.ts`（引用 provider-map）
-3. `direct-llm.ts`（引用 provider-map + 事件处理）
-4. `batch/runner.ts` + `main.ts`（apiKey 透传 + 引用 provider-map）
-5. `configStore.ts`（前端修复）
-6. `ConfigPage.tsx`（UI 扩展）
+1. DB 迁移 (migrations.rs)
+2. Rust 结构体 (config.rs)
+3. Rust 数据库查询 (models_repo.rs)
+4. Rust Bridge + 命令 (bridge_server.rs, config.rs)
+5. 前端类型 (types/config.ts)
+6. 前端表单 UI (ConfigPage.tsx)
+7. Sidecar 代理模块 (proxy-state.ts)
+8. Sidecar fetch 重构 (main.ts)
+9. Sidecar 各入口同步 (agent.ts, direct-llm.ts, batch/runner.ts, protocol.ts, bridge.ts, main.ts batch handler)
 
-## 验证方式
+## 验证
 
-1. `cd src-agent && npx tsc --noEmit` — 类型检查通过
-2. `cd src-agent && npm run build` — 构建成功
-3. 启动应用，配置一个 OpenAI 兼容模型，在右栏 Agent 面板发送消息 → 应收到流式回复
-4. 点击快捷 LLM 按钮（公式生成/提示词生成）→ 应收到流式回复
-5. 在中栏批量处理页面启动批量任务 → 应逐行处理并写入结果
-6. 配置 DeepSeek 模型测试 → 应正常工作
+1. `cd src-tauri && cargo test` — DB 迁移和 models_repo 测试通过
+2. `cd src-agent && npx tsc --noEmit` — 类型检查通过
+3. 启动应用，新增模型 → 确认「启用代理」开关默认开启
+4. 关闭代理开关，使用该模型发送消息 → 确认请求直连（不走 HTTP_PROXY）
+5. 开启代理开关，使用该模型发送消息 → 确认请求走代理
+6. 不同模型使用不同代理设置 → 确认独立生效

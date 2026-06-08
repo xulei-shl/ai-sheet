@@ -3,6 +3,7 @@ import type { BridgeClient } from './bridge.js';
 import { createCustomTools } from './tools/mod.js';
 import { buildSystemPrompt } from './prompts/system.js';
 import { buildModel } from './provider-map.js';
+import { setUseProxy } from './proxy-state.js';
 import type { AgentContext } from './protocol.js';
 
 export async function createSheetAgent(bridge: BridgeClient) {
@@ -14,6 +15,7 @@ export async function createSheetAgent(bridge: BridgeClient) {
     name?: string;
     apiKey?: string;
     baseUrl?: string;
+    useProxy?: boolean;
   } | null = null;
   try {
     defaultModel = await bridge.getDefaultModel();
@@ -30,6 +32,10 @@ export async function createSheetAgent(bridge: BridgeClient) {
   let model: ReturnType<typeof buildModel> | undefined = undefined;
   if (defaultModel) {
     log(`defaultModel: providerType=${defaultModel.providerType}, modelId=${defaultModel.modelId}, baseUrl=${defaultModel.baseUrl}, hasApiKey=${!!defaultModel.apiKey}`);
+
+    // 同步代理状态：根据模型的 useProxy 设置决定 fetch 路由
+    setUseProxy(defaultModel.useProxy ?? true);
+    log(`proxy state: useProxy=${defaultModel.useProxy ?? true}`);
 
     // 使用 provider-map 正确拆分 provider 和 api
     model = buildModel(defaultModel);

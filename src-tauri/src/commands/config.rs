@@ -17,6 +17,7 @@ pub async fn get_active_model(state: State<'_, AppState>) -> Result<Option<Model
         base_url: m.base_url.clone(),
         model_id: m.model_id.clone(),
         provider_type: m.provider_type.clone(),
+        use_proxy: m.use_proxy,
     }))
 }
 

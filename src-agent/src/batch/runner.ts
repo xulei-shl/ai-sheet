@@ -4,6 +4,7 @@ import type { BridgeClient } from '../bridge.js';
 import { ProgressTracker, type ProgressCallback, type RowCompleteUpdate } from './progress.js';
 import { stream } from '@earendil-works/pi-ai';
 import { buildModel } from '../provider-map.js';
+import { setUseProxy } from '../proxy-state.js';
 
 interface BatchRunParams {
   filePath: string;
@@ -15,6 +16,7 @@ interface BatchRunParams {
   providerType?: string;
   apiKey?: string;
   baseUrl?: string;
+  useProxy?: boolean;
   temperature?: number;
 }
 
@@ -61,6 +63,9 @@ export class BatchRunner {
   async run(params: BatchRunParams): Promise<void> {
     this.abortController = new AbortController();
     this.paused = false;
+
+    // 同步代理状态：根据模型的 useProxy 设置决定 fetch 路由
+    setUseProxy(params.useProxy ?? true);
 
     const tracker = new ProgressTracker(this._generateBatchId());
 

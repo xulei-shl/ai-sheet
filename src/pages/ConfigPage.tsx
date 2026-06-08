@@ -36,6 +36,7 @@ interface ModelFormData {
   baseUrl: string;
   modelId: string;
   providerType: string;
+  useProxy: boolean;
 }
 
 const emptyForm: ModelFormData = {
@@ -44,6 +45,7 @@ const emptyForm: ModelFormData = {
   baseUrl: '',
   modelId: '',
   providerType: 'openai-completions',
+  useProxy: true,
 };
 
 type Mode = 'view' | 'create' | 'edit';
@@ -88,6 +90,7 @@ export function ConfigPage() {
       baseUrl: model.baseUrl,
       modelId: model.modelId,
       providerType: model.providerType,
+      useProxy: model.useProxy,
     });
     setTestResult(null);
   };
@@ -131,6 +134,7 @@ export function ConfigPage() {
       baseUrl: form.baseUrl.trim(),
       modelId: form.modelId.trim(),
       providerType: form.providerType,
+      useProxy: form.useProxy,
     };
 
     if (mode === 'edit' && selected) {
@@ -168,6 +172,7 @@ export function ConfigPage() {
       baseUrl: form.baseUrl,
       modelId: form.modelId,
       providerType: form.providerType,
+      useProxy: form.useProxy,
     });
     setTestResult({ ok: !err, message: err || '连接成功' });
     setTesting(false);
@@ -183,6 +188,7 @@ export function ConfigPage() {
       baseUrl: selected.baseUrl,
       modelId: selected.modelId,
       providerType: selected.providerType,
+      useProxy: selected.useProxy,
     });
     setDetailTestResult({ ok: !err, message: err || '连接成功' });
     setDetailTesting(false);
@@ -455,6 +461,27 @@ function DetailView({
           label="API Key"
           value={model.apiKey ? '••••••••' : '（未设置）'}
         />
+        <div>
+          <label
+            className="mb-1 block text-xs font-medium"
+            style={{ color: 'var(--muted)' }}
+          >
+            启用代理
+          </label>
+          <div
+            className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: model.useProxy ? 'var(--success)' : 'var(--muted)',
+            }}
+          >
+            <div
+              className={`h-2 w-2 rounded-full ${model.useProxy ? 'bg-[var(--success)]' : 'bg-[var(--muted)]'}`}
+            />
+            {model.useProxy ? '已启用（通过 HTTP_PROXY/HTTPS_PROXY）' : '已关闭（直连）'}
+          </div>
+        </div>
 
         {testResult && (
           <div
@@ -643,6 +670,31 @@ function FormPanel({
             onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
             placeholder="sk-..."
           />
+        </div>
+        <div className="flex items-center justify-between rounded-md px-3 py-2" style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
+          <div>
+            <span className="text-sm" style={{ color: 'var(--ink)' }}>启用代理</span>
+            <span className="ml-2 text-xs" style={{ color: 'var(--muted)' }}>
+              {form.useProxy ? '通过 HTTP_PROXY/HTTPS_PROXY' : '直连'}
+            </span>
+          </div>
+          <button
+            role="switch"
+            aria-checked={form.useProxy}
+            onClick={() => setForm({ ...form, useProxy: !form.useProxy })}
+            className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors"
+            style={{
+              background: form.useProxy ? 'var(--primary)' : 'var(--border)',
+            }}
+          >
+            <span
+              className="pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transition-transform"
+              style={{
+                transform: form.useProxy ? 'translateX(18px)' : 'translateX(2px)',
+                marginTop: '2px',
+              }}
+            />
+          </button>
         </div>
 
         {testResult && (

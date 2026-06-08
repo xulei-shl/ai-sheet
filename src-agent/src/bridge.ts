@@ -43,6 +43,7 @@ export class BridgeClient {
     name?: string;
     apiKey?: string;
     baseUrl?: string;
+    useProxy?: boolean;
   }> {
     return this.post('/api/config/default');
   }

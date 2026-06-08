@@ -5,4 +5,5 @@ export interface ModelConfig {
   baseUrl: string;
   modelId: string;
   providerType: string;
+  useProxy: boolean;
 }

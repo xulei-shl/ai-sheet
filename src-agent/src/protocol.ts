@@ -74,6 +74,7 @@ export interface BatchParams {
   providerType?: string;
   apiKey?: string;
   baseUrl?: string;
+  useProxy?: boolean;
   temperature?: number;
   savePrompt?: boolean;
   promptName?: string;

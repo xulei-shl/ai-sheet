@@ -47,6 +47,8 @@ const MIGRATIONS: &[&str] = &[
         value       TEXT NOT NULL,
         updated_at  TEXT NOT NULL
     );",
+    // v6: use_proxy column for per-model proxy toggle
+    "ALTER TABLE models ADD COLUMN use_proxy INTEGER NOT NULL DEFAULT 1;",
 ];
 
 pub fn run(conn: &Connection) -> AppResult<()> {

@@ -114,19 +114,16 @@ export function MessageList({ messages }: MessageListProps) {
     const el = containerRef.current;
     if (!el) return;
 
-    const handleWheel = () => {
-      userInteractingRef.current = true;
-    };
-    const handleTouch = () => {
-      userInteractingRef.current = true;
+    const handleScroll = () => {
+      const threshold = 100;
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+      userInteractingRef.current = !isNearBottom;
     };
 
-    el.addEventListener('wheel', handleWheel, { passive: true });
-    el.addEventListener('touchmove', handleTouch, { passive: true });
+    el.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      el.removeEventListener('wheel', handleWheel);
-      el.removeEventListener('touchmove', handleTouch);
+      el.removeEventListener('scroll', handleScroll);
     };
   }, []);
 

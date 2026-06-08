@@ -1,3 +1,11 @@
+// 在所有其他模块之前加载 .env，使 HTTP_PROXY/HTTPS_PROXY 环境变量可用
+// dist/main.js 向上两级到达项目根目录
+import { config as loadDotenv } from 'dotenv';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+loadDotenv({ path: join(__dirname, '..', '..', '.env') });
+
 import { createInterface } from 'node:readline';
 import type { SidecarCommand, SidecarEvent, BatchStats, BatchParams } from './protocol.js';
 import type { BridgeClient } from './bridge.js';
@@ -5,6 +13,7 @@ import type { AgentSession } from '@earendil-works/pi-coding-agent';
 import { BatchRunner } from './batch/runner.js';
 import type { RowCompleteUpdate } from './batch/progress.js';
 import { runDirectLlmStream, abortDirectLlm } from './direct-llm.js';
+import { getUseProxy } from './proxy-state.js';
 
 const args = parseArgs();
 const bridgePort = args.bridgePort;
@@ -28,30 +37,50 @@ function emit(event: SidecarEvent) {
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
 async function initialize() {
-  // 配置 undici HTTP dispatcher（支持 HTTP_PROXY 环境变量 + 60 秒超时）
-  // 注意：必须同时覆盖 globalThis.fetch，因为 OpenAI SDK 使用 globalThis.fetch，
-  // 而 Node.js 原生 fetch 不使用 undici 的全局 dispatcher，
-  // 导致 bodyTimeout 不生效，SSE 流式传输期间无空闲超时保护。
+  // 配置双 dispatcher：代理（EnvHttpProxyAgent）和直连（Agent）
   const { createRequire } = await import('node:module');
   const undici = createRequire(import.meta.url)('undici');
-  const customDispatcher = new undici.EnvHttpProxyAgent({
+
+  const timeoutConfig = {
     allowH2: false,
-    bodyTimeout: 300_000,     // 5 分钟（LLM 可能生成很长的回复）
-    headersTimeout: 120_000,  // 2 分钟（等待首个响应头）
-  });
-  undici.setGlobalDispatcher(customDispatcher);
+    bodyTimeout: 600_000,     // 10 分钟（LLM 可能生成很长的回复）
+    headersTimeout: 300_000,  // 5 分钟（等待首个响应头，部分模型冷启动很慢）
+  };
+
+  // 代理 dispatcher：读取 HTTP_PROXY/HTTPS_PROXY/NO_PROXY 环境变量
+  const proxyDispatcher = new undici.EnvHttpProxyAgent(timeoutConfig);
+
+  // 直连 dispatcher：忽略代理环境变量，直接连接
+  const directDispatcher = new undici.Agent(timeoutConfig);
+
+  undici.setGlobalDispatcher(proxyDispatcher);
 
   // 保存原始 fetch，对本地请求使用原始实现
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = (url: any, init: any) => {
-    const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : String(url);
+  globalThis.fetch = (input: any, init: any) => {
+    // 从各种输入类型中提取 URL 字符串
+    let urlStr: string;
+    if (typeof input === 'string') {
+      urlStr = input;
+    } else if (input instanceof URL) {
+      urlStr = input.toString();
+    } else if (input?.url) {
+      // Request 对象有 .url 属性
+      urlStr = input.url;
+    } else {
+      urlStr = String(input);
+    }
+
     // 本地 bridge 请求使用原始 fetch，避免受 SSE 超时设置影响
     if (urlStr.startsWith('http://127.0.0.1') || urlStr.startsWith('http://localhost')) {
-      return originalFetch(url, init);
+      return originalFetch(input, init);
     }
-    return undici.fetch(url, { ...init, dispatcher: customDispatcher });
+
+    // 根据当前模型的代理设置选择 dispatcher
+    const dispatcher = getUseProxy() ? proxyDispatcher : directDispatcher;
+    return undici.fetch(input, { ...init, dispatcher });
   };
-  log('fetch overridden with custom undici dispatcher (bodyTimeout=300s, headersTimeout=120s)');
+  log('fetch overridden with dual dispatcher (proxy + direct)');
 
   if (bridgePort > 0) {
     const { BridgeClient } = await import('./bridge.js');
@@ -259,6 +288,9 @@ async function handleBatchStart(params: Extract<SidecarCommand, { type: 'batch_s
     if (defaultModel.baseUrl) enrichedParams.baseUrl = defaultModel.baseUrl;
     if (!enrichedParams.providerType) enrichedParams.providerType = defaultModel.providerType;
     if (!enrichedParams.modelId) enrichedParams.modelId = defaultModel.modelId;
+    if (enrichedParams.useProxy === undefined && defaultModel.useProxy !== undefined) {
+      enrichedParams.useProxy = defaultModel.useProxy;
+    }
   } catch {
     // 无默认模型，使用 params 原始值
   }

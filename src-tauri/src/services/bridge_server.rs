@@ -178,6 +178,7 @@ impl BridgeServer {
                         "modelId": m.model_id,
                         "apiKey": m.api_key,
                         "baseUrl": m.base_url,
+                        "useProxy": m.use_proxy,
                     })
                 } else {
                     serde_json::json!({"error": "no active model configured"})

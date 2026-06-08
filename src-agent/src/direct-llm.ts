@@ -3,6 +3,7 @@ import type { BridgeClient } from './bridge.js';
 import type { SidecarCommand } from './protocol.js';
 import type { SidecarEvent } from './protocol.js';
 import { buildModel } from './provider-map.js';
+import { setUseProxy } from './proxy-state.js';
 
 const SYSTEM_PROMPT =
   '你是一名 AI 助手。基于用户提供的 Excel 上下文（文件、Sheet、列名、样例数据），' +
@@ -32,7 +33,7 @@ export async function runDirectLlmStream(
     return;
   }
 
-  let modelInfo: { providerType: string; modelId: string; name?: string; apiKey?: string; baseUrl?: string };
+  let modelInfo: { providerType: string; modelId: string; name?: string; apiKey?: string; baseUrl?: string; useProxy?: boolean };
   try {
     modelInfo = await bridge.getDefaultModel();
   } catch (e) {
@@ -44,6 +45,9 @@ export async function runDirectLlmStream(
     emit({ type: 'agent_error', id: command.id, message: '当前未配置默认模型或缺少 API Key' });
     return;
   }
+
+  // 同步代理状态：根据模型的 useProxy 设置决定 fetch 路由
+  setUseProxy(modelInfo.useProxy ?? true);
 
   // 使用 provider-map 正确拆分 provider 和 api
   const model = buildModel(modelInfo);

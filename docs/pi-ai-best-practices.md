@@ -10,36 +10,78 @@
 
 | 概念 | 说明 | 示例 |
 |------|------|------|
-| **Provider** | 模型提供商名称，pi-ai 内部标识 | `'openai'`, `'anthropic'`, `'mistral'`, `'deepseek'` |
-| **API Type** | API 协议/格式类型 | `'openai-completions'`, `'openai-responses'`, `'anthropic-messages'`, `'mistral-conversations'` |
+| **Provider** | 模型提供商身份标识，用于 API Key 查找 | `'openai'`, `'anthropic'`, `'mistral'`, `'deepseek'` |
+| **API Type** | API 协议/格式类型，决定请求格式和 SDK 选择 | `'openai-completions'`, `'openai-responses'`, `'anthropic-messages'`, `'mistral-conversations'` |
 
 **关键区别**：
-- `provider` 用于查找 API key 环境变量映射（如 `openai` → `OPENAI_API_KEY`）
-- `api` 决定请求格式和使用的 SDK
+- `provider` 用于查找 API key（`authStorage.getApiKey(model.provider)` → 环境变量映射）
+- `api` 决定请求格式、使用的 SDK 和 endpoint 路径
 
 ```js
 // 内置模型示例
-{ id: 'gpt-4o', provider: 'openai', api: 'openai-responses' }
-{ id: 'claude-3-5-sonnet', provider: 'anthropic', api: 'anthropic-messages' }
-{ id: 'mistral-small-latest', provider: 'mistral', api: 'mistral-conversations' }
+{ id: 'gpt-4o',               provider: 'openai',    api: 'openai-responses' }
+{ id: 'claude-3-5-sonnet',    provider: 'anthropic', api: 'anthropic-messages' }
+{ id: 'mistral-small-latest', provider: 'mistral',   api: 'mistral-conversations' }
+{ id: 'deepseek-chat',        provider: 'deepseek',  api: 'openai-completions' }  // ← 注意：api 不是 'deepseek'
 ```
 
-### 1.2 用户配置中的 `providerType`
+### 1.2 Provider 与 API Type 可以不同
 
-在 ai-sheet 的配置管理页面，用户配置的 `providerType` 实际上是 **API Type**，不是 provider 名称：
+这是最常见的混淆点。许多 provider 使用 OpenAI 兼容协议：
+
+```
+deepseek    → api: 'openai-completions'  (DeepSeek 用 OpenAI 格式)
+groq        → api: 'openai-completions'  (Groq 用 OpenAI 格式)
+cerebras    → api: 'openai-completions'  (Cerebras 用 OpenAI 格式)
+mistral     → api: 'mistral-conversations' (Mistral 有自己的 SDK 和协议)
+google      → api: 'google-generative-ai'
+```
+
+**如果混淆二者**，会出现以下错误：
+- `provider: 'deepseek'` + `api: 'deepseek'` → ❌ "No API provider registered for api: deepseek"
+- `provider: 'openai-completions'` + `api: 'openai-completions'` → ❌ API key 查找时用 `OPENAI-COMPLETIONS_API_KEY`，不存在
+
+### 1.3 Provider-Map 模式（推荐）
+
+当项目中用户配置的 `providerType` 字段同时承载了 provider 身份和 API 协议信息时，需要一个运行时映射模块来正确拆分：
 
 ```ts
-// 用户配置示例
-{
-  name: 'Mistral API',
-  providerType: 'openai-completions',  // ← 这是 API Type
-  modelId: 'mistral-small-latest',
-  baseUrl: 'https://api.mistral.ai/v1',
-  apiKey: 'xxx'
+// provider-map.ts
+const PROVIDER_TYPE_MAP: Record<string, { provider: string; api: string }> = {
+  'openai-completions':     { provider: 'openai',          api: 'openai-completions' },
+  'openai-responses':       { provider: 'openai',          api: 'openai-responses' },
+  'anthropic-messages':     { provider: 'anthropic',       api: 'anthropic-messages' },
+  'deepseek':               { provider: 'deepseek',        api: 'openai-completions' },  // ← 关键映射
+  'mistral-conversations':  { provider: 'mistral',         api: 'mistral-conversations' },
+  'google-generative-ai':   { provider: 'google',          api: 'google-generative-ai' },
+};
+
+export function resolveProviderApi(providerType: string): { provider: string; api: string } {
+  const mapped = PROVIDER_TYPE_MAP[providerType];
+  if (mapped) return mapped;
+
+  // heuristic: providerType 以已知 API 后缀结尾，截取前缀为 provider
+  for (const suffix of KNOWN_API_SUFFIXES) {
+    if (providerType.endsWith('-' + suffix)) {
+      const provider = providerType.slice(0, providerType.length - suffix.length - 1);
+      if (provider) return { provider, api: suffix };
+    }
+  }
+  // fallback
+  return { provider: providerType, api: providerType };
+}
+
+export function buildModel(info: { providerType: string; modelId: string; name?: string; baseUrl?: string }): Model<any> {
+  const { provider, api } = resolveProviderApi(info.providerType);
+  return {
+    id: info.modelId, name: info.name ?? info.modelId,
+    api, provider, baseUrl: info.baseUrl || '',
+    reasoning: false, input: ['text'],
+    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+    contextWindow: 128_000, maxTokens: 16_384,
+  } as Model<any>;
 }
 ```
-
-**最佳实践**：完全尊重用户配置的 `providerType`，不要尝试匹配内置模型的 provider。
 
 ---
 
@@ -50,16 +92,13 @@
 `AuthStorage` 管理 API key 的存储和查找：
 
 ```ts
-// 创建内存存储（不依赖文件系统）
 const authStorage = AuthStorage.inMemory();
-
-// 注册运行时 API key（不持久化）
 authStorage.setRuntimeApiKey(providerName, apiKey);
 
 // 查找优先级
 // 1. runtimeOverrides（setRuntimeApiKey 设置的）
 // 2. auth.json 文件存储
-// 3. 环境变量（按 provider 名称映射）
+// 3. 环境变量（按 provider 名称映射，如 'openai' → OPENAI_API_KEY）
 // 4. fallbackResolver
 ```
 
@@ -68,15 +107,7 @@ authStorage.setRuntimeApiKey(providerName, apiKey);
 `ModelRegistry` 管理模型列表和 auth 解析：
 
 ```ts
-// 创建内存注册表（不加载 models.json）
 const modelRegistry = ModelRegistry.inMemory(authStorage);
-
-// 动态注册 provider
-modelRegistry.registerProvider(providerName, {
-  apiKey: 'xxx',
-  baseUrl: 'https://api.example.com/v1',
-  models: [{ id: 'model-id', name: 'Model Name', ... }]
-});
 
 // SDK 内部调用链
 // session.prompt() → streamFn → modelRegistry.getApiKeyAndHeaders(model)
@@ -84,60 +115,46 @@ modelRegistry.registerProvider(providerName, {
 //                                authStorage.getApiKey(model.provider)
 ```
 
-### 2.3 关键：provider 名称必须一致
+### 2.3 关键：registerProvider 必须同时指定 api 字段
 
 ```ts
-// ❌ 错误：provider 名称不匹配
-model.provider = 'openai';
-authStorage.setRuntimeApiKey('openai-completions', apiKey);  // 不匹配！
+// ❌ 错误：缺少 api 字段，SDK 无法选择正确的 API 实现
+modelRegistry.registerProvider('deepseek', {
+  apiKey: 'sk-xxx',
+  baseUrl: 'https://api.deepseek.com/v1',
+  models: [model],
+} as any);
 
-// ✅ 正确：provider 名称一致
-model.provider = 'openai-completions';
-authStorage.setRuntimeApiKey('openai-completions', apiKey);
-// 或者用 registerProvider
-modelRegistry.registerProvider('openai-completions', { apiKey, ... });
+// ✅ 正确：provider 级别和 model 级别都要有正确的 api
+modelRegistry.registerProvider(model.provider, {
+  api: model.api,          // ← 必须指定，如 'openai-completions'
+  apiKey: userApiKey,
+  baseUrl: userBaseUrl,
+  models: [model],         // model 对象中也包含正确的 api 字段
+} as any);
 ```
 
 ---
 
 ## 3. 正确构造模型对象
 
-### 3.1 完全自定义模型（推荐）
-
-适用于：用户自行配置的任意 API 端点
+### 3.1 通过 Provider-Map 构造（推荐）
 
 ```ts
-const providerName = userConfig.providerType;  // 如 'openai-completions'
+const model = buildModel({
+  providerType: userConfig.providerType,  // 如 'deepseek'
+  modelId: userConfig.modelId,            // 如 'deepseek-chat'
+  baseUrl: userConfig.baseUrl,
+});
+// model.provider = 'deepseek'
+// model.api = 'openai-completions'
 
-const model = {
-  id: userConfig.modelId,
-  name: userConfig.name ?? userConfig.modelId,
-  api: userConfig.providerType,      // API 格式
-  provider: providerName,             // 与 registerProvider 的 key 一致
-  baseUrl: userConfig.baseUrl || '',
-  reasoning: false,
-  input: ['text'],
-  cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-  contextWindow: 128000,
-  maxTokens: 4096,
-} as any;
-
-// 注册 API key
-if (userConfig.apiKey) {
-  modelRegistry.registerProvider(providerName, {
-    apiKey: userConfig.apiKey,
-    baseUrl: userConfig.baseUrl,
-    models: [{
-      id: userConfig.modelId,
-      name: userConfig.name ?? userConfig.modelId,
-      reasoning: false,
-      input: ['text'],
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: 128000,
-      maxTokens: 4096,
-    }],
-  } as any);
-}
+modelRegistry.registerProvider(model.provider, {
+  api: model.api,
+  apiKey: userConfig.apiKey,
+  baseUrl: userConfig.baseUrl,
+  models: [model],
+} as any);
 ```
 
 ### 3.2 不要搜索内置模型
@@ -151,139 +168,311 @@ const builtIn = getModel('openai', userConfig.modelId);
 // 3. 例如 mistral-small-latest 的 api 是 'mistral-conversations'，
 //    而用户可能配置了 'openai-completions'
 
-// ✅ 正确：直接用用户配置
-const model = {
-  api: userConfig.providerType,  // 用户决定 API 格式
-  provider: userConfig.providerType,
-  ...
-};
+// ✅ 正确：直接用用户配置构建
+const model = buildModel(userConfig);
 ```
 
 ---
 
-## 4. Direct LLM 调用（不经过 Agent）
+## 4. Stream 事件处理
+
+### 4.1 事件类型体系
+
+`stream()` 函数返回 `AsyncIterable<AssistantMessageEvent>`，主要事件类型：
+
+| 事件类型 | 说明 | 关键字段 |
+|----------|------|----------|
+| `text_delta` | 文本增量 | `delta: string` |
+| `error` | 错误 | `error: AssistantMessage`（含 `errorMessage`） |
+| `done` | 流结束 | `message: AssistantMessage`（含完整 content） |
+| `thinking_delta` | 思考增量 | `delta: string` |
+| `toolcall_start` | 工具调用开始 | — |
+| `toolcall_delta` | 工具调用增量 | — |
+| `toolcall_end` | 工具调用结束 | — |
+
+### 4.2 正确的事件处理循环
+
+```ts
+const eventStream = stream(model, context, options);
+
+for await (const ev of eventStream as AsyncIterable<any>) {
+  if (ev.type === 'text_delta') {
+    // ✅ 正确：text_delta 事件有 delta 字段
+    const delta: string = ev.delta ?? '';
+    if (delta) { /* 处理增量文本 */ }
+  } else if (ev.type === 'error') {
+    // ✅ 正确：error 事件的 error 字段是 AssistantMessage，有 errorMessage
+    const errorMsg = ev.error?.errorMessage ?? 'LLM 返回错误';
+    break;
+  } else if (ev.type === 'done') {
+    // done 事件的 message.content 包含完整输出
+    for (const content of ev.message.content) {
+      if (content.type === 'text') { /* 完整文本 */ }
+    }
+  }
+  // 其他事件类型按需处理
+}
+```
+
+### 4.3 常见错误
+
+```ts
+// ❌ 错误：用 ev.text 或 ev.content 取增量
+// pi-ai 中不存在 ev.text 字段，只有 ev.delta
+
+// ❌ 错误：不区分事件类型，所有事件都尝试取文本
+// 非 text_delta 事件没有 delta 字段
+
+// ❌ 错误：忘记处理 error 事件
+// error 事件的 error.errorMessage 包含具体错误信息
+```
+
+---
+
+## 5. 网络代理配置
+
+### 5.1 问题背景
+
+在中国网络环境下，部分 LLM API 需要代理才能访问（OpenAI、Anthropic），而另一些可以直接连接（DeepSeek、本地模型）。pi-ai 内部使用 `globalThis.fetch` 发起请求，可以通过覆盖 fetch 来控制代理行为。
+
+### 5.2 双 Dispatcher 模式（推荐）
+
+使用 undici 创建两个 dispatcher，在 fetch override 中根据模型配置动态切换：
+
+```ts
+import { getUseProxy, setUseProxy } from './proxy-state.js';
+
+async function initialize() {
+  const { createRequire } = await import('node:module');
+  const undici = createRequire(import.meta.url)('undici');
+
+  const timeoutConfig = {
+    allowH2: false,
+    bodyTimeout: 600_000,     // 10 分钟
+    headersTimeout: 300_000,  // 5 分钟
+  };
+
+  // 代理 dispatcher：读取 HTTP_PROXY/HTTPS_PROXY/NO_PROXY
+  const proxyDispatcher = new undici.EnvHttpProxyAgent(timeoutConfig);
+
+  // 直连 dispatcher：忽略代理环境变量
+  const directDispatcher = new undici.Agent(timeoutConfig);
+
+  undici.setGlobalDispatcher(proxyDispatcher);
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (input: any, init: any) => {
+    let urlStr: string;
+    if (typeof input === 'string') urlStr = input;
+    else if (input instanceof URL) urlStr = input.toString();
+    else if (input?.url) urlStr = input.url;  // Request 对象
+    else urlStr = String(input);
+
+    // 本地请求用原始 fetch
+    if (urlStr.startsWith('http://127.0.0.1') || urlStr.startsWith('http://localhost')) {
+      return originalFetch(input, init);
+    }
+
+    // 根据当前模型的代理设置选择 dispatcher
+    const dispatcher = getUseProxy() ? proxyDispatcher : directDispatcher;
+    return undici.fetch(input, { ...init, dispatcher });
+  };
+}
+```
+
+### 5.3 代理状态同步
+
+每个 LLM 调用入口在发起请求前同步代理状态：
+
+```ts
+// agent.ts
+setUseProxy(defaultModel.useProxy ?? true);
+
+// direct-llm.ts
+setUseProxy(modelInfo.useProxy ?? true);
+
+// batch/runner.ts
+setUseProxy(params.useProxy ?? true);
+```
+
+### 5.4 .env 文件加载
+
+sidecar 是 Node.js 子进程，不会自动加载 `.env`。需要在入口最顶部显式加载：
+
+```ts
+// main.ts 顶部（必须在所有其他 import 之前）
+import { config as loadDotenv } from 'dotenv';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+loadDotenv({ path: join(__dirname, '..', '..', '.env') });
+```
+
+`.env` 文件内容：
+```
+HTTP_PROXY=http://127.0.0.1:7890
+HTTPS_PROXY=http://127.0.0.1:7890
+# NO_PROXY=localhost,127.0.0.1
+```
+
+### 5.5 处理 Request 对象
+
+部分 SDK（如 Mistral）传递 `Request` 对象给 `fetch()`，而非字符串 URL：
+
+```ts
+// ❌ 错误：String(requestObj) → "[object Request]"
+// ✅ 正确：requestObj.url → "https://api.mistral.ai/v1/..."
+if (input?.url) urlStr = input.url;
+```
+
+### 5.6 数据库字段与 serde 兼容
+
+新增 `use_proxy` 字段时需注意旧数据兼容：
+
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ActiveModel {
+    // ...其他字段
+    #[serde(default = "default_use_proxy")]
+    pub use_proxy: bool,
+}
+
+fn default_use_proxy() -> bool { true }
+```
+
+数据库迁移默认值设为 `1`（启用），与原来全局走代理的行为一致：
+
+```sql
+ALTER TABLE models ADD COLUMN use_proxy INTEGER NOT NULL DEFAULT 1;
+```
+
+---
+
+## 6. SettingsManager 超时配置
+
+### 6.1 默认超时可能不够
+
+部分模型冷启动很慢（尤其是非主流 provider），默认超时可能导致请求被过早中断。
+
+```ts
+const settingsManager = SettingsManager.inMemory({
+  httpIdleTimeoutMs: 60000,   // 空闲超时
+  retry: { maxRetries: 0 },   // 禁用自动重试，避免重复请求
+});
+```
+
+### 6.2 注意事项
+
+- `httpIdleTimeoutMs` 控制 SSE 流式传输期间的空闲超时，过短会导致长回复中断
+- `maxRetries` 设为 0 避免代理环境下重试加剧延迟
+- undici 的 `bodyTimeout` / `headersTimeout` 是独立于 pi-ai 设置的另一层超时保护，需要同时配置
+
+---
+
+## 7. Direct LLM 调用（不经过 Agent）
 
 使用 `stream()` 函数直接调用 LLM：
 
 ```ts
 import { stream } from '@earendil-works/pi-ai';
 
-const model = {
-  id: 'model-id',
-  api: 'openai-completions',
-  provider: 'openai-completions',
-  baseUrl: 'https://api.example.com/v1',
-  // ... 其他字段
-} as any;
+const model = buildModel({
+  providerType: userConfig.providerType,
+  modelId: userConfig.modelId,
+  baseUrl: userConfig.baseUrl,
+});
 
-// 关键：通过 options.apiKey 直接传入
 const eventStream = stream(model, {
   systemPrompt: '...',
-  messages: [{ role: 'user', content: [...], timestamp: Date.now() }],
+  messages: [{ role: 'user', content: [{ type: 'text', text: prompt }], timestamp: Date.now() }],
 }, {
   temperature: 0.3,
   signal: abortController.signal,
   apiKey: userApiKey,  // ← 直接传入，优先级最高
 });
-
-for await (const ev of eventStream) {
-  if (ev.type === 'text_delta') {
-    console.log(ev.delta);
-  }
-}
 ```
+
+**关键**：`options.apiKey` 直接传入优先级最高，绕过 AuthStorage 查找链。
 
 ---
 
-## 5. Agent Session 调用
-
-使用 `createAgentSession` 创建带工具调用的 Agent：
+## 8. Agent Session 调用
 
 ```ts
-import { createAgentSession, SessionManager, AuthStorage, ModelRegistry } from '@earendil-works/pi-coding-agent';
+import { createAgentSession, SessionManager, AuthStorage, ModelRegistry, SettingsManager } from '@earendil-works/pi-coding-agent';
+
+const model = buildModel(userConfig);
+setUseProxy(userConfig.useProxy ?? true);
 
 const authStorage = AuthStorage.inMemory();
 const modelRegistry = ModelRegistry.inMemory(authStorage);
 
-// 构造模型
-const model = {
-  id: userConfig.modelId,
-  api: userConfig.providerType,
-  provider: userConfig.providerType,
-  baseUrl: userConfig.baseUrl,
-  // ...
-} as any;
-
-// 注册 API key
-modelRegistry.registerProvider(userConfig.providerType, {
+modelRegistry.registerProvider(model.provider, {
+  api: model.api,           // ← 必须指定
   apiKey: userConfig.apiKey,
   baseUrl: userConfig.baseUrl,
-  models: [{ id: userConfig.modelId, ... }],
+  models: [model],
 } as any);
+
+const settingsManager = SettingsManager.inMemory({
+  httpIdleTimeoutMs: 60000,
+  retry: { maxRetries: 0 },
+});
 
 const { session } = await createAgentSession({
   model,
   tools: ['read', 'bash', 'edit', 'write'],
-  customTools: myCustomTools,
-  authStorage,      // ← 必须传入
-  modelRegistry,    // ← 必须传入
+  customTools,
+  authStorage,
+  modelRegistry,
+  settingsManager,
   sessionManager: SessionManager.inMemory(),
   cwd: process.cwd(),
 });
 
-// 调用
 await session.prompt('你的问题');
 ```
 
 ---
 
-## 6. 常见陷阱
+## 9. 常见陷阱汇总
 
-### 6.1 `process.env` 不生效
+### 9.1 `process.env` 不生效
 
 ```ts
-// ❌ 错误：pi-coding-agent 不读 process.env
+// ❌ 错误：pi-coding-agent 不读 process.env 设置 API key
 process.env.OPENAI_API_KEY = apiKey;
 
 // ✅ 正确：通过 AuthStorage 或 options.apiKey 传入
 authStorage.setRuntimeApiKey('openai', apiKey);
-// 或
-stream(model, context, { apiKey });
+// 或 stream(model, context, { apiKey });
 ```
 
-### 6.2 Provider 与 API Type 混淆
+### 9.2 Provider 与 API Type 混淆
 
 ```ts
-// 用户配置
-{ providerType: 'openai-completions', modelId: 'mistral-small-latest' }
+// ❌ 错误：DeepSeek 用 'deepseek' 作为 api
+{ provider: 'deepseek', api: 'deepseek' }
+// → "No API provider registered for api: deepseek"
 
-// ❌ 错误：用 providerType 搜索内置模型
-getModel('openai-completions', 'mistral-small-latest');  // 找不到
-
-// ✅ 正确：直接构造模型，用 providerType 作为 api
-const model = {
-  api: 'openai-completions',  // OpenAI 兼容格式
-  provider: 'openai-completions',
-  ...
-};
+// ✅ 正确：DeepSeek 使用 OpenAI 兼容协议
+{ provider: 'deepseek', api: 'openai-completions' }
 ```
 
-### 6.3 测试连接 ≠ 实际调用
+### 9.3 测试连接 ≠ 实际调用
 
 配置管理页面的"测试"只是简单的 HTTP GET：
 
 ```ts
-// 测试连接（不经过 pi-ai）
 fetch(`${model.baseUrl}/models`, {
   headers: { 'Authorization': `Bearer ${model.apiKey}` }
 });
 ```
 
-实际调用需要正确的 `api` 格式和完整的 model 对象。
+实际调用需要正确的 `api` 格式和完整的 model 对象。测试通过不代表实际调用能成功。
 
-### 6.4 内置模型列表有限
-
-pi-ai 内置模型列表只包含主流模型：
+### 9.4 内置模型列表有限
 
 ```ts
 // 内置的
@@ -296,87 +485,44 @@ getModel('openai', 'deepseek-chat');    // ❌ 找不到
 
 自定义模型必须手动构造 model 对象。
 
----
-
-## 7. 完整示例
+### 9.5 undici fetch 与 Request 对象
 
 ```ts
-// src-agent/src/agent.ts
-import { createAgentSession, SessionManager, AuthStorage, ModelRegistry } from '@earendil-works/pi-coding-agent';
+// Mistral SDK 传递 Request 对象给 fetch
+// ❌ String(request) → "[object Request]"（不是有效 URL）
+// ✅ request.url → 实际 URL 字符串
+```
 
-export async function createAgent(bridge: BridgeClient) {
-  // 1. 获取用户配置
-  const userConfig = await bridge.getDefaultModel();
-  if (!userConfig?.apiKey) {
-    throw new Error('未配置 API Key');
-  }
+### 9.6 旧数据兼容
 
-  // 2. 创建内存存储
-  const authStorage = AuthStorage.inMemory();
-  const modelRegistry = ModelRegistry.inMemory(authStorage);
+新增字段时，`serde` 反序列化旧 JSON 会因缺少字段而失败。务必使用 `#[serde(default)]`：
 
-  // 3. 用用户配置的 providerType 构造模型
-  const providerName = userConfig.providerType;
-  const model = {
-    id: userConfig.modelId,
-    name: userConfig.name ?? userConfig.modelId,
-    api: userConfig.providerType,
-    provider: providerName,
-    baseUrl: userConfig.baseUrl || '',
-    reasoning: false,
-    input: ['text'],
-    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-    contextWindow: 128000,
-    maxTokens: 4096,
-  } as any;
-
-  // 4. 注册 provider 和 API key（必须指定 api 字段）
-  modelRegistry.registerProvider(providerName, {
-    api: userConfig.providerType,      // ← 必须：provider 级别的 api
-    apiKey: userConfig.apiKey,
-    baseUrl: userConfig.baseUrl,
-    models: [{
-      id: userConfig.modelId,
-      name: userConfig.name ?? userConfig.modelId,
-      api: userConfig.providerType,    // ← 必须：model 级别的 api
-      reasoning: false,
-      input: ['text'],
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: 128000,
-      maxTokens: 4096,
-    }],
-  } as any);
-
-  // 5. 创建 session
-  const { session } = await createAgentSession({
-    model,
-    tools: ['read', 'bash', 'edit', 'write'],
-    customTools: createCustomTools(bridge),
-    authStorage,
-    modelRegistry,
-    sessionManager: SessionManager.inMemory(),
-    cwd: process.cwd(),
-  });
-
-  return session;
-}
+```rust
+#[serde(default = "default_use_proxy")]
+pub use_proxy: bool,
 ```
 
 ---
 
-## 8. 参考文件
+## 10. 参考文件
 
 | 文件 | 说明 |
 |------|------|
+| `src-agent/src/provider-map.ts` | Provider/API 映射模块，providerType → { provider, api } |
+| `src-agent/src/proxy-state.ts` | 代理状态管理，与 fetch override 配合 |
+| `src-agent/src/main.ts` | Sidecar 入口，双 Dispatcher + .env 加载 |
+| `src-agent/src/agent.ts` | Agent Session 创建，含 SettingsManager 配置 |
+| `src-agent/src/direct-llm.ts` | 直接 LLM 调用，stream() 事件处理范例 |
+| `src-agent/src/batch/runner.ts` | 批量处理，apiKey 透传范例 |
 | `pi-ai/dist/stream.js` | `stream()` 函数，支持 `options.apiKey` |
 | `pi-ai/dist/types.d.ts` | `Model<Api>` 类型定义 |
-| `pi-ai/dist/providers/mistral.js` | Mistral provider 使用 `@mistralai/mistralai` SDK |
 | `pi-coding-agent/dist/core/sdk.js` | `createAgentSession()` 实现 |
 | `pi-coding-agent/dist/core/auth-storage.d.ts` | AuthStorage API |
 | `pi-coding-agent/dist/core/model-registry.d.ts` | ModelRegistry API |
+| `pi-coding-agent/dist/core/settings-manager.d.ts` | SettingsManager API |
 
 ---
 
-**文档版本**：v1.0  
+**文档版本**：v2.0  
 **更新日期**：2026-06-08  
 **适用版本**：pi-ai 0.x, pi-coding-agent 0.78+

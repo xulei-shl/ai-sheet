@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { AgentMessage } from '../../types/agent';
 import { useAgentStore } from '../../stores/agentStore';
 import { ContextPreview } from './ContextPreview';
+import { MarkdownRenderer } from '../ui/MarkdownRenderer';
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -148,16 +149,10 @@ export function MessageList({ messages }: MessageListProps) {
                     <span className="whitespace-pre-wrap">{message.content}</span>
                   </div>
                 ) : (
-                  <>
-                    {message.content}
-                    {message.isStreaming && (
-                      <span
-                        aria-hidden="true"
-                        className="streaming-cursor ml-1 inline-block h-4 w-1.5 align-[-2px]"
-                        style={{ background: 'var(--primary)' }}
-                      />
-                    )}
-                  </>
+                  <MarkdownRenderer
+                    content={message.content}
+                    isStreaming={message.isStreaming}
+                  />
                 )}
               </>
             )}

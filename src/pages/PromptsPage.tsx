@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FileText, Plus, Search, Pencil, Trash2, X, Check, Eye, Code2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { usePromptStore } from '../stores/promptStore';
+import { MarkdownRenderer } from '../components/ui/MarkdownRenderer';
 
 type Mode = 'view' | 'create' | 'edit';
 type ViewTab = 'preview' | 'raw';
@@ -309,9 +308,7 @@ export function PromptsPage() {
                   }}
                 >
                   {selected.content.trim() ? (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {selected.content}
-                    </ReactMarkdown>
+                    <MarkdownRenderer content={selected.content} />
                   ) : (
                     <p style={{ color: 'var(--muted)' }}>（无内容）</p>
                   )}

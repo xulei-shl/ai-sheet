@@ -120,9 +120,22 @@ async function handleSteer(command: Extract<SidecarCommand, { type: 'steer' }>) 
 
   try {
     const context = command.context;
-    const contextText = `[系统上下文更新] 用户切换到了"${context.currentTab}"功能。` +
-      `当前文件：${(context.loadedFiles ?? []).join(', ')}` +
-      `选中列：${(context.selectedColumns ?? []).join(', ')}`;
+    const fileList = (context.loadedFiles ?? [])
+      .map((f) => {
+        const sheets = f.sheets
+          .map((sh) => {
+            const cols = sh.columns.map((c) => `${c.letter}(${c.name})`).join(', ');
+            return `${sh.sheetName}[${cols}]`;
+          })
+          .join('; ');
+        return `${f.name} (${f.path}) -> ${sheets}`;
+      })
+      .join(' || ');
+    let sampleText = '';
+    if (context.sampleDataPreview) {
+      sampleText = `\n样例数据:\n${context.sampleDataPreview}`;
+    }
+    const contextText = `[系统上下文更新] 当前文件：${fileList}${sampleText}`;
 
     await session.steer(contextText);
     emit({ type: 'agent_delta', id: command.id, delta: '上下文已更新。' });

@@ -29,6 +29,7 @@ export function ContextPreview({ context }: ContextPreviewProps) {
     (acc, f) => acc + f.sheets.reduce((s, sh) => s + sh.columns.length, 0),
     0,
   );
+  const hasSampleData = context.sampleDataPreview !== undefined;
 
   return (
     <div className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
@@ -43,7 +44,7 @@ export function ContextPreview({ context }: ContextPreviewProps) {
             <Layers className="h-4 w-4 text-[var(--primary)]" />
             <span>已加载上下文</span>
             <span className="text-xs text-[var(--muted)]">
-              {context.loadedFiles!.length} 个文件 · {totalSheets} 个 Sheet · {totalColumns} 列
+              {context.loadedFiles!.length} 个文件 · {totalSheets} 个 Sheet · {totalColumns} 列{hasSampleData ? ' · 含样例' : ''}
             </span>
           </div>
           {isExpanded ? (
@@ -70,6 +71,7 @@ export function ContextPreview({ context }: ContextPreviewProps) {
               <div className="flex items-center gap-2 mb-1.5">
                 <FileSpreadsheet className="h-3.5 w-3.5 text-[var(--primary)] flex-shrink-0" />
                 <span className="text-xs font-medium text-[var(--ink)]">{file.name}</span>
+                <span className="text-[10px] truncate max-w-[200px]" style={{ color: 'var(--muted)' }} title={file.path}>{file.path}</span>
               </div>
               <div className="ml-5 space-y-1.5">
                 {file.sheets.map((sheet, sheetIdx) => (
@@ -89,7 +91,7 @@ export function ContextPreview({ context }: ContextPreviewProps) {
                             key={colIdx}
                             className="inline-flex items-center rounded-md bg-[var(--bg)] px-2 py-0.5 text-xs text-[var(--ink-light)]"
                           >
-                            {col}
+                            {col.letter}({col.name})
                           </span>
                         ))}
                       </div>

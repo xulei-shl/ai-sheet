@@ -27,6 +27,7 @@ interface ExcelStore {
   previewData: PreviewData | null;
   loading: boolean;
   error: string | null;
+  includeSampleData: boolean;
 
   addFile: (path: string) => Promise<void>;
   removeFile: (index: number) => void;
@@ -38,6 +39,17 @@ interface ExcelStore {
   notifyContextChange: () => void;
   clearAllContext: () => void;
   clearError: () => void;
+  setIncludeSampleData: (value: boolean) => void;
+}
+
+function columnIndexToLetter(index: number): string {
+  let letter = '';
+  let i = index;
+  while (i >= 0) {
+    letter = String.fromCharCode(65 + (i % 26)) + letter;
+    i = Math.floor(i / 26) - 1;
+  }
+  return letter;
 }
 
 export const useExcelStore = create<ExcelStore>((set, get) => ({
@@ -46,6 +58,7 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   previewData: null,
   loading: false,
   error: null,
+  includeSampleData: true,
 
   addFile: async (path: string) => {
     set({ loading: true, error: null });
@@ -179,17 +192,26 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   },
 
   notifyContextChange: () => {
-    const { files, selections } = get();
+    const { files, selections, includeSampleData } = get();
 
     // Only include files that have at least one sheet selected
     const loadedFiles = selections
       .filter((sel) => sel.selectedSheets.length > 0)
       .map((sel) => {
         // For each selected sheet in this file, collect the selected columns
-        const sheets = sel.selectedSheets.map((sheetName) => ({
-          sheetName,
-          columns: sel.selectedColumns[sheetName] || [],
-        }));
+        // with both header name and column letter
+        const sheets = sel.selectedSheets.map((sheetName) => {
+          const colInfoMap = sel.columnInfo[sheetName] || [];
+          const selectedNames = sel.selectedColumns[sheetName] || [];
+          const columns = selectedNames.map((colName) => {
+            const info = colInfoMap.find((c) => c.name === colName);
+            return {
+              name: colName,
+              letter: info !== undefined ? columnIndexToLetter(info.index) : '',
+            };
+          });
+          return { sheetName, columns };
+        });
         return {
           name: sel.file.name,
           path: sel.file.path,
@@ -204,6 +226,29 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
     }
 
     const context: AgentContext = { loadedFiles };
+
+    // Build optional sample data preview (first 3 rows)
+    if (includeSampleData) {
+      const sampleParts: string[] = [];
+      for (const sel of selections) {
+        if (!sel.selectedSheets.length) continue;
+        for (const sheetName of sel.selectedSheets) {
+          const preview = sel.previewData[sheetName];
+          if (preview && preview.rows.length > 0) {
+            const sampleRows = preview.rows.slice(0, 3);
+            const header = '| ' + preview.columns.join(' | ') + ' |';
+            const sep = '| ' + preview.columns.map(() => '---').join(' | ') + ' |';
+            const body = sampleRows
+              .map((r) => '| ' + preview.columns.map((c) => String(r[c] ?? '')).join(' | ') + ' |')
+              .join('\n');
+            sampleParts.push(`Sheet: ${sheetName}\n${header}\n${sep}\n${body}`);
+          }
+        }
+      }
+      if (sampleParts.length > 0) {
+        context.sampleDataPreview = sampleParts.join('\n\n');
+      }
+    }
 
     // Update agentStore with the context (for Agent UI preview)
     useAgentStore.getState().setLoadedContext(context);
@@ -231,4 +276,8 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  setIncludeSampleData: (value: boolean) => {
+    set({ includeSampleData: value });
+  },
 }));

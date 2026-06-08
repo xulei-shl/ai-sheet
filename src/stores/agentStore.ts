@@ -201,8 +201,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
     const first = loadedContext.loadedFiles[0];
     const context: DirectLlmRequest['context'] = {
-      fileName: first.name,
-      sheets: first.sheets.map((s) => ({ sheet: s.sheetName, columns: s.columns })),
+      fileName: first.path,
+      sheets: first.sheets.map((s) => ({ sheet: s.sheetName, columns: s.columns.map((c) => `${c.letter}(${c.name})`) })),
     };
 
     const requestId = `direct-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;

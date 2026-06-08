@@ -75,8 +75,9 @@ export function buildDisplaySummary(
   const truncated = userInput.length > 60 ? userInput.slice(0, 60) + '...' : userInput;
   const sheets = ctx.sheets.map((s) => s.sheet).join(', ');
   const allCols = [...new Set(ctx.sheets.flatMap((s) => s.columns))].join(', ');
+  const fileNameShort = ctx.fileName.split('\\').pop()?.split('/').pop() ?? ctx.fileName;
   const suffix = sampleMissing ? ' · 未加载样例预览' : '';
-  return `${prefix}${actionLabel} · 「${truncated}」 · ${ctx.fileName} · Sheet: ${sheets} · 列: ${allCols}${suffix}`;
+  return `${prefix}${actionLabel} · 「${truncated}」 · ${fileNameShort} · Sheet: ${sheets} · 列: ${allCols}${suffix}`;
 }
 
 function taskHeader(action: QuickAction): string {
@@ -138,11 +139,8 @@ function formatContext(ctx: DirectLlmContext): string {
   }
   if (ctx.samplePreview) {
     lines.push('');
-    lines.push('样例数据（前 5 行）:');
+    lines.push('样例数据（前 3 行）:');
     lines.push(ctx.samplePreview);
-  } else {
-    lines.push('');
-    lines.push('(未加载样例预览，请基于列名推断)');
   }
   return lines.join('\n');
 }

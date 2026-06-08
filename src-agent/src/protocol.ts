@@ -41,9 +41,14 @@ export type SidecarEvent =
   | { type: 'batch_paused'; batchId: string }
   | { type: 'sidecar_ready' };
 
+export interface LoadedColumn {
+  name: string;
+  letter: string;
+}
+
 export interface LoadedSheet {
   sheetName: string;
-  columns: string[];
+  columns: LoadedColumn[];
 }
 
 export interface LoadedFile {

@@ -30,9 +30,14 @@ export interface ToolResult {
   success: boolean;
 }
 
+export interface LoadedColumn {
+  name: string;
+  letter: string;
+}
+
 export interface LoadedSheet {
   sheetName: string;
-  columns: string[];
+  columns: LoadedColumn[];
 }
 
 export interface LoadedFile {
@@ -43,6 +48,7 @@ export interface LoadedFile {
 
 export interface AgentContext {
   loadedFiles?: LoadedFile[];
+  sampleDataPreview?: string;
 }
 
 export type SidecarEvent =

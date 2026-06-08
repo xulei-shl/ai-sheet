@@ -12,6 +12,7 @@ export interface SheetInfo {
 
 export interface ColumnInfo {
   name: string;
+  index: number;
   sampleValues: string[];
 }
 

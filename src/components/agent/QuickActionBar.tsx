@@ -51,31 +51,35 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
       const { template, usedFallback } = findPromptTemplate(prompts, action);
 
       const first = loadedContext.loadedFiles[0];
-      const sel = selections.find((s) => s.file.name === first.name);
+      const sel = selections.find((s) => s.file.path === first.path);
       const activeSheet = first.sheets[0]?.sheetName;
 
-      const samplePreview = activeSheet
-        ? sel?.previewData?.[activeSheet] ?? previewData
-        : null;
-
+      // Use sampleDataPreview from loadedContext if available, otherwise build from store
       let previewStr: string | undefined;
       let sampleMissing = false;
-      if (samplePreview && samplePreview.rows && samplePreview.rows.length > 0) {
-        const cols = samplePreview.columns;
-        const head = samplePreview.rows.slice(0, 5);
-        const header = '| ' + cols.join(' | ') + ' |';
-        const sep = '| ' + cols.map(() => '---').join(' | ') + ' |';
-        const body = head
-          .map((r) => '| ' + cols.map((c) => String(r[c] ?? '')).join(' | ') + ' |')
-          .join('\n');
-        previewStr = `${header}\n${sep}\n${body}`;
+      if (loadedContext.sampleDataPreview) {
+        previewStr = loadedContext.sampleDataPreview;
       } else {
-        sampleMissing = true;
+        const samplePreview = activeSheet
+          ? sel?.previewData?.[activeSheet] ?? previewData
+          : null;
+        if (samplePreview && samplePreview.rows && samplePreview.rows.length > 0) {
+          const cols = samplePreview.columns;
+          const head = samplePreview.rows.slice(0, 5);
+          const header = '| ' + cols.join(' | ') + ' |';
+          const sep = '| ' + cols.map(() => '---').join(' | ') + ' |';
+          const body = head
+            .map((r) => '| ' + cols.map((c) => String(r[c] ?? '')).join(' | ') + ' |')
+            .join('\n');
+          previewStr = `${header}\n${sep}\n${body}`;
+        } else {
+          sampleMissing = true;
+        }
       }
 
       const ctx = {
-        fileName: first.name,
-        sheets: first.sheets.map((s) => ({ sheet: s.sheetName, columns: s.columns })),
+        fileName: first.path,
+        sheets: first.sheets.map((s) => ({ sheet: s.sheetName, columns: s.columns.map((c) => `${c.letter}(${c.name})`) })),
         samplePreview: previewStr,
       };
 

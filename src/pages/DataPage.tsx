@@ -13,13 +13,15 @@ export function DataPage() {
     selections,
     loading,
     error,
+    includeSampleData,
     addFile,
     removeFile,
     selectSheets,
     selectColumns,
     loadPreview,
     notifyContextChange,
-    clearError
+    clearError,
+    setIncludeSampleData,
   } = useExcelStore();
 
   const clearMessages = useAgentStore((s) => s.clearMessages);
@@ -434,6 +436,24 @@ export function DataPage() {
                   <Eraser className="h-3.5 w-3.5" />
                   清空上下文
                 </button>
+
+                <label
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer select-none border transition-all duration-150"
+                  style={{
+                    borderColor: 'var(--border)',
+                    color: includeSampleData ? 'var(--primary)' : 'var(--muted)',
+                    background: includeSampleData ? 'var(--primary-glow)' : 'transparent',
+                  }}
+                  title="将前 3 行样例数据加入上下文"
+                >
+                  <input
+                    type="checkbox"
+                    checked={includeSampleData}
+                    onChange={(e) => setIncludeSampleData(e.target.checked)}
+                    className="h-3 w-3 accent-[var(--primary)] cursor-pointer"
+                  />
+                  样例数据
+                </label>
               </div>
             </div>
 

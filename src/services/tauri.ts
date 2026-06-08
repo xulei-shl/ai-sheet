@@ -179,6 +179,7 @@ export interface DirectLlmContext {
   fileName: string;
   sheets: Array<{ sheet: string; columns: string[] }>;
   samplePreview?: string;
+  includeSampleData?: boolean;
 }
 
 export interface DirectLlmRequest {

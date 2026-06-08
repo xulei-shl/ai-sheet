@@ -7,11 +7,21 @@ export function buildSystemPrompt(context?: AgentContext): string {
     filesBlock = context.loadedFiles
       .map((f) => {
         const sheetLines = f.sheets
-          .map((sh) => `    - Sheet: ${sh.sheetName}, 列: ${sh.columns.join(', ') || '（无）'}`)
+          .map((sh) => {
+            const colStr = sh.columns.length > 0
+              ? sh.columns.map((c) => `${c.letter}(${c.name})`).join(', ')
+              : '（无）';
+            return `    - Sheet: ${sh.sheetName}, 列: ${colStr}`;
+          })
           .join('\n');
-        return `  - 文件: ${f.name}\n${sheetLines}`;
+        return `  - 文件: ${f.path}\n${sheetLines}`;
       })
       .join('\n');
+  }
+
+  let sampleBlock = '';
+  if (context?.sampleDataPreview) {
+    sampleBlock = `\n## 样例数据（前 3 行）\n${context.sampleDataPreview}\n`;
   }
 
   return `你是 AI-Sheet，一个专业的 Excel 智能数据处理助手。
@@ -30,10 +40,10 @@ export function buildSystemPrompt(context?: AgentContext): string {
 
 ## 当前上下文
 ${filesBlock || '（未加载数据上下文）'}
-
+${sampleBlock}
 ## 注意事项
 - 生成公式前先确认数据列和 Sheet 名称
-- 执行 Python 代码前先检查依赖是否已安装
+- 执行 Python 代码前检查依赖是否已安装
 - 写入 Excel 前确认用户意图
 - 批量处理大量数据时先在小样本上验证`;
 }

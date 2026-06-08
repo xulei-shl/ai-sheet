@@ -2,6 +2,7 @@ import { Bot, RotateCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAgentEvent, onSidecarDead, onSidecarRestarted } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
+import { usePromptStore } from '../../stores/promptStore';
 import { ErrorState } from '../ui/ErrorState';
 import { AgentInput } from './AgentInput';
 import { MessageList } from './MessageList';
@@ -24,8 +25,11 @@ export function AgentChatPanel() {
   const [agentInput, setAgentInput] = useState('');
   const [quickPlaceholder, setQuickPlaceholder] = useState<string | null>(null);
 
+  const fetchPrompts = usePromptStore((s) => s.fetchPrompts);
+
   useEffect(() => {
     void refreshStatus();
+    void fetchPrompts();
 
     const timer = window.setInterval(() => {
       void refreshStatus();
@@ -43,7 +47,7 @@ export function AgentChatPanel() {
       window.clearInterval(timer);
       void Promise.all(unlisteners).then((items) => items.forEach((unlisten) => unlisten()));
     };
-  }, [handleEvent, markOffline, refreshStatus]);
+  }, [handleEvent, markOffline, refreshStatus, fetchPrompts]);
 
   const isReady = status?.ready ?? false;
   const isAgentStreaming = agentStreamingRequestId !== null;

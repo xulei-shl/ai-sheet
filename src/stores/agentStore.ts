@@ -77,10 +77,17 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     try {
       await sendAgentMessage(trimmed);
     } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : String(error),
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      set((s) => ({
+        error: errorMsg,
         agentStreamingRequestId: null,
-      });
+        messages: [...s.messages, {
+          id: `error-${Date.now()}`,
+          role: 'assistant' as const,
+          content: errorMsg,
+          isError: true,
+        }],
+      }));
     }
   },
 
@@ -130,15 +137,34 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       if (event.id) {
         const kind = resolveRequestKind(event.id);
         set((s) => {
-          // 找到对应的 assistant 消息，将其内容替换为错误信息
-          const messages = s.messages.map((m) => {
-            if (m.requestId === event.id && m.role === 'assistant') {
-              return { ...m, content: event.message, isStreaming: false, isError: true };
-            }
-            return m;
-          });
+          const existing = s.messages.find((m) => m.requestId === event.id && m.role === 'assistant');
+          if (existing) {
+            // 找到对应的 assistant 消息，将其内容替换为错误信息
+            const messages = s.messages.map((m) =>
+              m.requestId === event.id && m.role === 'assistant'
+                ? { ...m, content: event.message, isStreaming: false, isError: true }
+                : m,
+            );
+            return {
+              messages,
+              [kind === 'agent'
+                ? 'agentStreamingRequestId'
+                : 'directStreamingRequestId']: null,
+            };
+          }
+          // 没有找到匹配的 assistant 消息（如 LLM 超时，从未收到 agent_delta），
+          // 需要新建一条错误消息
           return {
-            messages,
+            messages: [
+              ...s.messages,
+              {
+                id: `error-${event.id}`,
+                requestId: event.id,
+                role: 'assistant' as const,
+                content: event.message,
+                isError: true,
+              },
+            ],
             [kind === 'agent'
               ? 'agentStreamingRequestId'
               : 'directStreamingRequestId']: null,
@@ -312,10 +338,11 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         context,
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       set((s) => ({
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMsg,
         messages: s.messages.map((m) =>
-          m.requestId === requestId ? { ...m, isStreaming: false } : m,
+          m.requestId === requestId ? { ...m, content: m.content || errorMsg, isStreaming: false, isError: true } : m,
         ),
         directStreamingRequestId: null,
       }));

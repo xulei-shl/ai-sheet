@@ -10,17 +10,17 @@
 
 import type { Model } from '@earendil-works/pi-ai';
 
-/** 已知的 providerType → { provider, api } 映射 */
-const PROVIDER_TYPE_MAP: Record<string, { provider: string; api: string }> = {
-  'openai-completions':     { provider: 'openai',     api: 'openai-completions' },
-  'openai-responses':       { provider: 'openai',     api: 'openai-responses' },
-  'anthropic-messages':     { provider: 'anthropic',  api: 'anthropic-messages' },
-  'deepseek':               { provider: 'deepseek',   api: 'openai-completions' },
-  'mistral-conversations':  { provider: 'mistral',    api: 'mistral-conversations' },
-  'google-generative-ai':   { provider: 'google',     api: 'google-generative-ai' },
-  'google-vertex':          { provider: 'google-vertex', api: 'google-vertex' },
-  'bedrock-converse-stream':{ provider: 'amazon-bedrock', api: 'bedrock-converse-stream' },
-  'azure-openai-responses': { provider: 'azure-openai-responses', api: 'azure-openai-responses' },
+/** 已知的 providerType → { provider, api } 映射，含默认 baseUrl */
+const PROVIDER_TYPE_MAP: Record<string, { provider: string; api: string; baseUrl: string }> = {
+  'openai-completions':     { provider: 'openai',     api: 'openai-completions',     baseUrl: 'https://api.openai.com' },
+  'openai-responses':       { provider: 'openai',     api: 'openai-responses',       baseUrl: 'https://api.openai.com' },
+  'anthropic-messages':     { provider: 'anthropic',  api: 'anthropic-messages',     baseUrl: 'https://api.anthropic.com' },
+  'deepseek':               { provider: 'deepseek',   api: 'openai-completions',     baseUrl: 'https://api.deepseek.com' },
+  'mistral-conversations':  { provider: 'mistral',    api: 'mistral-conversations',  baseUrl: 'https://api.mistral.ai' },
+  'google-generative-ai':   { provider: 'google',     api: 'google-generative-ai',   baseUrl: '' },
+  'google-vertex':          { provider: 'google-vertex', api: 'google-vertex',       baseUrl: '' },
+  'bedrock-converse-stream':{ provider: 'amazon-bedrock', api: 'bedrock-converse-stream', baseUrl: '' },
+  'azure-openai-responses': { provider: 'azure-openai-responses', api: 'azure-openai-responses', baseUrl: '' },
 };
 
 /** 已知的 API 协议后缀，用于 heuristic fallback */
@@ -41,9 +41,9 @@ const KNOWN_API_SUFFIXES = [
  * 2. 若 providerType 以已知 API 后缀结尾，截取前缀为 provider
  * 3. 兜底：provider 和 api 均使用原值（兼容自定义 providerType）
  */
-export function resolveProviderApi(providerType: string): { provider: string; api: string } {
+export function resolveProviderApi(providerType: string): { provider: string; api: string; defaultBaseUrl: string } {
   const mapped = PROVIDER_TYPE_MAP[providerType];
-  if (mapped) return mapped;
+  if (mapped) return { provider: mapped.provider, api: mapped.api, defaultBaseUrl: mapped.baseUrl };
 
   // heuristic: providerType 可能是 "<provider>-<api-suffix>"
   for (const suffix of KNOWN_API_SUFFIXES) {

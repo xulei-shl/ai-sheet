@@ -1,15 +1,17 @@
-import { Bot, RotateCw } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Bot, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { onAgentEvent, onSidecarDead, onSidecarRestarted } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
 import { usePromptStore } from '../../stores/promptStore';
 import { ErrorState } from '../ui/ErrorState';
+import { Tooltip } from '../ui/Tooltip';
 import { AgentInput } from './AgentInput';
 import { MessageList } from './MessageList';
 import { QuickActionBar } from './QuickActionBar';
 
 export function AgentChatPanel() {
   const {
+    clearMessages,
     error,
     handleEvent,
     markOffline,
@@ -21,11 +23,16 @@ export function AgentChatPanel() {
   } = useAgentStore();
 
   const agentStreamingRequestId = useAgentStore((s) => s.agentStreamingRequestId);
+  const agentStreaming = agentStreamingRequestId !== null;
 
   const [agentInput, setAgentInput] = useState('');
   const [quickPlaceholder, setQuickPlaceholder] = useState<string | null>(null);
 
   const fetchPrompts = usePromptStore((s) => s.fetchPrompts);
+
+  const handleClear = useCallback(() => {
+    clearMessages();
+  }, [clearMessages]);
 
   useEffect(() => {
     void refreshStatus();
@@ -70,15 +77,16 @@ export function AgentChatPanel() {
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => void restart()}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md border transition-colors hover:bg-white/5"
-          style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
-          aria-label="重连 Agent"
-        >
-          <RotateCw className="h-4 w-4" aria-hidden="true" />
-        </button>
+        <Tooltip text="清空对话历史" side="bottom">
+          <button
+            type="button"
+            onClick={handleClear}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border transition-colors hover:bg-white/5"
+            style={{ borderColor: 'var(--border)', color: 'var(--ink)' }}
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </Tooltip>
       </header>
 
       {error && (

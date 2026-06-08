@@ -68,28 +68,61 @@ export function buildDisplaySummary(
   ctx: DirectLlmContext,
   usedFallback: boolean,
   sampleMissing: boolean,
+  userInput: string,
 ): string {
   const prefix = usedFallback ? '[已使用默认模板] ' : '';
   const actionLabel = action === 'formula_generation' ? '公式生成' : '提示词生成';
+  const truncated = userInput.length > 60 ? userInput.slice(0, 60) + '...' : userInput;
   const sheets = ctx.sheets.map((s) => s.sheet).join(', ');
   const allCols = [...new Set(ctx.sheets.flatMap((s) => s.columns))].join(', ');
   const suffix = sampleMissing ? ' · 未加载样例预览' : '';
-  return `${prefix}${actionLabel} · ${ctx.fileName} · Sheet: ${sheets} · 列: ${allCols}${suffix}`;
+  return `${prefix}${actionLabel} · 「${truncated}」 · ${ctx.fileName} · Sheet: ${sheets} · 列: ${allCols}${suffix}`;
+}
+
+function taskHeader(action: QuickAction): string {
+  if (action === 'formula_generation') {
+    return (
+      '公式生成\n\n' +
+      '请根据用户需求生成 Excel 公式。\n' +
+      '要求：\n' +
+      '1. 优先使用当前表格中的字段名、列名或单元格位置。\n' +
+      '2. 输出可直接复制到 Excel 单元格的公式。\n' +
+      '3. 行号占位符 `{}` 会被替换为实际行号（如 `=A{}+B{}` 展开为 `=A2+B2`）。\n' +
+      '4. 如果用户需求不明确，先提出澄清问题。\n' +
+      '5. 如有必要，简要解释公式逻辑。'
+    );
+  }
+  return (
+    '提示词生成\n\n' +
+    '请根据用户需求生成适合批量处理当前行数据的提示词模板。\n' +
+    '要求：\n' +
+    '1. 利用当前表格中的字段名和列名构建上下文。\n' +
+    '2. 输出列、格式与约束需明确。\n' +
+    '3. 结构用 Markdown 分节：角色、背景、工作流程、输出格式、约束。\n' +
+    '4. 如果用户需求不明确，先提出澄清问题。'
+  );
 }
 
 export function buildDirectPrompt(
   action: QuickAction,
   template: string,
   ctx: DirectLlmContext,
+  userInput: string,
 ): string {
-  const header =
-    action === 'formula_generation'
-      ? `# 任务：生成 Excel 公式\n\n请基于下方 Excel 上下文，仅输出可粘贴到目标单元格的 Excel 公式；` +
-        `行号占位符 \`{}\` 会被替换为实际行号（如 \`=A{}+B{}\` 展开为 \`=A2+B2\`）。`
-      : `# 任务：生成提示词模板\n\n请基于下方 Excel 上下文，生成适合批量处理当前行数据的提示词模板，输出列、格式与约束需明确。`;
-
   const contextBlock = formatContext(ctx);
-  return `${template}\n\n${header}\n\n---\n# Excel 上下文\n${contextBlock}`;
+  return `你是一个专业的 Excel 助手。
+
+# 当前 Excel 上下文
+${contextBlock}
+
+# 当前任务
+${taskHeader(action)}
+
+# 用户具体需求
+${userInput}
+
+---
+${template}`;
 }
 
 function formatContext(ctx: DirectLlmContext): string {

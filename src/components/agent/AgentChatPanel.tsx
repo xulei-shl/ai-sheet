@@ -1,5 +1,5 @@
 import { Bot, RotateCw } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { onAgentEvent, onSidecarDead, onSidecarRestarted } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
 import { ErrorState } from '../ui/ErrorState';
@@ -20,6 +20,9 @@ export function AgentChatPanel() {
   } = useAgentStore();
 
   const agentStreamingRequestId = useAgentStore((s) => s.agentStreamingRequestId);
+
+  const [agentInput, setAgentInput] = useState('');
+  const [quickPlaceholder, setQuickPlaceholder] = useState<string | null>(null);
 
   useEffect(() => {
     void refreshStatus();
@@ -44,6 +47,7 @@ export function AgentChatPanel() {
 
   const isReady = status?.ready ?? false;
   const isAgentStreaming = agentStreamingRequestId !== null;
+  const placeholder = quickPlaceholder ?? '描述你想处理的数据任务...';
 
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label="AI-Sheet Agent">
@@ -83,8 +87,19 @@ export function AgentChatPanel() {
         <MessageList messages={messages} />
       </div>
 
-      <QuickActionBar />
-      <AgentInput disabled={!isReady} isStreaming={isAgentStreaming} onSend={sendMessage} />
+      <QuickActionBar
+        agentInput={agentInput}
+        onAgentInputChange={setAgentInput}
+        onSetQuickPlaceholder={setQuickPlaceholder}
+      />
+      <AgentInput
+        disabled={!isReady}
+        isStreaming={isAgentStreaming}
+        onSend={sendMessage}
+        value={agentInput}
+        onValueChange={(v) => { setAgentInput(v); setQuickPlaceholder(null); }}
+        placeholder={placeholder}
+      />
     </section>
   );
 }

@@ -10,6 +10,9 @@ interface AgentInputProps {
   disabled?: boolean;
   isStreaming?: boolean;
   onSend: (content: string) => Promise<void>;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
 }
 
 function ModelAvatar({ name }: { name: string }) {
@@ -24,12 +27,18 @@ function ModelAvatar({ name }: { name: string }) {
   );
 }
 
-export function AgentInput({ disabled, isStreaming, onSend }: AgentInputProps) {
-  const [content, setContent] = useState('');
+export function AgentInput({ disabled, isStreaming, onSend, value: controlledValue, onValueChange, placeholder: customPlaceholder }: AgentInputProps) {
+  const [localContent, setLocalContent] = useState('');
   const [defaultModel, setDefaultModel] = useState<ModelConfig | null>(null);
   const [modelOpen, setModelOpen] = useState(false);
   const modelRef = useRef<HTMLDivElement>(null);
   const bootstrapAppliedRef = useRef(false);
+
+  const isControlled = controlledValue !== undefined;
+  const content = isControlled ? controlledValue : localContent;
+  const setContent = isControlled
+    ? (v: string) => onValueChange?.(v)
+    : setLocalContent;
 
   const selectedAgentModelName = useUiStore((s) => s.selectedAgentModelName);
   const setSelectedAgentModelName = useUiStore((s) => s.setSelectedAgentModelName);
@@ -122,6 +131,7 @@ export function AgentInput({ disabled, isStreaming, onSend }: AgentInputProps) {
   }
 
   const canSend = !disabled && !isStreaming && !!content.trim();
+  const placeholder = customPlaceholder ?? '描述你想处理的数据任务...';
 
   return (
     <form
@@ -146,7 +156,7 @@ export function AgentInput({ disabled, isStreaming, onSend }: AgentInputProps) {
           onChange={(event) => setContent(event.target.value)}
           disabled={disabled || isStreaming}
           rows={3}
-          placeholder="描述你想处理的数据任务..."
+          placeholder={placeholder}
           className="block w-full resize-none border-0 bg-transparent px-3 pt-2.5 pb-1.5 text-sm outline-none placeholder:opacity-50 disabled:opacity-60"
           style={{ color: 'var(--ink)' }}
           onKeyDown={handleKeyDown}

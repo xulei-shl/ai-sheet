@@ -5,7 +5,18 @@ import { useExcelStore } from '../../stores/excelStore';
 import { usePromptStore } from '../../stores/promptStore';
 import { findPromptTemplate, buildDirectPrompt, buildDisplaySummary, type QuickAction } from './agentQuickActions';
 
-export function QuickActionBar() {
+interface QuickActionBarProps {
+  agentInput: string;
+  onAgentInputChange: (value: string) => void;
+  onSetQuickPlaceholder: (placeholder: string | null) => void;
+}
+
+const PLACEHOLDER_HINTS: Record<QuickAction, string> = {
+  formula_generation: '请输入你想生成的公式，例如：根据销售额和成本计算利润率',
+  prompt_generation: '请输入你想生成的提示词需求，例如：对每行数据进行情感分类并输出JSON',
+};
+
+export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlaceholder }: QuickActionBarProps) {
   const status = useAgentStore((s) => s.status);
   const directStreamingRequestId = useAgentStore((s) => s.directStreamingRequestId);
   const appliedModelName = useAgentStore((s) => s.appliedModelName);
@@ -26,6 +37,17 @@ export function QuickActionBar() {
     (action: QuickAction) => {
       if (!canClick || !loadedContext?.loadedFiles?.length) return;
 
+      const input = agentInput.trim();
+
+      // 空输入：聚焦输入框 + 提示 placeholder
+      if (!input) {
+        onSetQuickPlaceholder(PLACEHOLDER_HINTS[action]);
+        const el = document.querySelector<HTMLTextAreaElement>('[data-ai-input]');
+        el?.focus();
+        return;
+      }
+
+      // 有输入：组合三部分发送
       const { template, usedFallback } = findPromptTemplate(prompts, action);
 
       const first = loadedContext.loadedFiles[0];
@@ -57,17 +79,24 @@ export function QuickActionBar() {
         samplePreview: previewStr,
       };
 
-      const displaySummary = buildDisplaySummary(action, ctx, usedFallback, sampleMissing);
-      const fullPrompt = buildDirectPrompt(action, template, ctx);
+      const displaySummary = buildDisplaySummary(action, ctx, usedFallback, sampleMissing, input);
+      const fullPrompt = buildDirectPrompt(action, template, ctx, input);
+
+      // 清空输入后再发送
+      onAgentInputChange('');
+      onSetQuickPlaceholder(null);
 
       sendDirectLlmMessage(action, displaySummary, fullPrompt).catch(() => {});
     },
     [
       canClick,
       loadedContext,
+      agentInput,
       prompts,
       selections,
       previewData,
+      onAgentInputChange,
+      onSetQuickPlaceholder,
       sendDirectLlmMessage,
     ],
   );
@@ -88,7 +117,9 @@ export function QuickActionBar() {
                 ? 'Sidecar 未就绪'
                 : isDirectStreaming
                   ? '正在生成中...'
-                  : '基于当前 Excel 上下文生成公式'
+                  : agentInput.trim()
+                    ? '结合输入需求 + Excel 上下文生成公式'
+                    : '请先在输入框输入具体公式需求'
         }
         onClick={() => handleQuickAction('formula_generation')}
         className="inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs transition-colors hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
@@ -113,7 +144,9 @@ export function QuickActionBar() {
                 ? 'Sidecar 未就绪'
                 : isDirectStreaming
                   ? '正在生成中...'
-                  : '基于当前 Excel 上下文生成提示词'
+                  : agentInput.trim()
+                    ? '结合输入需求 + Excel 上下文生成提示词'
+                    : '请先在输入框输入具体提示词需求'
         }
         onClick={() => handleQuickAction('prompt_generation')}
         className="inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs transition-colors hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"

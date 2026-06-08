@@ -183,7 +183,8 @@ impl BridgeServer {
                     let model = state.config_service.get_active_model();
                     serde_json::json!({
                         "providerType": model.provider_type,
-                        "modelId": model.model_id
+                        "modelId": model.model_id,
+                        "baseUrl": model.base_url,
                     })
                 }
             }

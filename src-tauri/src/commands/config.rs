@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tauri::{AppHandle, State};
 
-use crate::db::{models_repo, Database};
+use crate::db::{models_repo, settings_repo, Database};
 use crate::error::AppError;
 use crate::models::config::{ActiveModel, ModelConfig};
 use crate::AppState;
@@ -16,11 +16,20 @@ pub async fn get_active_model(state: State<'_, AppState>) -> Result<ModelConfig,
 pub async fn set_active_model(
     app: AppHandle,
     state: State<'_, AppState>,
+    db: State<'_, Arc<Database>>,
     model: ActiveModel,
 ) -> Result<(), AppError> {
     {
         let mut guard = state.active_model.write().await;
-        *guard = Some(model);
+        *guard = Some(model.clone());
+    }
+    // 持久化到 settings 表
+    {
+        let conn = db.get_conn().await;
+        let json = serde_json::to_string(&model)
+            .map_err(|e| AppError::Database(e.to_string()))?;
+        settings_repo::set_setting(&conn, "active_model", &json)
+            .map_err(|e| AppError::Database(e.to_string()))?;
     }
     state.sidecar_manager.restart(app).await
 }
@@ -29,10 +38,17 @@ pub async fn set_active_model(
 pub async fn clear_active_model(
     app: AppHandle,
     state: State<'_, AppState>,
+    db: State<'_, Arc<Database>>,
 ) -> Result<(), AppError> {
     {
         let mut guard = state.active_model.write().await;
         *guard = None;
+    }
+    // 删除持久化的 active_model
+    {
+        let conn = db.get_conn().await;
+        settings_repo::delete_setting(&conn, "active_model")
+            .map_err(|e| AppError::Database(e.to_string()))?;
     }
     state.sidecar_manager.restart(app).await
 }

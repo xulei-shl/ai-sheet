@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tauri::{Emitter, Manager};
 use tokio::sync::RwLock;
 
-use crate::db::Database;
+use crate::db::{settings_repo, Database};
 use crate::models::config::ActiveModel;
 use crate::services::{
     bridge_server::BridgeServer, config_service::ConfigService,
@@ -57,6 +57,27 @@ pub fn run() {
                 }
                 Err(e) => {
                     eprintln!("Failed to resolve app data dir: {}", e);
+                }
+            }
+
+            // 从 settings 表恢复 active_model 到内存
+            let state = app.state::<AppState>();
+            if let Some(db) = app.try_state::<Arc<Database>>() {
+                let db_inner = db.inner().clone();
+                match tauri::async_runtime::block_on(async {
+                    let conn = db_inner.get_conn().await;
+                    settings_repo::get_setting(&conn, "active_model")
+                }) {
+                    Ok(Some(json)) => {
+                        if let Ok(model) = serde_json::from_str::<ActiveModel>(&json) {
+                            let mut guard = tauri::async_runtime::block_on(state.active_model.write());
+                            *guard = Some(model);
+                        }
+                    }
+                    Ok(None) => {}
+                    Err(e) => {
+                        eprintln!("Failed to restore active_model: {}", e);
+                    }
                 }
             }
 

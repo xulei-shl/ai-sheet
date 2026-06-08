@@ -2,6 +2,7 @@ pub mod formula_cache_repo;
 pub mod migrations;
 pub mod models_repo;
 pub mod prompts_repo;
+pub mod settings_repo;
 
 use rusqlite::Connection;
 use std::path::Path;

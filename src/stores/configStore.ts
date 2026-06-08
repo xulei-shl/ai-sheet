@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import type { ModelConfig } from '../types/config';
 import {
   getActiveModel,
-  getFallbackModels,
   getUserModels,
   addUserModel as apiAddUserModel,
   updateUserModel as apiUpdateUserModel,
@@ -27,7 +26,6 @@ let fetchVersion = 0;
 
 interface ConfigStore {
   activeModel: ModelConfig | null;
-  fallbackModels: ModelConfig[];
   userModels: ModelConfig[];
   loading: boolean;
   error: string | null;
@@ -38,25 +36,10 @@ interface ConfigStore {
   deleteModel: (index: number) => Promise<void>;
   testConnection: (model: ModelConfig) => Promise<string | null>;
   getAllModels: () => ModelConfig[];
-  getMergedModels: () => ModelConfig[];
-}
-
-export type DisplayModel = ModelConfig & { displaySource: 'user' | 'builtin' };
-
-export function mergeModels(userModels: ModelConfig[], fallbackModels: ModelConfig[]): DisplayModel[] {
-  const byName = new Map<string, DisplayModel>();
-  for (const m of fallbackModels) {
-    byName.set(m.name, { ...m, displaySource: 'builtin' });
-  }
-  for (const m of userModels) {
-    byName.set(m.name, { ...m, displaySource: 'user' });
-  }
-  return Array.from(byName.values());
 }
 
 export const useConfigStore = create<ConfigStore>((set, get) => ({
   activeModel: null,
-  fallbackModels: [],
   userModels: [],
   loading: false,
   error: null,
@@ -65,15 +48,14 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
     const version = ++fetchVersion;
     set({ loading: true, error: null });
     try {
-      const [active, fallbacks, rawUserModels] = await Promise.all([
+      const [active, rawUserModels] = await Promise.all([
         getActiveModel(),
-        getFallbackModels(),
         getUserModels(),
       ]);
       if (version !== fetchVersion) return;
       const userModels = await enrichWithApiKeys(rawUserModels);
       if (version !== fetchVersion) return;
-      set({ activeModel: active, fallbackModels: fallbacks, userModels, loading: false });
+      set({ activeModel: active, userModels, loading: false });
     } catch (e) {
       if (version === fetchVersion) {
         set({ error: e instanceof Error ? e.message : String(e), loading: false });
@@ -86,7 +68,7 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
     try {
       const key = model.apiKey;
       const meta = { ...model, apiKey: '' };
-      const created = await apiAddUserModel({ ...meta, source: 'user' });
+      const created = await apiAddUserModel(meta);
       if (key) {
         await setApiKey(secureKeyFor(created.name), key);
       }
@@ -99,13 +81,13 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
   updateModel: async (index, model) => {
     fetchVersion++;
     try {
-      await apiUpdateUserModel(index, { ...model, apiKey: '', source: 'user' });
+      await apiUpdateUserModel(index, { ...model, apiKey: '' });
       if (model.apiKey) {
         await setApiKey(secureKeyFor(model.name), model.apiKey);
       }
       const userModels = [...get().userModels];
       if (index >= 0 && index < userModels.length) {
-        userModels[index] = { ...model, source: 'user' };
+        userModels[index] = model;
         set({ userModels });
       }
     } catch (e) {
@@ -141,12 +123,6 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
   },
 
   getAllModels: () => {
-    const { fallbackModels, userModels } = get();
-    return [...userModels, ...fallbackModels];
-  },
-
-  getMergedModels: () => {
-    const { fallbackModels, userModels } = get();
-    return mergeModels(userModels, fallbackModels);
+    return get().userModels;
   },
 }));

@@ -180,24 +180,11 @@ impl BridgeServer {
                         "baseUrl": m.base_url,
                     })
                 } else {
-                    let model = state.config_service.get_active_model();
-                    serde_json::json!({
-                        "providerType": model.provider_type,
-                        "modelId": model.model_id,
-                        "baseUrl": model.base_url,
-                    })
+                    serde_json::json!({"error": "no active model configured"})
                 }
             }
             "/api/config/models" => {
-                let state = app.state::<crate::AppState>();
-                let chain = state.config_service.get_fallback_chain();
-                serde_json::json!(chain.iter().map(|m| {
-                    serde_json::json!({
-                        "name": m.name,
-                        "providerType": m.provider_type,
-                        "modelId": m.model_id
-                    })
-                }).collect::<Vec<_>>())
+                serde_json::json!([])
             }
             "/api/config/test" => {
                 serde_json::json!({"success": false, "error": "not implemented"})

@@ -564,19 +564,12 @@ CREATE TABLE settings (
 
 > **API Key 不入库**。存储策略详见 §10.1。
 
-### 7.2 默认模型 + Fallback 链
+### 7.2 模型配置
 
-`ConfigService` 维护一个 fallback 链：
+LLM 配置全部由用户手动添加，无内置免费模型。用户通过配置页面新增/编辑/删除模型配置。
 
-```
-[用户默认模型（is_default=1）] → DEFAULT_MODELS[0]（DeepSeek-V3）
-                             → DEFAULT_MODELS[1]（GLM-4-Flash）
-```
-
-`get_active_model()` 优先返回用户默认；`get_fallback_chain()` 返回
-完整链。当前实现只把链暴露给 Agent 侧（HTTP Bridge `/api/config/models`），
-**自动降级尚未实装**（`ModelFallbackService` 是设计稿，代码中尚未出现，
-降级逻辑当前由 pi-ai Provider 自身的重试承担）。详见 `HANDOFF.md` §3。
+当前使用的模型由前端 `set_active_model` 写入进程内存的 `ActiveModel` 并持久化到 `settings` 表，
+HTTP Bridge `/api/config/default` 读取后下发给 sidecar。
 
 ### 7.3 pi-agent 会话持久化
 

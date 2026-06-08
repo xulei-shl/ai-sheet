@@ -1,11 +1,11 @@
 use rusqlite::Connection;
 
 use crate::error::AppResult;
-use crate::models::config::{ModelConfig, ModelSource};
+use crate::models::config::ModelConfig;
 
 pub fn get_all_models(conn: &Connection) -> AppResult<Vec<ModelConfig>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, api_key, base_url, model_id, provider_type, is_default
+        "SELECT id, name, api_key, base_url, model_id, provider_type
          FROM models ORDER BY id ASC",
     )?;
     let rows = stmt.query_map([], |row| {
@@ -16,8 +16,6 @@ pub fn get_all_models(conn: &Connection) -> AppResult<Vec<ModelConfig>> {
             base_url: row.get(3)?,
             model_id: row.get(4)?,
             provider_type: row.get(5)?,
-            is_default: row.get::<_, i32>(6)? != 0,
-            source: ModelSource::User,
         })
     })?;
     let mut models = Vec::new();
@@ -31,14 +29,13 @@ pub fn insert_model(conn: &Connection, model: &ModelConfig) -> AppResult<ModelCo
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
         "INSERT INTO models (name, api_key, base_url, model_id, provider_type, is_default, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+         VALUES (?1, ?2, ?3, ?4, ?5, 0, ?6, ?7)",
         rusqlite::params![
             model.name,
             model.api_key,
             model.base_url,
             model.model_id,
             model.provider_type,
-            model.is_default as i32,
             now,
             now,
         ],
@@ -51,23 +48,20 @@ pub fn insert_model(conn: &Connection, model: &ModelConfig) -> AppResult<ModelCo
         base_url: model.base_url.clone(),
         model_id: model.model_id.clone(),
         provider_type: model.provider_type.clone(),
-        is_default: model.is_default,
-        source: ModelSource::User,
     })
 }
 
 pub fn update_model(conn: &Connection, id: i64, model: &ModelConfig) -> AppResult<()> {
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "UPDATE models SET name=?1, api_key=?2, base_url=?3, model_id=?4, provider_type=?5, is_default=?6, updated_at=?7
-         WHERE id=?8",
+        "UPDATE models SET name=?1, api_key=?2, base_url=?3, model_id=?4, provider_type=?5, updated_at=?6
+         WHERE id=?7",
         rusqlite::params![
             model.name,
             model.api_key,
             model.base_url,
             model.model_id,
             model.provider_type,
-            model.is_default as i32,
             now,
             id,
         ],
@@ -105,8 +99,6 @@ mod tests {
             base_url: "https://api.test.com/v1".into(),
             model_id: "test-model".into(),
             provider_type: "openai-completions".into(),
-            is_default: true,
-            source: ModelSource::User,
         }
     }
 
@@ -180,4 +172,3 @@ mod tests {
         assert!(get_model_by_index(&conn, 0).unwrap().is_none());
     }
 }
-

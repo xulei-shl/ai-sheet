@@ -46,8 +46,4 @@ export class BridgeClient {
   }> {
     return this.post('/api/config/default');
   }
-
-  async getAllModels(): Promise<Array<{ providerType: string; modelId: string; name: string }>> {
-    return this.get('/api/config/models');
-  }
 }

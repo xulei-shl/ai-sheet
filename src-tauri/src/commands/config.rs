@@ -8,8 +8,16 @@ use crate::models::config::{ActiveModel, ModelConfig};
 use crate::AppState;
 
 #[tauri::command]
-pub async fn get_active_model(state: State<'_, AppState>) -> Result<ModelConfig, String> {
-    Ok(state.config_service.get_active_model())
+pub async fn get_active_model(state: State<'_, AppState>) -> Result<Option<ModelConfig>, String> {
+    let guard = state.active_model.read().await;
+    Ok(guard.as_ref().map(|m| ModelConfig {
+        id: None,
+        name: m.name.clone(),
+        api_key: m.api_key.clone(),
+        base_url: m.base_url.clone(),
+        model_id: m.model_id.clone(),
+        provider_type: m.provider_type.clone(),
+    }))
 }
 
 #[tauri::command]
@@ -51,11 +59,6 @@ pub async fn clear_active_model(
             .map_err(|e| AppError::Database(e.to_string()))?;
     }
     state.sidecar_manager.restart(app).await
-}
-
-#[tauri::command]
-pub async fn get_fallback_models(state: State<'_, AppState>) -> Result<Vec<ModelConfig>, String> {
-    Ok(state.config_service.get_fallback_chain())
 }
 
 #[tauri::command]

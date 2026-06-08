@@ -20,6 +20,8 @@ function parseArgs(): { bridgePort: number } {
   return { bridgePort };
 }
 
+const log = (msg: string) => process.stderr.write(`[sidecar] ${msg}\n`);
+
 function emit(event: SidecarEvent) {
   process.stdout.write(`${JSON.stringify(event)}\n`);
 }
@@ -27,18 +29,37 @@ function emit(event: SidecarEvent) {
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
 async function initialize() {
+  // 配置 undici HTTP dispatcher（支持 HTTP_PROXY 环境变量 + 60 秒超时）
+  // 注意：必须同时覆盖 globalThis.fetch，因为 OpenAI SDK 使用 globalThis.fetch，
+  // 而 Node.js 原生 fetch 不使用 undici 的全局 dispatcher，
+  // 导致 bodyTimeout 不生效，SSE 流式传输期间无空闲超时保护。
+  const { createRequire } = await import('node:module');
+  const undici = createRequire(import.meta.url)('undici');
+  const customDispatcher = new undici.EnvHttpProxyAgent({
+    allowH2: false,
+    bodyTimeout: 60_000,
+    headersTimeout: 60_000,
+  });
+  undici.setGlobalDispatcher(customDispatcher);
+  // 覆盖 globalThis.fetch 使用自定义 dispatcher，使 bodyTimeout 对 SSE 流生效
+  globalThis.fetch = (url, init) => undici.fetch(url, { ...init, dispatcher: customDispatcher });
+  log('fetch overridden with custom undici dispatcher (bodyTimeout=60s)');
+
   if (bridgePort > 0) {
     const { BridgeClient } = await import('./bridge.js');
     bridge = new BridgeClient(bridgePort);
+    log('bridge client created');
   }
 
   try {
     const { createSheetAgent } = await import('./agent.js');
     if (bridge) {
       session = await createSheetAgent(bridge);
+      log('agent session created');
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    log(`agent init failed: ${message}`);
     emit({ type: 'agent_error', message: `Agent 初始化失败: ${message}` });
   }
 
@@ -57,24 +78,46 @@ async function initialize() {
 
 async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_message' }>) {
   if (!session) {
+    log('handleUserMessage: session is null');
     emit({ type: 'agent_error', id: command.id, message: 'Agent 未初始化' });
     return;
   }
 
+  log(`handleUserMessage: prompt starting, content length=${command.content.length}`);
+
   try {
     let accumulatedText = '';
+    let lastError: string | null = null;
+    let eventsReceived = 0;
 
     const unsubscribe = session.subscribe((event) => {
+      eventsReceived++;
+      log(`event #${eventsReceived}: type=${event.type}`);
+
       if (event.type === 'message_update') {
         const msgEvent = (event as any).assistantMessageEvent;
+        log(`  message_update: msgEvent.type=${msgEvent?.type}, hasDelta=${!!msgEvent?.delta}`);
         if (msgEvent?.type === 'text_delta' && msgEvent.delta) {
           accumulatedText += msgEvent.delta;
           emit({ type: 'agent_delta', id: command.id, delta: msgEvent.delta });
         }
       }
 
+      if (event.type === 'message_end') {
+        const msg = (event as any).message;
+        log(`  message_end: role=${msg?.role}, stopReason=${msg?.stopReason}, errorMessage=${msg?.errorMessage}`);
+        if (msg?.role === 'assistant') {
+          if (msg?.stopReason === 'error' && msg?.errorMessage) {
+            lastError = msg.errorMessage;
+          } else {
+            lastError = null;
+          }
+        }
+      }
+
       if (event.type === 'tool_execution_start') {
         const ev = event as any;
+        log(`  tool_start: tool=${ev.toolName}`);
         emit({
           type: 'agent_tool_start',
           id: command.id,
@@ -86,6 +129,7 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
       if (event.type === 'tool_execution_end') {
         const ev = event as any;
         const resultStr = typeof ev.result === 'string' ? ev.result : JSON.stringify(ev.result ?? '');
+        log(`  tool_end: tool=${ev.toolName}`);
         emit({
           type: 'agent_tool_end',
           id: command.id,
@@ -93,16 +137,18 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
           result: resultStr,
         });
       }
-
-      if (event.type === 'agent_end') {
-        emit({ type: 'agent_done', id: command.id });
-      }
     });
 
+    log('prompt() starting...');
     await session.prompt(command.content);
+    log(`prompt() resolved, events=${eventsReceived}, textLen=${accumulatedText.length}, lastError=${lastError}`);
     unsubscribe();
 
-    if (!accumulatedText) {
+    if (lastError) {
+      emit({ type: 'agent_error', id: command.id, message: lastError });
+    } else if (!accumulatedText) {
+      emit({ type: 'agent_error', id: command.id, message: '模型未返回任何输出，请检查模型ID和API配置是否正确' });
+    } else {
       emit({ type: 'agent_done', id: command.id });
     }
   } catch (error) {

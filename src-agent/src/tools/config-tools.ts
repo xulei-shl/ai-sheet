@@ -10,11 +10,10 @@ export function configTools(bridge: BridgeClient) {
       description: '获取当前模型配置列表和默认模型信息',
       parameters: Type.Object({}),
       execute: async (_toolCallId: string, _params: Record<string, never>, _signal: AbortSignal | undefined, _onUpdate: AgentToolUpdateCallback<unknown> | undefined, _ctx: ExtensionContext): Promise<AgentToolResult<unknown>> => {
-        const models = await bridge.post<unknown>('/api/config/models');
         const defaultModel = await bridge.post<{ providerType: string; modelId: string }>('/api/config/default');
         return {
-          content: [{ type: 'text', text: JSON.stringify({ models, defaultModel }, null, 2) }],
-          details: { models, defaultModel },
+          content: [{ type: 'text', text: JSON.stringify({ defaultModel }, null, 2) }],
+          details: { defaultModel },
         };
       },
     }),
@@ -33,7 +32,7 @@ export function configTools(bridge: BridgeClient) {
           content: [{ type: 'text', text: result.success ? '连接成功' : `连接失败: ${result.error ?? '未知错误'}` }],
           details: result,
         };
-      },
+      }),
     }),
   ];
 }

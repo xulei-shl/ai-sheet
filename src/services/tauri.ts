@@ -32,7 +32,7 @@ export function getAppStatus() {
 
 // Config
 export function getActiveModel() {
-  return invoke<ModelConfig>('get_active_model');
+  return invoke<ModelConfig | null>('get_active_model');
 }
 
 export interface ActiveAgentModel {
@@ -49,10 +49,6 @@ export function setActiveAgentModel(model: ActiveAgentModel) {
 
 export function clearActiveAgentModel() {
   return invoke<void>('clear_active_model');
-}
-
-export function getFallbackModels() {
-  return invoke<ModelConfig[]>('get_fallback_models');
 }
 
 export function getUserModels() {

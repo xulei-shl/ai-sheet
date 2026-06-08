@@ -78,14 +78,25 @@ export async function runDirectLlmStream(
       { temperature: 0.3, signal: controller.signal, apiKey: modelInfo.apiKey },
     );
 
+    let llmError: string | null = null;
+
     for await (const ev of eventStream as AsyncIterable<any>) {
       if (controller.signal.aborted) break;
+      if (ev?.type === 'error') {
+        llmError = ev?.error?.errorMessage ?? 'LLM 返回错误';
+        break;
+      }
       const delta = ev?.delta ?? ev?.text ?? '';
       if (delta) {
         emit({ type: 'agent_delta', id: command.id, delta });
       }
     }
-    emit({ type: 'agent_done', id: command.id });
+
+    if (llmError) {
+      emit({ type: 'agent_error', id: command.id, message: llmError });
+    } else {
+      emit({ type: 'agent_done', id: command.id });
+    }
   } catch (err) {
     if (controller.signal.aborted) {
       emit({ type: 'agent_done', id: command.id });

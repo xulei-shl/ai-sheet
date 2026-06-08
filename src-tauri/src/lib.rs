@@ -26,6 +26,7 @@ pub struct AppState {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let _ = dotenvy::dotenv();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -114,7 +115,6 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::config::get_active_model,
-            commands::config::get_fallback_models,
             commands::config::set_active_model,
             commands::config::clear_active_model,
             commands::excel::get_excel_info,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Network, Plus, ShieldCheck, Pencil, Trash2, RefreshCw, X, Check, ChevronRight } from 'lucide-react';
-import { mergeModels, useConfigStore, type DisplayModel } from '../stores/configStore';
+import { useConfigStore } from '../stores/configStore';
 import type { ModelConfig } from '../types/config';
 
 const PROVIDER_OPTIONS = [
@@ -42,7 +42,6 @@ type Mode = 'view' | 'create' | 'edit';
 export function ConfigPage() {
   const {
     userModels,
-    fallbackModels,
     loading,
     fetchModels,
     addModel,
@@ -63,14 +62,9 @@ export function ConfigPage() {
     fetchModels();
   }, []);
 
-  const merged: DisplayModel[] = useMemo(
-    () => mergeModels(userModels, fallbackModels),
-    [userModels, fallbackModels],
-  );
-
-  const selected: DisplayModel | null = useMemo(
-    () => (selectedName ? merged.find((m) => m.name === selectedName) ?? null : null),
-    [selectedName, merged],
+  const selected = useMemo(
+    () => (selectedName ? userModels.find((m) => m.name === selectedName) ?? null : null),
+    [selectedName, userModels],
   );
 
   const resetForm = () => {
@@ -93,7 +87,7 @@ export function ConfigPage() {
     setSelectedName(name);
     setMode('view');
     setDetailTestResult(null);
-    const m = merged.find((x) => x.name === name);
+    const m = userModels.find((x) => x.name === name);
     if (m) loadIntoForm(m);
   };
 
@@ -128,18 +122,12 @@ export function ConfigPage() {
       baseUrl: form.baseUrl.trim(),
       modelId: form.modelId.trim(),
       providerType: form.providerType,
-      isDefault: false,
-      source: 'user',
     };
 
     if (mode === 'edit' && selected) {
-      if (selected.displaySource === 'user') {
-        const idx = userModels.findIndex((m) => m.name === selected.name);
-        if (idx >= 0) {
-          await updateModel(idx, next);
-        }
-      } else {
-        await addModel(next);
+      const idx = userModels.findIndex((m) => m.name === selected.name);
+      if (idx >= 0) {
+        await updateModel(idx, next);
       }
       setSelectedName(next.name);
       setMode('view');
@@ -151,7 +139,7 @@ export function ConfigPage() {
   };
 
   const handleDelete = async () => {
-    if (!selected || selected.displaySource !== 'user') return;
+    if (!selected) return;
     const idx = userModels.findIndex((m) => m.name === selected.name);
     if (idx >= 0) {
       await deleteModel(idx);
@@ -171,8 +159,6 @@ export function ConfigPage() {
       baseUrl: form.baseUrl,
       modelId: form.modelId,
       providerType: form.providerType,
-      isDefault: false,
-      source: 'user',
     });
     setTestResult({ ok: !err, message: err || '连接成功' });
     setTesting(false);
@@ -188,8 +174,6 @@ export function ConfigPage() {
       baseUrl: selected.baseUrl,
       modelId: selected.modelId,
       providerType: selected.providerType,
-      isDefault: false,
-      source: 'user',
     });
     setDetailTestResult({ ok: !err, message: err || '连接成功' });
     setDetailTesting(false);
@@ -213,7 +197,7 @@ export function ConfigPage() {
                 className="rounded px-1.5 py-0.5 text-[10px] font-mono"
                 style={{ background: 'var(--bg)', color: 'var(--muted)' }}
               >
-                {merged.length}
+                {userModels.length}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -239,13 +223,12 @@ export function ConfigPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {merged.length > 0 ? (
-            merged.map((m) => {
+          {userModels.length > 0 ? (
+            userModels.map((m) => {
               const isSelected = selectedName === m.name;
-              const isUser = m.displaySource === 'user';
               return (
                 <div
-                  key={`${m.displaySource}-${m.name}`}
+                  key={m.name}
                   onClick={() => handleSelect(m.name)}
                   className={`group rounded-md px-2.5 py-2 cursor-pointer transition-colors border ${
                     isSelected
@@ -258,8 +241,8 @@ export function ConfigPage() {
                     <div
                       className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-[10px] font-bold"
                       style={{
-                        background: isUser ? 'var(--primary-glow)' : 'var(--bg)',
-                        color: isUser ? 'var(--primary)' : 'var(--muted)',
+                        background: 'var(--primary-glow)',
+                        color: 'var(--primary)',
                       }}
                     >
                       {m.name.slice(0, 2).toUpperCase()}
@@ -272,14 +255,6 @@ export function ConfigPage() {
                         >
                           {m.name}
                         </h3>
-                        {m.isDefault && (
-                          <span
-                            className="shrink-0 rounded-full px-1.5 py-0 text-[10px]"
-                            style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
-                          >
-                            默认
-                          </span>
-                        )}
                       </div>
                       <p className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--muted)' }}>
                         {m.modelId}
@@ -326,7 +301,7 @@ export function ConfigPage() {
                 模型配置管理
               </h3>
               <p className="mb-4 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
-                管理 LLM API 配置，支持多模型配置和自动降级。从左侧选择一个模型查看详情，或点击"新增"添加新的模型配置。
+                管理 LLM API 配置，支持多模型配置。从左侧选择一个模型查看详情，或点击"新增"添加新的模型配置。
               </p>
               <div
                 className="flex items-start gap-3 rounded-lg p-4 text-left"
@@ -341,7 +316,7 @@ export function ConfigPage() {
                     API Key 加密存储
                   </p>
                   <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
-                    所有 API Key 使用本地存储加密保存。添加新模型配置后，若调用失败将自动降级至内置免费模型。
+                    所有 API Key 使用本地存储加密保存，不会明文写入数据库。
                   </p>
                 </div>
               </div>
@@ -353,7 +328,6 @@ export function ConfigPage() {
         {mode === 'view' && selected && (
           <DetailView
             model={selected}
-            isUser={selected.displaySource === 'user'}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onTest={handleDetailTest}
@@ -366,7 +340,6 @@ export function ConfigPage() {
         {isEditing && (
           <FormPanel
             mode={mode}
-            builtinName={mode === 'edit' && selected?.displaySource === 'builtin' ? selected.name : null}
             form={form}
             setForm={setForm}
             onSave={handleSave}
@@ -383,15 +356,13 @@ export function ConfigPage() {
 
 function DetailView({
   model,
-  isUser,
   onEdit,
   onDelete,
   onTest,
   testing,
   testResult,
 }: {
-  model: DisplayModel;
-  isUser: boolean;
+  model: ModelConfig;
   onEdit: () => void;
   onDelete: () => void;
   onTest: () => void;
@@ -428,24 +399,6 @@ function DetailView({
               >
                 {model.name}
               </h2>
-              <span
-                className="shrink-0 rounded-full px-2 py-0.5 text-xs"
-                style={{
-                  background: isUser ? 'var(--primary-glow)' : 'var(--surface)',
-                  color: isUser ? 'var(--primary)' : 'var(--muted)',
-                  border: isUser ? 'none' : '1px solid var(--border)',
-                }}
-              >
-                {isUser ? '用户配置' : '内置免费'}
-              </span>
-              {model.isDefault && (
-                <span
-                  className="shrink-0 rounded-full px-2 py-0.5 text-xs"
-                  style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}
-                >
-                  默认
-                </span>
-              )}
             </div>
             <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
               {model.modelId} · {hostname} · {providerLabel}
@@ -471,16 +424,14 @@ function DetailView({
             <Pencil className="h-3.5 w-3.5" />
             编辑
           </button>
-          {isUser && (
-            <button
-              onClick={onDelete}
-              className="inline-flex items-center justify-center rounded-md p-1.5 hover:bg-[var(--surface-hover)]"
-              style={{ color: 'var(--error)' }}
-              title="删除"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+          <button
+            onClick={onDelete}
+            className="inline-flex items-center justify-center rounded-md p-1.5 hover:bg-[var(--surface-hover)]"
+            style={{ color: 'var(--error)' }}
+            title="删除"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -508,26 +459,6 @@ function DetailView({
           >
             {testResult.ok ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
             {testResult.message}
-          </div>
-        )}
-
-        {!isUser && (
-          <div
-            className="flex items-start gap-3 rounded-lg p-4"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-          >
-            <ShieldCheck
-              className="mt-0.5 h-5 w-5 flex-shrink-0"
-              style={{ color: 'var(--success)' }}
-            />
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
-                内置免费模型
-              </p>
-              <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
-                任何编辑都会保存为你的用户配置。删除用户配置后，将恢复显示内置默认配置。
-              </p>
-            </div>
           </div>
         )}
       </div>
@@ -562,7 +493,6 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
 
 function FormPanel({
   mode,
-  builtinName,
   form,
   setForm,
   onSave,
@@ -572,7 +502,6 @@ function FormPanel({
   testResult,
 }: {
   mode: Mode;
-  builtinName: string | null;
   form: ModelFormData;
   setForm: (f: ModelFormData) => void;
   onSave: () => void;
@@ -591,11 +520,6 @@ function FormPanel({
           <h2 className="text-base font-semibold" style={{ color: 'var(--ink)' }}>
             {mode === 'create' ? '新增模型' : '编辑模型'}
           </h2>
-          {builtinName && (
-            <p className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>
-              正在编辑内置模型「{builtinName}」，保存后将作为用户配置生效
-            </p>
-          )}
         </div>
         <button
           onClick={onCancel}

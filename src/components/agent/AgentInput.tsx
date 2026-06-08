@@ -1,9 +1,8 @@
 import { ChevronDown, Send, Square } from 'lucide-react';
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useAgentStore } from '../../stores/agentStore';
-import { mergeModels, useConfigStore, type DisplayModel } from '../../stores/configStore';
+import { useConfigStore } from '../../stores/configStore';
 import { useUiStore } from '../../stores/uiStore';
-import { getActiveModel } from '../../services/tauri';
 import type { ModelConfig } from '../../types/config';
 
 interface AgentInputProps {
@@ -29,7 +28,6 @@ function ModelAvatar({ name }: { name: string }) {
 
 export function AgentInput({ disabled, isStreaming, onSend, value: controlledValue, onValueChange, placeholder: customPlaceholder }: AgentInputProps) {
   const [localContent, setLocalContent] = useState('');
-  const [defaultModel, setDefaultModel] = useState<ModelConfig | null>(null);
   const [modelOpen, setModelOpen] = useState(false);
   const modelRef = useRef<HTMLDivElement>(null);
   const bootstrapAppliedRef = useRef(false);
@@ -44,32 +42,24 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
   const setSelectedAgentModelName = useUiStore((s) => s.setSelectedAgentModelName);
 
   const userModels = useConfigStore((s) => s.userModels);
-  const fallbackModels = useConfigStore((s) => s.fallbackModels);
+  const activeModel = useConfigStore((s) => s.activeModel);
   const fetchModels = useConfigStore((s) => s.fetchModels);
-
-  const mergedModels = useMemo(
-    () => mergeModels(userModels, fallbackModels) as DisplayModel[],
-    [userModels, fallbackModels],
-  );
 
   const applyModel = useAgentStore((s) => s.applyModel);
   const isApplyingModel = useAgentStore((s) => s.isApplyingModel);
 
   useEffect(() => {
     void fetchModels();
-    void getActiveModel()
-      .then((m) => setDefaultModel(m))
-      .catch(() => undefined);
   }, [fetchModels]);
 
   useEffect(() => {
     if (bootstrapAppliedRef.current) return;
     if (selectedAgentModelName === null) return;
-    if (mergedModels.length === 0) return;
-    if (!mergedModels.some((m) => m.name === selectedAgentModelName)) return;
+    if (userModels.length === 0) return;
+    if (!userModels.some((m) => m.name === selectedAgentModelName)) return;
     bootstrapAppliedRef.current = true;
     void applyModel(selectedAgentModelName);
-  }, [selectedAgentModelName, mergedModels, applyModel]);
+  }, [selectedAgentModelName, userModels, applyModel]);
 
   useEffect(() => {
     if (!modelOpen) return;
@@ -90,15 +80,15 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
   }, [modelOpen]);
 
   const currentName = useMemo(() => {
-    if (selectedAgentModelName && mergedModels.some((m) => m.name === selectedAgentModelName)) {
+    if (selectedAgentModelName && userModels.some((m) => m.name === selectedAgentModelName)) {
       return selectedAgentModelName;
     }
-    return defaultModel?.name ?? mergedModels[0]?.name ?? null;
-  }, [selectedAgentModelName, mergedModels, defaultModel]);
+    return activeModel?.name ?? userModels[0]?.name ?? null;
+  }, [selectedAgentModelName, userModels, activeModel]);
 
   const currentModel = useMemo(
-    () => mergedModels.find((m) => m.name === currentName) ?? null,
-    [mergedModels, currentName],
+    () => userModels.find((m) => m.name === currentName) ?? null,
+    [userModels, currentName],
   );
 
   function handleModelSelect(name: string) {
@@ -170,7 +160,7 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
                 if (!modelOpen) void fetchModels();
                 setModelOpen((o) => !o);
               }}
-              disabled={disabled || mergedModels.length === 0}
+              disabled={disabled || userModels.length === 0}
               className="flex h-7 max-w-full items-center gap-1.5 rounded-md px-2 text-xs transition-colors hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-50"
               style={{ color: 'var(--ink)' }}
               aria-haspopup="listbox"
@@ -201,16 +191,16 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
                 }}
                 role="listbox"
               >
-                {mergedModels.length === 0 ? (
+                {userModels.length === 0 ? (
                   <div className="p-3 text-xs" style={{ color: 'var(--muted)' }}>
                     暂无可用模型，请到「配置管理」添加
                   </div>
                 ) : (
-                  mergedModels.map((m) => {
+                  userModels.map((m) => {
                     const isSelected = m.name === currentName;
                     return (
                       <button
-                        key={`${m.displaySource}-${m.name}`}
+                        key={m.name}
                         type="button"
                         onClick={() => handleModelSelect(m.name)}
                         className={`flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs transition-colors hover:bg-[var(--surface-hover)] ${
@@ -229,7 +219,7 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
                             className="truncate text-[10px]"
                             style={{ color: 'var(--muted)' }}
                           >
-                            {m.modelId} · {m.displaySource === 'user' ? '用户配置' : '内置免费'}
+                            {m.modelId}
                           </div>
                         </div>
                       </button>

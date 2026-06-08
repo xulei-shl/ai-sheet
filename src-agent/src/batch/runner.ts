@@ -174,8 +174,20 @@ export class BatchRunner {
       try {
         return getModel(params.providerType as any, params.modelId as any);
       } catch {
-        // fallback
+        // fallback to direct model construction for custom providerTypes
       }
+      // construct model directly for custom providerTypes (e.g. 'openai-completions')
+      return {
+        id: params.modelId,
+        api: params.providerType,
+        provider: params.providerType,
+        baseUrl: '',
+        reasoning: false,
+        input: ['text'],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 128000,
+        maxTokens: 4096,
+      } as any;
     }
     return null;
   }
@@ -223,6 +235,9 @@ export class BatchRunner {
               text += content.text;
             }
           }
+        }
+        if (event.type === 'error') {
+          throw new Error(event?.error?.errorMessage ?? 'LLM 处理失败');
         }
       }
       return text.trim();

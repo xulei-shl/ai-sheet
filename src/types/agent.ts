@@ -10,6 +10,7 @@ export interface AgentMessage {
   role: 'user' | 'assistant' | 'system' | 'tool';
   content: string;
   isStreaming?: boolean;
+  isError?: boolean;        // 标记为错误消息
   requestId?: string;       // 关联 direct LLM 流或 agent 流
   fullContent?: string;     // 实际发送给 LLM 的完整 prompt（仅 user 可选）
   displayContent?: string;  // UI 显示用摘要；缺省回退到 content

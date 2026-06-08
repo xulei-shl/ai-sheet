@@ -1,7 +1,70 @@
+import { AlertTriangle, RotateCw, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import type { AgentMessage } from '../../types/agent';
 import { useAgentStore } from '../../stores/agentStore';
 import { ContextPreview } from './ContextPreview';
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      className="flex items-center gap-1 text-xs opacity-0 transition-opacity group-hover:opacity-60 hover:opacity-100!"
+      style={{ color: 'var(--muted)' }}
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {copied ? (
+          <>
+            <polyline points="20 6 9 17 4 12" />
+          </>
+        ) : (
+          <>
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </>
+        )}
+      </svg>
+      {copied ? '已复制' : '复制'}
+    </button>
+  );
+}
+
+function RetryButton({ messageId }: { messageId: string }) {
+  const retryMessage = useAgentStore((s) => s.retryMessage);
+  return (
+    <button
+      type="button"
+      onClick={() => retryMessage(messageId)}
+      className="flex items-center gap-1 text-xs opacity-0 transition-opacity group-hover:opacity-60 hover:opacity-100!"
+      style={{ color: 'var(--muted)' }}
+      title="重新生成"
+    >
+      <RotateCw className="h-3 w-3" />
+      重试
+    </button>
+  );
+}
+
+function DeleteButton({ messageId }: { messageId: string }) {
+  const deleteMessage = useAgentStore((s) => s.deleteMessage);
+  return (
+    <button
+      type="button"
+      onClick={() => deleteMessage(messageId)}
+      className="flex items-center gap-1 text-xs opacity-0 transition-opacity group-hover:opacity-60 hover:opacity-100!"
+      style={{ color: 'var(--muted)' }}
+      title="删除"
+    >
+      <Trash2 className="h-3 w-3" />
+      删除
+    </button>
+  );
+}
 
 interface MessageListProps {
   messages: AgentMessage[];
@@ -59,33 +122,55 @@ export function MessageList({ messages }: MessageListProps) {
     <div className="space-y-4 p-4" aria-live="polite">
       {loadedContext && <ContextPreview context={loadedContext} />}
       {messages.map((message) => (
-        <article key={message.id} className="space-y-1">
+        <article key={message.id} className="group space-y-1">
           <div className="text-xs uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
             {message.role === 'user' ? 'You' : 'AI-Sheet Agent'}
           </div>
           <div
             className="whitespace-pre-wrap rounded-lg border p-3 text-sm leading-relaxed"
             style={{
-              background: message.role === 'assistant' ? 'var(--surface)' : 'transparent',
-              borderColor: 'var(--border)',
-              color: 'var(--ink)',
+              background: message.isError
+                ? 'rgba(224, 140, 140, 0.1)'
+                : message.role === 'assistant'
+                  ? 'var(--surface)'
+                  : 'transparent',
+              borderColor: message.isError ? 'rgba(224, 140, 140, 0.3)' : 'var(--border)',
+              color: message.isError ? 'var(--error)' : 'var(--ink)',
             }}
           >
             {message.role === 'user' ? (
               <UserMessage message={message} />
             ) : (
               <>
-                {message.content}
-                {message.isStreaming && (
-                  <span
-                    aria-hidden="true"
-                    className="streaming-cursor ml-1 inline-block h-4 w-1.5 align-[-2px]"
-                    style={{ background: 'var(--primary)' }}
-                  />
+                {message.isError ? (
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
+                    <span className="whitespace-pre-wrap">{message.content}</span>
+                  </div>
+                ) : (
+                  <>
+                    {message.content}
+                    {message.isStreaming && (
+                      <span
+                        aria-hidden="true"
+                        className="streaming-cursor ml-1 inline-block h-4 w-1.5 align-[-2px]"
+                        style={{ background: 'var(--primary)' }}
+                      />
+                    )}
+                  </>
                 )}
               </>
             )}
           </div>
+          {!message.isStreaming && (
+            <div className="flex justify-end gap-1">
+              {message.role === 'assistant' && (
+                <RetryButton messageId={message.id} />
+              )}
+              <DeleteButton messageId={message.id} />
+              <CopyButton text={message.fullContent ?? message.content} />
+            </div>
+          )}
         </article>
       ))}
     </div>

@@ -213,10 +213,11 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
                         key={`${m.displaySource}-${m.name}`}
                         type="button"
                         onClick={() => handleModelSelect(m.name)}
-                        className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs transition-colors hover:bg-[var(--surface-hover)]"
+                        className={`flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs transition-colors hover:bg-[var(--surface-hover)] ${
+                          isSelected ? 'bg-[var(--primary-glow)]' : ''
+                        }`}
                         style={{
                           color: 'var(--ink)',
-                          background: isSelected ? 'var(--primary-glow)' : 'transparent',
                         }}
                         role="option"
                         aria-selected={isSelected}

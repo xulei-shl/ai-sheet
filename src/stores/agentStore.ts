@@ -34,6 +34,8 @@ interface AgentStore {
   markOffline: (message: string) => void;
   setLoadedContext: (context: AgentContext | null) => void;
   clearMessages: () => void;
+  deleteMessage: (id: string) => void;
+  retryMessage: (id: string) => Promise<void>;
   sendDirectLlmMessage: (action: 'formula_generation' | 'prompt_generation', userDisplay: string, fullPrompt: string) => Promise<void>;
 }
 
@@ -123,16 +125,35 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   handleEvent: (event) => {
     if (event.type === 'agent_error') {
-      set({ error: event.message });
       if (event.id) {
         const kind = resolveRequestKind(event.id);
+        set((s) => {
+          // 找到对应的 assistant 消息，将其内容替换为错误信息
+          const messages = s.messages.map((m) => {
+            if (m.requestId === event.id && m.role === 'assistant') {
+              return { ...m, content: event.message, isStreaming: false, isError: true };
+            }
+            return m;
+          });
+          return {
+            messages,
+            [kind === 'agent'
+              ? 'agentStreamingRequestId'
+              : 'directStreamingRequestId']: null,
+          };
+        });
+      } else {
+        // 没有 id 的错误（如初始化错误）也显示在消息列表中
         set((s) => ({
-          messages: s.messages.map((m) =>
-            m.requestId === event.id ? { ...m, isStreaming: false } : m,
-          ),
-          [kind === 'agent'
-            ? 'agentStreamingRequestId'
-            : 'directStreamingRequestId']: null,
+          messages: [
+            ...s.messages,
+            {
+              id: `error-${Date.now()}`,
+              role: 'assistant' as const,
+              content: event.message,
+              isError: true,
+            },
+          ],
         }));
       }
       return;
@@ -189,6 +210,46 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   clearMessages: () => {
     set({ messages: [], error: null });
+  },
+
+  deleteMessage: (id) => {
+    const { messages, agentStreamingRequestId, directStreamingRequestId } = get();
+    const idx = messages.findIndex((m) => m.id === id);
+    if (idx === -1) return;
+    const removed = messages.slice(idx);
+    const clears: Record<string, null> = {};
+    if (removed.some((m) => m.requestId === agentStreamingRequestId)) {
+      clears.agentStreamingRequestId = null;
+    }
+    if (removed.some((m) => m.requestId === directStreamingRequestId)) {
+      clears.directStreamingRequestId = null;
+    }
+    set({ messages: messages.slice(0, idx), ...clears });
+  },
+
+  retryMessage: async (id) => {
+    const state = get();
+    const idx = state.messages.findIndex((m) => m.id === id);
+    if (idx === -1) return;
+    const msg = state.messages[idx];
+    if (msg.role !== 'assistant') return;
+
+    const userMsg = state.messages[idx - 1];
+    if (!userMsg || userMsg.role !== 'user') return;
+
+    set({ messages: state.messages.slice(0, idx), error: null });
+
+    const pendingId = `msg-pending-${Date.now()}`;
+    set({ agentStreamingRequestId: pendingId });
+
+    try {
+      await sendAgentMessage(userMsg.content);
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : String(error),
+        agentStreamingRequestId: null,
+      });
+    }
   },
 
   sendDirectLlmMessage: async (action, userDisplay, fullPrompt) => {

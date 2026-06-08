@@ -59,7 +59,7 @@ export function Tooltip({ text, children, side = 'top', align = 'center', classN
     if (align === 'start' || (align === 'end' && overflow === 'right')) {
       return { positionClass: 'left-0', arrowPosition: 'left-3' };
     }
-    if (align === 'end' || (align === 'start' && overflow === 'left') || overflow === 'right') {
+    if (align === 'end' || overflow === 'right') {
       return { positionClass: 'right-0', arrowPosition: 'right-3' };
     }
     return { positionClass: 'left-1/2 -translate-x-1/2', arrowPosition: 'left-1/2 -translate-x-1/2' };

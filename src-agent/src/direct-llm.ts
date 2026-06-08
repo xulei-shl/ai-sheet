@@ -1,4 +1,4 @@
-import { stream, getModel, getProviders } from '@earendil-works/pi-ai';
+import { stream } from '@earendil-works/pi-ai';
 import type { BridgeClient } from './bridge.js';
 import type { SidecarCommand } from './protocol.js';
 import type { SidecarEvent } from './protocol.js';
@@ -31,7 +31,7 @@ export async function runDirectLlmStream(
     return;
   }
 
-  let modelInfo: { providerType: string; modelId: string; apiKey?: string; baseUrl?: string };
+  let modelInfo: { providerType: string; modelId: string; name?: string; apiKey?: string; baseUrl?: string };
   try {
     modelInfo = await bridge.getDefaultModel();
   } catch (e) {
@@ -39,52 +39,25 @@ export async function runDirectLlmStream(
     return;
   }
 
-  let model: any;
-  let resolvedApiKey: string | undefined;
-  try {
-    // providerType 是 api 类型（如 'openai-completions'），不是 provider 名称（如 'openai'）
-    // 遍历内置 provider 列表寻找匹配的模型
-    let builtIn: any = undefined;
-    const providers = getProviders();
-    for (const provider of providers) {
-      try {
-        const found = getModel(provider as any, modelInfo.modelId as any);
-        if (found) {
-          builtIn = found;
-          break;
-        }
-      } catch {
-        // continue searching
-      }
-    }
-
-    if (builtIn) {
-      model = modelInfo.baseUrl ? { ...builtIn, baseUrl: modelInfo.baseUrl } : builtIn;
-    } else {
-      // 自定义模型不在 pi-ai 内置列表中 → 手动构造 Model<Api> 对象
-      model = {
-        id: modelInfo.modelId,
-        name: (modelInfo as any).name ?? modelInfo.modelId,
-        api: modelInfo.providerType,
-        provider: modelInfo.providerType,
-        baseUrl: modelInfo.baseUrl || '',
-        reasoning: false,
-        input: ['text'],
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: 128000,
-        maxTokens: 4096,
-      };
-    }
-    resolvedApiKey = modelInfo.apiKey;
-  } catch {
-    emit({ type: 'agent_error', id: command.id, message: '模型解析失败，请到配置页检查' });
+  if (!modelInfo.apiKey) {
+    emit({ type: 'agent_error', id: command.id, message: '当前未配置默认模型或缺少 API Key' });
     return;
   }
 
-  if (!model) {
-    emit({ type: 'agent_error', id: command.id, message: '当前未配置默认模型' });
-    return;
-  }
+  // 完全按用户配置的 providerType 构造模型
+  // providerType 就是 API 类型（如 'openai-completions', 'anthropic-messages'）
+  const model = {
+    id: modelInfo.modelId,
+    name: modelInfo.name ?? modelInfo.modelId,
+    api: modelInfo.providerType,
+    provider: modelInfo.providerType,
+    baseUrl: modelInfo.baseUrl || '',
+    reasoning: false,
+    input: ['text'],
+    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+    contextWindow: 128000,
+    maxTokens: 4096,
+  } as any;
 
   const controller = new AbortController();
   currentAbort = controller;
@@ -102,7 +75,7 @@ export async function runDirectLlmStream(
           },
         ],
       },
-      { temperature: 0.3, signal: controller.signal, apiKey: resolvedApiKey },
+      { temperature: 0.3, signal: controller.signal, apiKey: modelInfo.apiKey },
     );
 
     for await (const ev of eventStream as AsyncIterable<any>) {

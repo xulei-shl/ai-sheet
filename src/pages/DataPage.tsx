@@ -6,6 +6,7 @@ import { useAgentStore } from '../stores/agentStore';
 import { getColumnNames } from '../services/tauri';
 import { ExcelTable } from '../components/excel/ExcelTable';
 import { ColumnSelector } from '../components/excel/ColumnSelector';
+import { Tooltip } from '../components/ui/Tooltip';
 
 export function DataPage() {
   const {
@@ -403,57 +404,66 @@ export function DataPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleSheetToggle(activeFileIdx, activeSheetName)}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border ${
-                    isActiveSheetSelected
-                      ? 'border-[var(--primary)] bg-[var(--primary-glow)] text-[var(--primary)]'
-                      : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--primary)] hover:text-[var(--ink)]'
-                  }`}
+                <Tooltip
+                  text={isActiveSheetSelected ? '取消当前 Sheet 的上下文选择' : '将当前 Sheet 加入上下文'}
+                  side="bottom"
                 >
-                  {isActiveSheetSelected && <Check className="h-3.5 w-3.5" />}
-                  {isActiveSheetSelected ? '已选为上下文' : '设为上下文'}
-                </button>
-                
-                <button
-                  onClick={handleLoadToContext}
-                  className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
-                  style={{ background: 'var(--primary)' }}
-                >
-                  <Check className="h-3.5 w-3.5" />
-                  加载到上下文
-                </button>
+                  <button
+                    onClick={() => handleSheetToggle(activeFileIdx, activeSheetName)}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border ${
+                      isActiveSheetSelected
+                        ? 'border-[var(--primary)] bg-[var(--primary-glow)] text-[var(--primary)]'
+                        : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--primary)] hover:text-[var(--ink)]'
+                    }`}
+                  >
+                    {isActiveSheetSelected && <Check className="h-3.5 w-3.5" />}
+                    {isActiveSheetSelected ? '已选为上下文' : '设为上下文'}
+                  </button>
+                </Tooltip>
 
-                <button
-                  onClick={() => {
-                    useExcelStore.getState().clearAllContext();
-                    clearMessages();
-                  }}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border"
-                  style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
-                  title="清空 Agent 上下文与消息"
-                >
-                  <Eraser className="h-3.5 w-3.5" />
-                  清空上下文
-                </button>
+                <Tooltip text="加载选中的 Sheet 到 AI Agent 上下文" side="bottom">
+                  <button
+                    onClick={handleLoadToContext}
+                    className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+                    style={{ background: 'var(--primary)' }}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    加载
+                  </button>
+                </Tooltip>
 
-                <label
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer select-none border transition-all duration-150"
-                  style={{
-                    borderColor: 'var(--border)',
-                    color: includeSampleData ? 'var(--primary)' : 'var(--muted)',
-                    background: includeSampleData ? 'var(--primary-glow)' : 'transparent',
-                  }}
-                  title="将前 3 行样例数据加入上下文"
-                >
-                  <input
-                    type="checkbox"
-                    checked={includeSampleData}
-                    onChange={(e) => setIncludeSampleData(e.target.checked)}
-                    className="h-3 w-3 accent-[var(--primary)] cursor-pointer"
-                  />
-                  样例数据
-                </label>
+                <Tooltip text="清空 Agent 上下文与消息" side="bottom">
+                  <button
+                    onClick={() => {
+                      useExcelStore.getState().clearAllContext();
+                      clearMessages();
+                    }}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer border"
+                    style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+                  >
+                    <Eraser className="h-3.5 w-3.5" />
+                    清空
+                  </button>
+                </Tooltip>
+
+                <Tooltip text="将前 3 行样例数据加入上下文" side="bottom">
+                  <label
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer select-none border transition-all duration-150"
+                    style={{
+                      borderColor: 'var(--border)',
+                      color: includeSampleData ? 'var(--primary)' : 'var(--muted)',
+                      background: includeSampleData ? 'var(--primary-glow)' : 'transparent',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={includeSampleData}
+                      onChange={(e) => setIncludeSampleData(e.target.checked)}
+                      className="h-3 w-3 accent-[var(--primary)] cursor-pointer"
+                    />
+                    样例数据
+                  </label>
+                </Tooltip>
               </div>
             </div>
 

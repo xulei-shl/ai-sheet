@@ -417,7 +417,7 @@ export function DataPage() {
                     }`}
                   >
                     {isActiveSheetSelected && <Check className="h-3.5 w-3.5" />}
-                    {isActiveSheetSelected ? '已选为上下文' : '设为上下文'}
+                    {isActiveSheetSelected ? '已选 Sheet' : 'Sheet 选择'}
                   </button>
                 </Tooltip>
 

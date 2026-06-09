@@ -69,13 +69,26 @@ export function buildModel(info: {
   name?: string;
   baseUrl?: string;
 }): Model<any> {
-  const { provider, api } = resolveProviderApi(info.providerType);
+  const { provider, api, defaultBaseUrl } = resolveProviderApi(info.providerType);
+  let baseUrl = info.baseUrl || defaultBaseUrl || '';
+  // Mistral SDK 内部路径模板为 "v1/chat/completions#stream"（相对路径），
+  // 若 baseUrl 也包含路径（如 /v1），拼接后会产生双路径导致 404。
+  // 统一剥离路径部分，只保留 origin。
+  if (api === 'mistral-conversations' && baseUrl) {
+    try {
+      const u = new URL(baseUrl);
+      u.pathname = '';
+      u.search = '';
+      u.hash = '';
+      baseUrl = u.toString().replace(/\/+$/, '');
+    } catch { /* 保持原值 */ }
+  }
   return {
     id: info.modelId,
     name: info.name ?? info.modelId,
     api,
     provider,
-    baseUrl: info.baseUrl || '',
+    baseUrl,
     reasoning: false,
     input: ['text'],
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },

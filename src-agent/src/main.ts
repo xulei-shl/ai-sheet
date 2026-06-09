@@ -61,17 +61,35 @@ async function initialize() {
   // 保存原始 fetch，对本地请求使用原始实现
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (input: any, init: any) => {
-    // 从各种输入类型中提取 URL 字符串
+    // 从各种输入类型中提取 URL 字符串和请求属性
     let urlStr: string;
+    let fetchInit: Record<string, any> = {};
+
     if (typeof input === 'string') {
       urlStr = input;
+      if (init) fetchInit = { ...init };
     } else if (input instanceof URL) {
       urlStr = input.toString();
+      if (init) fetchInit = { ...init };
     } else if (input?.url) {
-      // Request 对象有 .url 属性
+      // Request 对象 — 提取属性而非直接传递，避免 undici 内部
+      // new Request(nativeRequest, init) 因 class 不匹配导致 URL 解析失败
       urlStr = input.url;
+      fetchInit = {
+        method: input.method,
+        headers: input.headers,
+        body: input.body,
+        signal: input.signal,
+        ...init,
+      };
+      // body 为 ReadableStream 时，Fetch API 要求设置 duplex: 'half'
+      // Mistral SDK 在创建 Request 时设置了此选项，但 Request 对象不暴露该属性
+      if (fetchInit.body instanceof ReadableStream && !fetchInit.duplex) {
+        fetchInit.duplex = 'half';
+      }
     } else {
       urlStr = String(input);
+      if (init) fetchInit = { ...init };
     }
 
     // 本地 bridge 请求使用原始 fetch，避免受 SSE 超时设置影响
@@ -81,7 +99,7 @@ async function initialize() {
 
     // 根据当前模型的代理设置选择 dispatcher
     const dispatcher = getUseProxy() ? proxyDispatcher : directDispatcher;
-    return undici.fetch(input, { ...init, dispatcher });
+    return undici.fetch(urlStr, { ...fetchInit, dispatcher });
   };
   log('fetch overridden with dual dispatcher (proxy + direct)');
 

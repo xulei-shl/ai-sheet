@@ -4,6 +4,8 @@ import type { AgentMessage } from '../../types/agent';
 import { useAgentStore } from '../../stores/agentStore';
 import { ContextPreview } from './ContextPreview';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
+import { WaitingIndicator } from './WaitingIndicator';
+import { ToolCallsBlock } from './ToolCallBlock';
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -172,16 +174,29 @@ export function MessageList({ messages }: MessageListProps) {
               <UserMessage message={message} />
             ) : (
               <>
+                {/* 等待动效：在收到首个 token 前显示 */}
+                {message.isWaitingForFirstToken && !message.toolCalls?.length && !message.content && (
+                  <WaitingIndicator />
+                )}
+
+                {/* 工具调用展示 */}
+                {message.toolCalls && message.toolCalls.length > 0 && (
+                  <ToolCallsBlock toolCalls={message.toolCalls} />
+                )}
+
+                {/* 主内容 */}
                 {message.isError ? (
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                     <span className="whitespace-pre-wrap">{message.content}</span>
                   </div>
                 ) : (
-                  <MarkdownRenderer
-                    content={message.content}
-                    isStreaming={message.isStreaming}
-                  />
+                  message.content && (
+                    <MarkdownRenderer
+                      content={message.content}
+                      isStreaming={message.isStreaming}
+                    />
+                  )
                 )}
               </>
             )}

@@ -16,13 +16,17 @@ export interface AgentMessage {
   displayContent?: string;  // UI 显示用摘要；缺省回退到 content
   toolCalls?: ToolCall[];
   toolResults?: ToolResult[];
+  isWaitingForFirstToken?: boolean;  // 等待首个 token 状态
 }
 
 export interface ToolCall {
+  id: string;              // 唯一标识
   tool: string;
   args: Record<string, unknown>;
-  status: 'running' | 'completed' | 'error';
+  status: 'pending' | 'running' | 'completed' | 'error';
   result?: string;
+  startTime: number;       // 开始时间戳
+  endTime?: number;        // 结束时间戳
 }
 
 export interface ToolResult {

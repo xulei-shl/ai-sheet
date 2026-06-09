@@ -75,6 +75,20 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       error: null,
     }));
 
+    // 预创建一个等待中的 assistant 消息，用于显示等待动效
+    const pendingAssistantMessage: AgentMessage = {
+      id: `assistant-${pendingId}`,
+      requestId: pendingId,
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+      isWaitingForFirstToken: true,
+      toolCalls: [],
+    };
+    set((state) => ({
+      messages: [...state.messages, pendingAssistantMessage],
+    }));
+
     try {
       await sendAgentMessage(trimmed);
     } catch (error) {
@@ -201,13 +215,61 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
                 role: 'assistant' as const,
                 content: event.delta,
                 isStreaming: true,
+                isWaitingForFirstToken: false,
+                toolCalls: [],
               },
             ],
           };
         }
         const arr = [...s.messages];
-        arr[idx] = { ...arr[idx], content: arr[idx].content + event.delta };
+        arr[idx] = { ...arr[idx], content: arr[idx].content + event.delta, isWaitingForFirstToken: false };
         return { messages: arr };
+      });
+      return;
+    }
+
+    if (event.type === 'agent_tool_start' && event.id) {
+      set((s) => {
+        const idx = s.messages.findIndex((m) => m.requestId === event.id && m.role === 'assistant');
+        if (idx === -1) return {};
+        const messages = [...s.messages];
+        const msg = messages[idx];
+        const newToolCall = {
+          id: `${event.tool}-${Date.now()}`,
+          tool: event.tool,
+          args: event.args,
+          status: 'running' as const,
+          startTime: Date.now(),
+        };
+        messages[idx] = {
+          ...msg,
+          toolCalls: [...(msg.toolCalls || []), newToolCall],
+          isWaitingForFirstToken: false,
+        };
+        return { messages };
+      });
+      return;
+    }
+
+    if (event.type === 'agent_tool_end' && event.id) {
+      set((s) => {
+        const idx = s.messages.findIndex((m) => m.requestId === event.id && m.role === 'assistant');
+        if (idx === -1) return {};
+        const messages = [...s.messages];
+        const msg = messages[idx];
+        const toolCalls = msg.toolCalls || [];
+        const toolCallIdx = toolCalls.findLastIndex((tc) => tc.tool === event.tool && tc.status === 'running');
+        if (toolCallIdx !== -1) {
+          const updated = [...toolCalls];
+          updated[toolCallIdx] = {
+            ...updated[toolCallIdx],
+            status: 'completed' as const,
+            result: event.result,
+            endTime: Date.now(),
+          };
+          messages[idx] = { ...msg, toolCalls: updated };
+        }
+        return { messages };
       });
       return;
     }

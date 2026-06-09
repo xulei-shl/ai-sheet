@@ -1,43 +1,57 @@
 import { create } from 'zustand';
-import { listen } from '@tauri-apps/api/event';
-import type { BatchProgress, BatchLog, BatchStartParams, BatchStatus } from '../types/processing';
+import type { BatchProgress, BatchLog, BatchStartParams } from '../types/processing';
+import type { ModelConfig } from '../types/config';
+import { runLLMBatch, PauseController } from '../services/llmBatchService';
 
 interface ProcessingStore {
   isRunning: boolean;
-  batchStatus: BatchStatus | null;
   batchProgress: BatchProgress | null;
   batchLogs: BatchLog[];
   selectedPromptId: string | null;
   customPrompt: string;
   inputColumns: string[];
   outputColumn: string;
-  modelParams: { modelIndex: number; temperature: number };
+  modelParams: { temperature: number };
+  // 新增状态
+  selectedModel: ModelConfig | null;
+  batchSize: number;
+  errorColumn: string;
 
   setCustomPrompt: (prompt: string) => void;
   setSelectedPromptId: (id: string | null) => void;
   setInputColumns: (cols: string[]) => void;
   setOutputColumn: (col: string) => void;
-  setModelParams: (params: { modelIndex?: number; temperature?: number }) => void;
+  setModelParams: (params: { temperature?: number }) => void;
+  setSelectedModel: (model: ModelConfig | null) => void;
+  setBatchSize: (size: number) => void;
+  setErrorColumn: (col: string) => void;
   startBatch: (params: BatchStartParams) => Promise<void>;
-  pauseBatch: () => Promise<void>;
-  resumeBatch: () => Promise<void>;
-  stopBatch: () => Promise<void>;
+  pauseBatch: () => void;
+  resumeBatch: () => void;
+  stopBatch: () => void;
   reset: () => void;
   addLog: (log: BatchLog) => void;
   clearLogs: () => void;
-  subscribeToEvents: () => () => void;
+
+  // 内部状态
+  _abortController: AbortController | null;
+  _pauseController: PauseController | null;
 }
 
 export const useProcessingStore = create<ProcessingStore>((set, get) => ({
   isRunning: false,
-  batchStatus: null,
   batchProgress: null,
   batchLogs: [],
   selectedPromptId: null,
   customPrompt: '',
   inputColumns: [],
   outputColumn: '',
-  modelParams: { modelIndex: 0, temperature: 0.3 },
+  modelParams: { temperature: 0.3 },
+  selectedModel: null,
+  batchSize: 3,
+  errorColumn: 'AI错误',
+  _abortController: null,
+  _pauseController: null,
 
   setCustomPrompt: (prompt) => set({ customPrompt: prompt }),
   setSelectedPromptId: (id) => set({ selectedPromptId: id }),
@@ -47,75 +61,182 @@ export const useProcessingStore = create<ProcessingStore>((set, get) => ({
     set((state) => ({
       modelParams: { ...state.modelParams, ...params },
     })),
+  setSelectedModel: (model) => set({ selectedModel: model }),
+  setBatchSize: (size) => set({ batchSize: size }),
+  setErrorColumn: (col) => set({ errorColumn: col }),
 
   startBatch: async (params) => {
+    const state = get();
+    const model = state.selectedModel;
+
+    if (!model) {
+      get().addLog({
+        id: `error-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        row: -1,
+        content: '请先选择要使用的大模型',
+        level: 'error',
+      });
+      return;
+    }
+
+    if (!model.apiKey) {
+      get().addLog({
+        id: `error-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        row: -1,
+        content: '所选模型缺少 API Key，请在配置页面检查',
+        level: 'error',
+      });
+      return;
+    }
+
+    // 创建中止和暂停控制器
+    const abortController = new AbortController();
+    const pauseController = new PauseController();
+
     set({
       isRunning: true,
       batchProgress: { batchId: '', current: 0, total: 0, speed: 0, status: 'running' },
       batchLogs: [],
+      _abortController: abortController,
+      _pauseController: pauseController,
     });
+
+    get().addLog({
+      id: `start-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      row: -1,
+      content: `开始批量处理，使用模型: ${model.name}`,
+      level: 'info',
+    });
+
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('send_agent_message', {
-        content: JSON.stringify({
-          type: 'batch_start',
-          params,
-        }),
-      });
-    } catch (e) {
-      set({ isRunning: false, batchProgress: null });
+      await runLLMBatch(
+        {
+          filePath: params.filePath,
+          sheet: params.sheet,
+          inputColumns: params.inputColumns,
+          outputColumn: params.outputColumn,
+          errorColumn: state.errorColumn,
+          prompt: params.prompt,
+          model: {
+            baseUrl: model.baseUrl,
+            apiKey: model.apiKey,
+            modelId: model.modelId,
+          },
+          batchSize: state.batchSize,
+          temperature: state.modelParams.temperature,
+          onLog: (log) => get().addLog(log),
+          onProgress: (current, total, speed) => {
+            set({
+              batchProgress: {
+                batchId: '',
+                current,
+                total,
+                speed,
+                status: get()._pauseController?.paused ? 'paused' : 'running',
+              },
+            });
+          },
+          onRowComplete: (row, result) => {
+            // 可选：额外的行完成回调
+          },
+          onRowError: (row, error) => {
+            // 可选：额外的行错误回调
+          },
+          signal: abortController.signal,
+        },
+        pauseController,
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
       get().addLog({
-        id: `error-${Date.now()}`,
+        id: `fatal-${Date.now()}`,
         timestamp: new Date().toISOString(),
-        row: 0,
-        content: `启动失败: ${e instanceof Error ? e.message : String(e)}`,
+        row: -1,
+        content: `批量处理异常: ${msg}`,
         level: 'error',
+      });
+    } finally {
+      set((s) => ({
+        isRunning: false,
+        batchProgress: s.batchProgress
+          ? { ...s.batchProgress, status: 'completed' }
+          : null,
+        _abortController: null,
+        _pauseController: null,
+      }));
+    }
+  },
+
+  pauseBatch: () => {
+    const pauseCtrl = get()._pauseController;
+    if (pauseCtrl) {
+      pauseCtrl.pause();
+      set((s) => ({
+        batchProgress: s.batchProgress
+          ? { ...s.batchProgress, status: 'paused' }
+          : null,
+      }));
+      get().addLog({
+        id: `pause-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        row: -1,
+        content: '批量处理已暂停',
+        level: 'warning',
       });
     }
   },
 
-  pauseBatch: async () => {
-    set((state) => ({
-      batchProgress: state.batchProgress ? { ...state.batchProgress, status: 'paused' } : null,
-    }));
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('send_agent_message', {
-        content: JSON.stringify({ type: 'batch_pause' }),
+  resumeBatch: () => {
+    const pauseCtrl = get()._pauseController;
+    if (pauseCtrl) {
+      pauseCtrl.resume();
+      set((s) => ({
+        batchProgress: s.batchProgress
+          ? { ...s.batchProgress, status: 'running' }
+          : null,
+      }));
+      get().addLog({
+        id: `resume-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        row: -1,
+        content: '批量处理已继续',
+        level: 'info',
       });
-    } catch {}
+    }
   },
 
-  resumeBatch: async () => {
-    set((state) => ({
-      batchProgress: state.batchProgress ? { ...state.batchProgress, status: 'running' } : null,
-    }));
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('send_agent_message', {
-        content: JSON.stringify({ type: 'batch_resume' }),
+  stopBatch: () => {
+    const abortCtrl = get()._abortController;
+    if (abortCtrl) {
+      abortCtrl.abort();
+      set({
+        isRunning: false,
+        batchProgress: null,
+        _abortController: null,
+        _pauseController: null,
       });
-    } catch {}
-  },
-
-  stopBatch: async () => {
-    set({ isRunning: false, batchProgress: null });
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('send_agent_message', {
-        content: JSON.stringify({ type: 'batch_stop' }),
+      get().addLog({
+        id: `stop-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        row: -1,
+        content: '批量处理已停止',
+        level: 'warning',
       });
-    } catch {}
+    }
   },
 
   reset: () => {
     set({
       isRunning: false,
-      batchStatus: null,
       batchProgress: null,
       batchLogs: [],
       inputColumns: [],
       outputColumn: '',
+      _abortController: null,
+      _pauseController: null,
     });
   },
 
@@ -123,81 +244,4 @@ export const useProcessingStore = create<ProcessingStore>((set, get) => ({
     set((state) => ({ batchLogs: [...state.batchLogs, log] })),
 
   clearLogs: () => set({ batchLogs: [] }),
-
-  subscribeToEvents: () => {
-    const unlisteners: (() => void)[] = [];
-
-    const unsub1 = listen<{
-      batchId?: string;
-      current?: number;
-      total?: number;
-      speed?: number;
-      status?: string;
-    }>('batch-progress', (event) => {
-      const p = event.payload;
-      if (p.current !== undefined && p.total !== undefined) {
-        set({
-          batchProgress: {
-            batchId: p.batchId ?? '',
-            current: p.current,
-            total: p.total,
-            speed: p.speed ?? 0,
-            status: (p.status as BatchProgress['status']) ?? 'running',
-          },
-        });
-      }
-    }).then((fn) => unlisteners.push(fn));
-
-    const unsub2 = listen<{
-      batchId?: string;
-      row?: number;
-      result?: string;
-    }>('batch-row-complete', (event) => {
-      const p = event.payload;
-      if (p.row !== undefined) {
-        get().addLog({
-          id: `row-${p.row}-${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          row: p.row,
-          content: p.result ?? '处理完成',
-          level: 'success',
-        });
-      }
-    }).then((fn) => unlisteners.push(fn));
-
-    const unsub3 = listen<{ batchId?: string; stats?: Record<string, unknown> }>(
-      'batch-done',
-      (event) => {
-        set((state) => ({
-          isRunning: false,
-          batchProgress: state.batchProgress
-            ? { ...state.batchProgress, status: 'completed' }
-            : null,
-        }));
-        get().addLog({
-          id: `done-${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          row: -1,
-          content: `批量处理完成${event.payload.stats ? JSON.stringify(event.payload.stats) : ''}`,
-          level: 'success',
-        });
-      },
-    ).then((fn) => unlisteners.push(fn));
-
-    const unsub4 = listen<{ batchId?: string; message?: string }>(
-      'batch-error',
-      (event) => {
-        set({ isRunning: false });
-        get().addLog({
-          id: `batch-err-${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          row: -1,
-          content: event.payload.message ?? '处理出错',
-          level: 'error',
-        });
-      },
-    ).then((fn) => unlisteners.push(fn));
-
-    return () => unlisteners.forEach((fn) => fn());
-  },
 }));

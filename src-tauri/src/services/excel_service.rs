@@ -170,19 +170,31 @@ impl ExcelService {
 
         let mut all_rows = range.rows();
 
-        let headers: Vec<String> = all_rows
+        let mut headers: Vec<String> = all_rows
             .next()
             .map(|row| row.iter().map(|c| c.to_string()).collect())
             .unwrap_or_default();
 
-        let col_idx = headers
-            .iter()
-            .position(|h| h == &req.column)
-            .ok_or_else(|| AppError::Service(format!("Column '{}' not found", req.column)))?;
+        // 若列名不存在，自动追加到 header 末尾（新建列）
+        let col_idx = match headers.iter().position(|h| h == &req.column) {
+            Some(idx) => idx,
+            None => {
+                headers.push(req.column.clone());
+                headers.len() - 1
+            }
+        };
 
-        let data_rows: Vec<Vec<String>> = all_rows
+        let mut data_rows: Vec<Vec<String>> = all_rows
             .map(|row| row.iter().map(|c| cell_to_string(c)).collect())
             .collect();
+
+        // 新建列时，为每行补空字符串以匹配列数
+        let expected_cols = headers.len();
+        for row in &mut data_rows {
+            while row.len() < expected_cols {
+                row.push(String::new());
+            }
+        }
 
         // Build a map of original formulas to preserve them
         let formula_range = workbook

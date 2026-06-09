@@ -10,10 +10,12 @@ import {
   Table,
   ChevronDown,
   ChevronRight,
+  Cpu,
 } from 'lucide-react';
 import { useExcelStore } from '../stores/excelStore';
 import { usePromptStore } from '../stores/promptStore';
 import { useProcessingStore } from '../stores/processingStore';
+import { useConfigStore } from '../stores/configStore';
 import { getColumnNames } from '../services/tauri';
 import type { ColumnInfo } from '../types/excel';
 import { SearchableSelect } from '../components/excel/SearchableSelect';
@@ -21,6 +23,7 @@ import { SearchableSelect } from '../components/excel/SearchableSelect';
 export function LLMProcessingPage() {
   const { files, selections } = useExcelStore();
   const { prompts, getFilteredPrompts, fetchPrompts } = usePromptStore();
+  const { userModels, fetchModels } = useConfigStore();
   const {
     isRunning,
     batchProgress,
@@ -30,11 +33,17 @@ export function LLMProcessingPage() {
     inputColumns,
     outputColumn,
     modelParams,
+    selectedModel,
+    batchSize,
+    errorColumn,
     setCustomPrompt,
     setSelectedPromptId,
     setInputColumns,
     setOutputColumn,
     setModelParams,
+    setSelectedModel,
+    setBatchSize,
+    setErrorColumn,
     startBatch,
     pauseBatch,
     resumeBatch,
@@ -42,15 +51,15 @@ export function LLMProcessingPage() {
     clearLogs,
     reset,
     addLog,
-    subscribeToEvents,
   } = useProcessingStore();
 
   const [selectedFileIdx, setSelectedFileIdx] = useState(0);
   const [selectedSheet, setSelectedSheet] = useState('');
-  const [promptMode, setPromptMode] = useState<'saved' | 'custom'>('custom');
+  const [promptMode, setPromptMode] = useState<'saved' | 'custom'>('saved');
   const [availableColumns, setAvailableColumns] = useState<ColumnInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [expandedFiles, setExpandedFiles] = useState<number[]>([0]);
+  const [newColumnName, setNewColumnName] = useState('');
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const currentFile = files[selectedFileIdx];
@@ -58,10 +67,14 @@ export function LLMProcessingPage() {
   const sheets = currentSel?.sheetInfo ?? [];
   const filteredPrompts = getFilteredPrompts();
 
+  // 过滤出 OpenAI Completions 协议的模型
+  const openAIModels = userModels.filter(
+    (m) => m.providerType === 'openai-completions'
+  );
+
   useEffect(() => {
-    const unsub = subscribeToEvents();
     fetchPrompts();
-    return unsub;
+    fetchModels();
   }, []);
 
   useEffect(() => {
@@ -90,13 +103,14 @@ export function LLMProcessingPage() {
     setSelectedSheet(sheet);
     setInputColumns([]);
     setOutputColumn('');
+    setNewColumnName('');
     const file = files[fileIdx];
     if (sheet && file) {
       try {
         const cols = await getColumnNames(file.path, sheet);
         setAvailableColumns(cols);
-      } catch { 
-        setAvailableColumns([]); 
+      } catch {
+        setAvailableColumns([]);
       }
     } else {
       setAvailableColumns([]);
@@ -114,11 +128,28 @@ export function LLMProcessingPage() {
       ? prompts.find((p) => p.id === selectedPromptId)?.content ?? ''
       : customPrompt;
 
+  // 实际输出列：如果是新建列模式，使用用户输入的新列名
+  const actualOutputColumn =
+    outputColumn === '__new__' ? newColumnName : outputColumn;
+
   const handleStart = async () => {
-    if (!currentFile || !selectedSheet || inputColumns.length === 0 || !outputColumn || !activePrompt) {
-      setError('请完善文件、Sheet、输入输出列和提示词选择');
+    if (!currentFile || !selectedSheet || inputColumns.length === 0) {
+      setError('请选择文件、Sheet 和输入列');
       return;
     }
+    if (!actualOutputColumn) {
+      setError('请选择或输入输出列名');
+      return;
+    }
+    if (!activePrompt) {
+      setError('请选择或输入提示词');
+      return;
+    }
+    if (!selectedModel) {
+      setError('请选择要使用的大模型');
+      return;
+    }
+
     setError(null);
     clearLogs();
     addLog({
@@ -132,7 +163,7 @@ export function LLMProcessingPage() {
       filePath: currentFile.path,
       sheet: selectedSheet,
       inputColumns,
-      outputColumn,
+      outputColumn: actualOutputColumn,
       prompt: activePrompt,
     });
   };
@@ -144,8 +175,8 @@ export function LLMProcessingPage() {
   return (
     <div className="flex h-full flex-row overflow-hidden bg-[var(--bg)]">
       {/* Left Sidebar: File Tree */}
-      <div 
-        className="w-60 shrink-0 border-r flex flex-col overflow-hidden" 
+      <div
+        className="w-60 shrink-0 border-r flex flex-col overflow-hidden"
         style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
       >
         <div className="p-3 border-b" style={{ borderColor: 'var(--border)' }}>
@@ -157,7 +188,7 @@ export function LLMProcessingPage() {
             const isExpanded = expandedFiles.includes(fi);
             return (
               <div key={fi} className="space-y-0.5">
-                <div 
+                <div
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-[var(--surface-hover)] cursor-pointer transition-colors"
                   onClick={() => toggleExpand(fi)}
                 >
@@ -203,8 +234,8 @@ export function LLMProcessingPage() {
       </div>
 
       {/* Middle: Configuration Panel */}
-      <div 
-        className="w-72 shrink-0 border-r flex flex-col overflow-hidden" 
+      <div
+        className="w-80 shrink-0 border-r flex flex-col overflow-hidden"
         style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
       >
         <div className="p-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
@@ -213,6 +244,50 @@ export function LLMProcessingPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          {/* Model Selection */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--muted)' }}>
+              <Cpu className="h-3 w-3" />
+              大模型选择
+            </label>
+            <SearchableSelect
+              options={[
+                { value: '', label: '选择模型' },
+                ...openAIModels.map((m) => ({ value: m.name, label: m.name })),
+              ]}
+              value={selectedModel?.name ?? ''}
+              onChange={(v) => {
+                const model = typeof v === 'string' ? openAIModels.find((m) => m.name === v) ?? null : null;
+                setSelectedModel(model);
+              }}
+              mode="single"
+              placeholder="选择模型..."
+              searchPlaceholder="搜索模型..."
+              formatValue={(sel) => sel[0]?.label || '选择模型'}
+            />
+            {userModels.length > 0 && openAIModels.length === 0 && (
+              <p className="text-[9px]" style={{ color: 'var(--warning)' }}>
+                当前没有 OpenAI Completions 协议的模型，请在配置页面添加
+              </p>
+            )}
+          </div>
+
+          {/* Batch Size */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+              批次大小（并发数）
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={batchSize}
+              onChange={(e) => setBatchSize(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+              className="w-full rounded px-2 py-1.5 text-[11px]"
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
+            />
+          </div>
+
           {/* Input Columns Selector */}
           {availableColumns.length > 0 && (
             <div className="space-y-1">
@@ -237,7 +312,7 @@ export function LLMProcessingPage() {
                   ...availableColumns
                     .filter((c) => !inputColumns.includes(c.name))
                     .map((c) => ({ value: c.name, label: c.name })),
-                  { value: '__new__', label: '[新建列] AI结果' },
+                  { value: '__new__', label: '[新建列...]' },
                 ]}
                 value={outputColumn}
                 onChange={(v) => setOutputColumn(typeof v === 'string' ? v : '')}
@@ -245,27 +320,47 @@ export function LLMProcessingPage() {
                 placeholder="选择输出列..."
                 searchPlaceholder="搜索输出列..."
               />
+              {outputColumn === '__new__' && (
+                <input
+                  type="text"
+                  value={newColumnName}
+                  onChange={(e) => setNewColumnName(e.target.value)}
+                  placeholder="输入新列名..."
+                  className="w-full rounded px-2 py-1.5 text-[11px] mt-1"
+                  style={{ background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--ink)' }}
+                />
+              )}
             </div>
           )}
 
+          {/* Error Column */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>错误信息列</label>
+            <input
+              type="text"
+              value={errorColumn}
+              onChange={(e) => setErrorColumn(e.target.value)}
+              className="w-full rounded px-2 py-1.5 text-[11px]"
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
+            />
+          </div>
+
           {/* Temperature */}
-          {availableColumns.length > 0 && (
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>LLM 温度</label>
-                <span className="text-[10px] font-mono px-1 rounded bg-[var(--bg)]" style={{ color: 'var(--primary)' }}>{modelParams.temperature}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={modelParams.temperature}
-                onChange={(e) => setModelParams({ temperature: parseFloat(e.target.value) })}
-                className="w-full h-1.5 accent-[var(--primary)] cursor-pointer"
-              />
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>LLM 温度</label>
+              <span className="text-[10px] font-mono px-1 rounded bg-[var(--bg)]" style={{ color: 'var(--primary)' }}>{modelParams.temperature}</span>
             </div>
-          )}
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={modelParams.temperature}
+              onChange={(e) => setModelParams({ temperature: parseFloat(e.target.value) })}
+              className="w-full h-1.5 accent-[var(--primary)] cursor-pointer"
+            />
+          </div>
 
           {/* Prompt Setup */}
           <div>
@@ -311,7 +406,7 @@ export function LLMProcessingPage() {
               <textarea
                 className="w-full resize-none rounded px-2 py-1.5 text-[11px] focus-visible:outline-[var(--primary)]"
                 rows={3}
-                placeholder="输入处理提示词模板，例如：翻译以下文本：{{}}"
+                placeholder="输入处理提示词模板，可用 {列名} 引用数据，如：翻译以下文本：{原文}"
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
@@ -337,7 +432,7 @@ export function LLMProcessingPage() {
             {!isRunning ? (
               <button
                 onClick={handleStart}
-                disabled={!currentFile || !selectedSheet || inputColumns.length === 0 || !activePrompt}
+                disabled={!currentFile || !selectedSheet || inputColumns.length === 0 || !activePrompt || !selectedModel}
                 className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
                 style={{ background: 'var(--primary)' }}
               >
@@ -405,7 +500,7 @@ export function LLMProcessingPage() {
                 </span>
                 <span className="font-semibold" style={{ color: 'var(--primary)' }}>{progressPercent.toFixed(1)}%</span>
               </div>
-              
+
               <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--bg)' }}>
                 <div
                   className="h-full rounded-full transition-all duration-300"
@@ -415,7 +510,7 @@ export function LLMProcessingPage() {
                   }}
                 />
               </div>
-              
+
               <div className="flex items-center justify-between text-[10px]" style={{ color: 'var(--muted)' }}>
                 <span>速度: {batchProgress.speed.toFixed(1)} 行/分</span>
                 {batchProgress.speed > 0 && (
@@ -446,7 +541,7 @@ export function LLMProcessingPage() {
               )}
             </div>
 
-            <div 
+            <div
               className="flex-1 overflow-y-auto p-3 font-mono text-[11px] leading-relaxed space-y-1 select-text"
               style={{ background: '#0a0a0a' }}
             >
@@ -456,7 +551,7 @@ export function LLMProcessingPage() {
                   if (log.level === 'error') colorClass = 'text-red-400 font-medium';
                   else if (log.level === 'success') colorClass = 'text-emerald-400';
                   else if (log.level === 'warning') colorClass = 'text-amber-400';
-                  
+
                   return (
                     <div key={log.id} className={`flex items-start gap-1.5 ${colorClass}`}>
                       <span className="opacity-40 shrink-0 select-none text-[9px]">

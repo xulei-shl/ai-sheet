@@ -49,6 +49,17 @@ pub async fn apply_excel_formula(req: ApplyFormulaRequest) -> Result<(), String>
 }
 
 #[tauri::command]
+pub async fn preview_formula(
+    path: String,
+    sheet: String,
+    columns: Vec<String>,
+    max_rows: Option<usize>,
+) -> Result<FormulaPreviewResult, String> {
+    ExcelService::preview_formula(&path, &sheet, &columns, max_rows.unwrap_or(3))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn get_excel_processing_status(
     path: String,
     sheet: String,

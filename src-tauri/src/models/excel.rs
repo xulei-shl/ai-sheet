@@ -79,3 +79,12 @@ pub struct ProcessingStatus {
     pub processed_rows: Vec<usize>,
     pub result_column: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FormulaPreviewResult {
+    pub columns: Vec<String>,
+    pub rows: Vec<Vec<String>>,
+    pub formulas: Vec<Vec<Option<String>>>,
+    pub total_rows: usize,
+}

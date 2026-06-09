@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Clock, History, Play, Sigma, Eye, FileSpreadsheet, AlertCircle, ChevronDown, ChevronRight, Table, Lightbulb, WandSparkles, Pin, X } from 'lucide-react';
 import { useExcelStore } from '../stores/excelStore';
-import { getColumnData, getColumnNames, applyExcelFormula, getFormulaHistory, saveFormulaCache, getPinnedFormulas, addPinnedFormula, deletePinnedFormula } from '../services/tauri';
+import { getColumnNames, applyExcelFormula, getFormulaHistory, saveFormulaCache, getPinnedFormulas, addPinnedFormula, deletePinnedFormula, previewFormula } from '../services/tauri';
 import { ExcelTable } from '../components/excel/ExcelTable';
 import { SearchableSelect } from '../components/excel/SearchableSelect';
 import type { PreviewData, ApplyFormulaRequest } from '../types/excel';
@@ -97,15 +97,20 @@ export function FormulaPage() {
     try {
       const colLabel = `${effectiveColumn}(公式结果)`;
       if (strategy === 'overwrite' && columns.some((c) => c.name === selectedColumn)) {
-        const data = await getColumnData(currentFile.path, selectedSheet, [selectedColumn]);
-        const previewRows: Record<string, string>[] = data.rows.slice(0, 3).map((row: string[], i: number) => ({
-          [selectedColumn]: row[0],
-          [colLabel]: `= ${formula.replace(/\{\}/g, String(i + 2))}`,
-        }));
+        const result = await previewFormula(currentFile.path, selectedSheet, [selectedColumn], 3);
+        const previewRows: Record<string, string>[] = result.rows.map((row, i) => {
+          const raw = row[0];
+          const fText = result.formulas[i]?.[0];
+          const displayVal = fText ? `Formula: ${fText}` : raw;
+          return {
+            [selectedColumn]: displayVal,
+            [colLabel]: formula.replace(/\{\}/g, String(i + 2)),
+          };
+        });
         setPreviewData({
-          columns: [...data.columns, colLabel],
+          columns: [selectedColumn, colLabel],
           rows: previewRows,
-          totalRows: data.rows.length,
+          totalRows: result.totalRows,
         });
       } else {
         const rows = sheets.find((s) => s.name === selectedSheet);
@@ -113,7 +118,7 @@ export function FormulaPage() {
         setPreviewData({
           columns: [colLabel],
           rows: Array.from({ length: Math.min(3, totalRows) }, (_, i) => ({
-            [colLabel]: `= ${formula.replace(/\{\}/g, String(i + 2))}`,
+            [colLabel]: formula.replace(/\{\}/g, String(i + 2)),
           })),
           totalRows,
         });

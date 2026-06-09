@@ -11,6 +11,7 @@ import type {
   WriteResult,
   ApplyFormulaRequest,
   ProcessingStatus,
+  FormulaPreviewResult,
 } from '../types/excel';
 
 export interface AppStatus {
@@ -150,6 +151,10 @@ export function writeExcelResults(req: {
 
 export function applyExcelFormula(req: ApplyFormulaRequest) {
   return invoke<void>('apply_excel_formula', { req });
+}
+
+export function previewFormula(path: string, sheet: string, columns: string[], maxRows?: number) {
+  return invoke<FormulaPreviewResult>('preview_formula', { path, sheet, columns, maxRows });
 }
 
 export function getExcelProcessingStatus(

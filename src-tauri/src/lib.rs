@@ -124,6 +124,7 @@ pub fn run() {
             commands::excel::get_column_data,
             commands::excel::write_excel_results,
             commands::excel::apply_excel_formula,
+            commands::excel::preview_formula,
             commands::excel::get_excel_processing_status,
             commands::sidecar::get_agent_status,
             commands::sidecar::restart_sidecar,

@@ -329,6 +329,72 @@ impl ExcelService {
         Ok(())
     }
 
+    pub fn preview_formula(
+        path: &str,
+        sheet: &str,
+        columns: &[String],
+        max_rows: usize,
+    ) -> AppResult<FormulaPreviewResult> {
+        let mut workbook: Xlsx<_> = open_workbook(path).map_err(|e| {
+            AppError::Service(format!("Failed to open workbook: {}", e))
+        })?;
+
+        let range = workbook
+            .worksheet_range(sheet)
+            .map_err(|e| AppError::Service(format!("Sheet '{}' not found: {}", sheet, e)))?;
+
+        let formula_map: HashMap<(u32, u16), String> = workbook
+            .worksheet_formula(sheet)
+            .ok()
+            .map(|fr| {
+                let (sr, sc) = fr.start().unwrap_or((0, 0));
+                fr.cells()
+                    .filter(|(_, _, f)| !f.is_empty())
+                    .map(|(r, c, f)| ((r as u32 + sr, c as u16 + sc as u16), f.clone()))
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        let mut all_rows = range.rows();
+
+        let header: Vec<String> = all_rows
+            .next()
+            .map(|row| row.iter().map(|c| c.to_string()).collect())
+            .unwrap_or_default();
+
+        let col_indices: Vec<usize> = columns
+            .iter()
+            .filter_map(|col| header.iter().position(|h| h == col))
+            .collect();
+
+        let data_rows: Vec<Vec<Data>> = all_rows.map(|row| row.to_vec()).collect();
+        let total = data_rows.len();
+        let count = max_rows.min(total);
+
+        let mut result_rows = Vec::with_capacity(count);
+        let mut result_formulas = Vec::with_capacity(count);
+
+        for (ri, row) in data_rows.iter().take(count).enumerate() {
+            let excel_row = (ri + 2) as u32;
+            let mut vals = Vec::with_capacity(col_indices.len());
+            let mut fmuls = Vec::with_capacity(col_indices.len());
+            for &ci in &col_indices {
+                let cell = row.get(ci).unwrap_or(&Data::Empty);
+                vals.push(cell_to_string(cell));
+                fmuls.push(formula_map.get(&(excel_row, ci as u16)).cloned());
+            }
+            result_rows.push(vals);
+            result_formulas.push(fmuls);
+        }
+
+        Ok(FormulaPreviewResult {
+            columns: columns.to_vec(),
+            rows: result_rows,
+            formulas: result_formulas,
+            total_rows: total,
+        })
+    }
+
     pub fn get_processing_status(
         path: &str,
         sheet: &str,

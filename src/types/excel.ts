@@ -63,3 +63,10 @@ export interface ProcessingStatus {
   processedRows: number[];
   resultColumn: string;
 }
+
+export interface FormulaPreviewResult {
+  columns: string[];
+  rows: string[][];
+  formulas: (string | null)[][];
+  totalRows: number;
+}

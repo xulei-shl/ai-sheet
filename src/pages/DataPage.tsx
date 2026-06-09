@@ -174,7 +174,7 @@ export function DataPage() {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="w-full max-w-md space-y-6">
+          <div className="w-full max-w-2xl space-y-6">
           <div className="text-center">
             <h2 className="text-xl font-semibold">数据加载</h2>
             <p className="text-sm mt-1.5" style={{ color: 'var(--muted)' }}>导入 Excel 文件，开始筛选列并生成数据预览</p>
@@ -203,7 +203,7 @@ export function DataPage() {
           )}
 
           <div
-            className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center transition-all duration-200 ${
+            className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-20 text-center transition-all duration-200 min-h-[360px] min-w-[500px] ${
               dragging
                 ? 'border-[var(--primary)] bg-[var(--primary-glow)] scale-[1.02]'
                 : 'border-[var(--border)] hover:border-[var(--primary)] bg-[var(--surface)]'

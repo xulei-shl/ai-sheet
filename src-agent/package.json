@@ -8,6 +8,7 @@
     "dev": "tsx src/main.ts"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "latest",
     "better-sqlite3": "^12.10.0",
     "sql.js": "^1.14.1",

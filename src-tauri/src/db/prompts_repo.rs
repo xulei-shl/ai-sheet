@@ -1,4 +1,4 @@
-use rusqlite::Connection;
+use rusqlite::{Connection, OptionalExtension};
 
 use crate::error::AppResult;
 use crate::models::prompt::{Prompt, PromptInput};
@@ -62,7 +62,8 @@ pub fn delete_prompt(conn: &Connection, id: &str) -> AppResult<()> {
 }
 
 /// Seed system prompts for quick actions if they don't exist yet.
-/// Idempotent — skips if a prompt with the same name already exists.
+/// Also updates existing prompts with matching names to have the quick action category
+/// if they don't have a category set.
 pub fn seed_system_prompts(conn: &Connection) -> AppResult<()> {
     const QUICK_ACTION_CATEGORY: &str = "快捷操作";
 
@@ -78,12 +79,27 @@ pub fn seed_system_prompts(conn: &Connection) -> AppResult<()> {
     ];
 
     for &(name, content) in seeds {
-        let count: i64 = conn.query_row(
-            "SELECT COUNT(*) FROM prompts WHERE name = ?1",
-            rusqlite::params![name],
-            |row| row.get(0),
-        )?;
-        if count == 0 {
+        // Check if prompt with this name exists and get its category
+        let result: Option<(String, i32)> = conn
+            .query_row(
+                "SELECT category, is_system FROM prompts WHERE name = ?1",
+                rusqlite::params![name],
+                |row| Ok((row.get::<_, String>(0)?, row.get::<_, i32>(1)?)),
+            )
+            .optional()?;
+
+        if let Some((existing_category, is_system)) = result {
+            // Prompt exists: if it has no category (empty string) and is not a system prompt,
+            // update its category to quick action
+            if existing_category.is_empty() && is_system == 0 {
+                let now = chrono::Utc::now().to_rfc3339();
+                conn.execute(
+                    "UPDATE prompts SET category = ?1, updated_at = ?2 WHERE name = ?3",
+                    rusqlite::params![QUICK_ACTION_CATEGORY, now, name],
+                )?;
+            }
+        } else {
+            // Prompt doesn't exist: insert it
             let now = chrono::Utc::now().to_rfc3339();
             let id = format!("prompt-seed-{}", name);
             conn.execute(

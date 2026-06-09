@@ -30,10 +30,18 @@ export function getPlaceholderForPrompt(name: string): string {
 
 // ── Quick action prompt filtering ──────────────────────────
 
+const LEGACY_QUICK_ACTION_NAMES = ['Excel公式生成', '提示词生成'];
+
 export function getQuickActionPrompts(prompts: Prompt[]): Prompt[] {
-  return prompts
-    .filter((p) => p.category === QUICK_ACTION_CATEGORY)
-    .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+  // Primary: filter by category
+  const byCategory = prompts.filter((p) => p.category === QUICK_ACTION_CATEGORY);
+  if (byCategory.length > 0) {
+    return byCategory.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+  }
+
+  // Fallback: match by legacy names (for backward compatibility before seed runs)
+  const byName = prompts.filter((p) => LEGACY_QUICK_ACTION_NAMES.includes(p.name));
+  return byName.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
 }
 
 // ── Prompt construction ────────────────────────────────────

@@ -49,12 +49,12 @@ export function resolveProviderApi(providerType: string): { provider: string; ap
   for (const suffix of KNOWN_API_SUFFIXES) {
     if (providerType.endsWith('-' + suffix)) {
       const provider = providerType.slice(0, providerType.length - suffix.length - 1);
-      if (provider) return { provider, api: suffix };
+      if (provider) return { provider, api: suffix, defaultBaseUrl: '' };
     }
   }
 
   // fallback: 直接用 providerType 作为 api，截取第一段作为 provider
-  return { provider: providerType, api: providerType };
+  return { provider: providerType, api: providerType, defaultBaseUrl: '' };
 }
 
 /**

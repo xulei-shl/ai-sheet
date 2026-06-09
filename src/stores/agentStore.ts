@@ -75,20 +75,6 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       error: null,
     }));
 
-    // 预创建一个等待中的 assistant 消息，用于显示等待动效
-    const pendingAssistantMessage: AgentMessage = {
-      id: `assistant-${pendingId}`,
-      requestId: pendingId,
-      role: 'assistant',
-      content: '',
-      isStreaming: true,
-      isWaitingForFirstToken: true,
-      toolCalls: [],
-    };
-    set((state) => ({
-      messages: [...state.messages, pendingAssistantMessage],
-    }));
-
     try {
       await sendAgentMessage(trimmed);
     } catch (error) {

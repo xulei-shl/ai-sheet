@@ -108,9 +108,16 @@ function UserMessage({ message }: { message: AgentMessage }) {
 }
 
 export function MessageList({ messages }: MessageListProps) {
-  const { loadedContext } = useAgentStore();
+  const { loadedContext, agentStreamingRequestId, directStreamingRequestId } = useAgentStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const userInteractingRef = useRef(false);
+
+  // 判断是否需要显示等待动效：
+  // 最后一条消息是用户消息，且正在等待响应（有 streamingRequestId 但还没有对应的 assistant 消息）
+  const lastMessage = messages[messages.length - 1];
+  const isWaitingForResponse = (agentStreamingRequestId || directStreamingRequestId)
+    && lastMessage?.role === 'user'
+    && !messages.some(m => m.requestId === (agentStreamingRequestId || directStreamingRequestId) && m.role === 'assistant');
 
   useEffect(() => {
     const el = containerRef.current;
@@ -174,11 +181,6 @@ export function MessageList({ messages }: MessageListProps) {
               <UserMessage message={message} />
             ) : (
               <>
-                {/* 等待动效：在收到首个 token 前显示 */}
-                {message.isWaitingForFirstToken && !message.toolCalls?.length && !message.content && (
-                  <WaitingIndicator />
-                )}
-
                 {/* 工具调用展示 */}
                 {message.toolCalls && message.toolCalls.length > 0 && (
                   <ToolCallsBlock toolCalls={message.toolCalls} />
@@ -212,6 +214,20 @@ export function MessageList({ messages }: MessageListProps) {
           )}
         </article>
       ))}
+      {/* 等待动效：在用户发送消息后、收到首个响应前显示 */}
+      {isWaitingForResponse && (
+        <article className="group space-y-1">
+          <div className="text-xs uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+            AI-Sheet Agent
+          </div>
+          <div
+            className="whitespace-pre-wrap rounded-lg border p-3 text-sm leading-relaxed"
+            style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--ink)' }}
+          >
+            <WaitingIndicator />
+          </div>
+        </article>
+      )}
     </div>
   );
 }

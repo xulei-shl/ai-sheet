@@ -117,6 +117,15 @@ impl SidecarManager {
         self.write_json_line(payload).await
     }
 
+    pub async fn send_reset(&self) -> AppResult<()> {
+        let id = format!("reset-{}", current_millis());
+        let payload = json!({
+            "id": id,
+            "type": "reset",
+        });
+        self.write_json_line(payload).await
+    }
+
     pub async fn stop_stream(&self) -> AppResult<()> {
         *self.is_streaming.write().await = false;
         let id = format!("stop-{}", current_millis());

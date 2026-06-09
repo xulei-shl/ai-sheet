@@ -349,6 +349,16 @@ async function handleDirectLlmMessage(command: Extract<SidecarCommand, { type: '
   await runDirectLlmStream(bridge, command, emit);
 }
 
+async function handleReset() {
+  if (!session) {
+    emit({ type: 'agent_error', message: 'Agent 未初始化' });
+    return;
+  }
+  session.agent.reset();
+  session.sessionManager.newSession();
+  log('conversation context reset');
+}
+
 async function handleCommand(command: SidecarCommand) {
   switch (command.type) {
     case 'ping':
@@ -390,6 +400,9 @@ async function handleCommand(command: SidecarCommand) {
       const r = activeBatches.get(command.batchId);
       break;
     }
+    case 'reset':
+      await handleReset();
+      break;
     case 'stop':
       abortDirectLlm();
       break;

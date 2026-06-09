@@ -18,6 +18,7 @@ export type SidecarCommand =
   | { id: string; type: 'batch_resume'; batchId: string }
   | { id: string; type: 'batch_stop'; batchId: string }
   | { id: string; type: 'batch_status'; batchId: string }
+  | { id: string; type: 'reset' }
   | { id: string; type: 'stop' };
 
 export interface DirectLlmSheet {

@@ -2,6 +2,7 @@ import { Bot, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { onAgentEvent, onSidecarDead, onSidecarRestarted } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
+import { useExcelStore } from '../../stores/excelStore';
 import { usePromptStore } from '../../stores/promptStore';
 import { ErrorState } from '../ui/ErrorState';
 import { Tooltip } from '../ui/Tooltip';
@@ -31,6 +32,7 @@ export function AgentChatPanel() {
   const fetchPrompts = usePromptStore((s) => s.fetchPrompts);
 
   const handleClear = useCallback(() => {
+    useExcelStore.getState().clearAllContext();
     clearMessages();
   }, [clearMessages]);
 

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   clearActiveAgentModel,
+  clearAgentContext,
   getAgentStatus,
   restartSidecar,
   sendAgentMessage,
@@ -250,6 +251,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   clearMessages: () => {
     set({ messages: [], error: null });
+    clearAgentContext();
   },
 
   deleteMessage: (id) => {

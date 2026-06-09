@@ -129,6 +129,7 @@ pub fn run() {
             commands::sidecar::restart_sidecar,
             commands::sidecar::send_agent_message,
             commands::sidecar::steer_agent,
+            commands::sidecar::clear_agent_context,
             commands::sidecar::stop_agent_stream,
             commands::sidecar::send_direct_llm_message,
             commands::system::get_app_status,

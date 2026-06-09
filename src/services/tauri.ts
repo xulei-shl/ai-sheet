@@ -167,6 +167,10 @@ export function steerAgent(context: AgentContext) {
   return invoke<void>('steer_agent', { context: JSON.stringify(context) });
 }
 
+export function clearAgentContext() {
+  return invoke<void>('clear_agent_context');
+}
+
 export function stopAgentStream() {
   return invoke<void>('stop_agent_stream');
 }

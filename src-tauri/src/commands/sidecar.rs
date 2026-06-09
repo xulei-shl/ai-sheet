@@ -33,6 +33,11 @@ pub async fn steer_agent(
 }
 
 #[tauri::command]
+pub async fn clear_agent_context(state: State<'_, AppState>) -> Result<(), AppError> {
+    state.sidecar_manager.send_reset().await
+}
+
+#[tauri::command]
 pub async fn stop_agent_stream(state: State<'_, AppState>) -> Result<(), AppError> {
     state.sidecar_manager.stop_stream().await
 }

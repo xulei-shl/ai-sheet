@@ -136,7 +136,7 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
           {feedback}
         </div>
       )}
-      <div className="flex gap-2 px-3 pb-2">
+      <div className="flex gap-2 overflow-x-auto px-3 pb-2">
       {quickActionPrompts.map((prompt) => {
         const iconName = getIconNameForPrompt(prompt.name);
         const Icon = iconComponents[iconName] ?? Zap;

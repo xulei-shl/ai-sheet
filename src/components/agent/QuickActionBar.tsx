@@ -1,4 +1,4 @@
-﻿import { Sigma, Sparkles, AlertCircle } from 'lucide-react';
+﻿import { Sigma, Sparkles, Zap, AlertCircle } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useAgentStore } from '../../stores/agentStore';
 import { useExcelStore } from '../../stores/excelStore';
@@ -8,8 +8,8 @@ import {
   getPlaceholderForPrompt,
   buildDisplaySummary,
   buildDirectPrompt,
-  QUICK_ACTION_NAMES,
-  QUICK_ACTION_LABELS,
+  QUICK_ACTION_CATEGORY,
+  getIconNameForPrompt,
 } from './agentQuickActions';
 
 interface QuickActionBarProps {
@@ -18,10 +18,11 @@ interface QuickActionBarProps {
   onSetQuickPlaceholder: (placeholder: string | null) => void;
 }
 
-const QUICK_BUTTONS = [
-  { key: 'formula', name: QUICK_ACTION_NAMES.formula, label: QUICK_ACTION_LABELS.formula, icon: Sigma },
-  { key: 'prompt', name: QUICK_ACTION_NAMES.prompt, label: QUICK_ACTION_LABELS.prompt, icon: Sparkles },
-] as const;
+const iconComponents: Record<string, React.FC<{ className?: string; style?: React.CSSProperties }>> = {
+  sigma: Sigma,
+  sparkles: Sparkles,
+  zap: Zap,
+};
 
 export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlaceholder }: QuickActionBarProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
   const includeSampleData = useExcelStore((s) => s.includeSampleData);
 
   const prompts = usePromptStore((s) => s.prompts);
+  const quickActionPrompts = prompts.filter((p) => p.category === QUICK_ACTION_CATEGORY);
 
   const hasExcel = (loadedContext?.loadedFiles?.length ?? 0) > 0;
   const isStreaming = agentStreamingRequestId !== null;
@@ -135,34 +137,38 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
         </div>
       )}
       <div className="flex gap-2 px-3 pb-2">
-      {QUICK_BUTTONS.map(({ key, name, label, icon: Icon }) => (
-        <button
-          key={key}
-          type="button"
-          disabled={!canClick}
-          title={
-            !hasExcel
-              ? '请先在左侧加载 Excel 文件'
-              : !isReady
-                ? 'Sidecar 未就绪'
-                : isStreaming
-                  ? '正在生成中...'
-                  : agentInput.trim()
-                    ? `结合输入需求 + Excel 上下文 · ${label}`
-                    : `请先在输入框输入具体需求 · ${label}`
-          }
-          onClick={() => handleQuickAction(name)}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs transition-colors hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
-          style={{
-            borderColor: 'var(--border)',
-            color: 'var(--ink)',
-            background: 'var(--surface)',
-          }}
-        >
-          <Icon className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
-          {label}
-        </button>
-      ))}
+      {quickActionPrompts.map((prompt) => {
+        const iconName = getIconNameForPrompt(prompt.name);
+        const Icon = iconComponents[iconName] ?? Zap;
+        return (
+          <button
+            key={prompt.id}
+            type="button"
+            disabled={!canClick}
+            title={
+              !hasExcel
+                ? '请先在左侧加载 Excel 文件'
+                : !isReady
+                  ? 'Sidecar 未就绪'
+                  : isStreaming
+                    ? '正在生成中...'
+                    : agentInput.trim()
+                      ? `结合输入需求 + Excel 上下文 · ${prompt.name}`
+                      : `请先在输入框输入具体需求 · ${prompt.name}`
+            }
+            onClick={() => handleQuickAction(prompt.name)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs transition-colors hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+            style={{
+              borderColor: 'var(--border)',
+              color: 'var(--ink)',
+              background: 'var(--surface)',
+            }}
+          >
+            <Icon className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
+            {prompt.name}
+          </button>
+        );
+      })}
       </div>
     </div>
   );

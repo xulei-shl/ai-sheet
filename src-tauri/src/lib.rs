@@ -144,6 +144,9 @@ pub fn run() {
             commands::formula_cache::get_formula_history,
             commands::formula_cache::save_formula_cache,
             commands::formula_cache::touch_formula_cache,
+            commands::pinned_formula::get_pinned_formulas,
+            commands::pinned_formula::add_pinned_formula,
+            commands::pinned_formula::delete_pinned_formula,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

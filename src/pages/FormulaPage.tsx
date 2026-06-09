@@ -1,23 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Clock, History, Play, Sigma, Eye, FileSpreadsheet, AlertCircle, ChevronDown, ChevronRight, Table, Lightbulb, WandSparkles } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Clock, History, Play, Sigma, Eye, FileSpreadsheet, AlertCircle, ChevronDown, ChevronRight, Table, Lightbulb, WandSparkles, Pin, X } from 'lucide-react';
 import { useExcelStore } from '../stores/excelStore';
-import { getColumnData, getColumnNames, applyExcelFormula, getFormulaHistory, saveFormulaCache } from '../services/tauri';
+import { getColumnData, getColumnNames, applyExcelFormula, getFormulaHistory, saveFormulaCache, getPinnedFormulas, addPinnedFormula, deletePinnedFormula } from '../services/tauri';
 import { ExcelTable } from '../components/excel/ExcelTable';
 import { SearchableSelect } from '../components/excel/SearchableSelect';
 import type { PreviewData, ApplyFormulaRequest } from '../types/excel';
-import type { FormulaCacheEntry } from '../types/formula';
+import type { FormulaCacheEntry, PinnedFormula } from '../types/formula';
 import type { ColumnInfo } from '../types/excel';
-
-const FORMULA_TEMPLATES = [
-  { label: 'CONCAT', desc: '合并两列', formula: '=CONCAT(A{}, B{})' },
-  { label: 'UPPER', desc: '转大写', formula: '=UPPER(A{})' },
-  { label: 'LOWER', desc: '转小写', formula: '=LOWER(A{})' },
-  { label: 'IF', desc: '条件判断', formula: '=IF(A{}>0, "是", "否")' },
-  { label: 'TRIM', desc: '去除空格', formula: '=TRIM(A{})' },
-  { label: 'LEFT', desc: '取左字符', formula: '=LEFT(A{}, 3)' },
-  { label: 'RIGHT', desc: '取右字符', formula: '=RIGHT(A{}, 3)' },
-  { label: 'LEN', desc: '计算长度', formula: '=LEN(A{})' },
-];
 
 export function FormulaPage() {
   const { files, selections } = useExcelStore();
@@ -34,10 +23,19 @@ export function FormulaPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [historyEntries, setHistoryEntries] = useState<FormulaCacheEntry[]>([]);
+  const [pinnedFormulas, setPinnedFormulas] = useState<PinnedFormula[]>([]);
   const [expandedFiles, setExpandedFiles] = useState<number[]>([0]);
+  const [pinDialog, setPinDialog] = useState<{ open: boolean; formula: string; columnsKey: string }>({ open: false, formula: '', columnsKey: '' });
+  const [pinName, setPinName] = useState('');
+  const pinInputRef = useRef<HTMLInputElement>(null);
+
+  const loadPinnedFormulas = () => {
+    getPinnedFormulas().then(setPinnedFormulas).catch(() => {});
+  };
 
   useEffect(() => {
     getFormulaHistory().then(setHistoryEntries).catch(() => {});
+    loadPinnedFormulas();
   }, []);
 
   useEffect(() => {
@@ -127,6 +125,27 @@ export function FormulaPage() {
     }
   };
 
+  const handlePinSubmit = async () => {
+    if (!pinName.trim()) return;
+    try {
+      await addPinnedFormula(pinName.trim(), pinDialog.formula, pinDialog.columnsKey);
+      setPinDialog({ open: false, formula: '', columnsKey: '' });
+      setPinName('');
+      loadPinnedFormulas();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const handlePinDelete = async (id: number) => {
+    try {
+      await deletePinnedFormula(id);
+      loadPinnedFormulas();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   const handleApply = async () => {
     if (!currentFile || !selectedSheet || !effectiveColumn || !formula) return;
     setApplying(true);
@@ -157,6 +176,7 @@ export function FormulaPage() {
   };
 
   return (
+    <>
     <div className="flex h-full flex-row overflow-hidden bg-[var(--bg)]">
       {/* Left Sidebar: File Tree */}
       <div 
@@ -218,26 +238,40 @@ export function FormulaPage() {
           )}
         </div>
 
-        {/* Formula Templates (bottom of sidebar) */}
+        {/* Pinned Formulas (bottom of sidebar) */}
         <div className="border-t p-3" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-1.5 mb-2">
             <Lightbulb className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
-            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>快捷公式模板</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>快捷公式</span>
           </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {FORMULA_TEMPLATES.map((t) => (
-              <button
-                key={t.label}
-                onClick={() => setFormula(t.formula)}
-                className="flex items-center gap-1.5 rounded px-2 py-1 text-[10px] hover:bg-[var(--surface-hover)] cursor-pointer transition-colors text-left"
-                style={{ color: 'var(--muted)', border: '1px solid var(--border)' }}
-                title={t.desc}
-              >
-                <WandSparkles className="h-2.5 w-2.5 shrink-0" style={{ color: 'var(--primary)' }} />
-                <span className="truncate">{t.label}</span>
-              </button>
-            ))}
-          </div>
+          {pinnedFormulas.length > 0 ? (
+            <div className="space-y-1">
+              {pinnedFormulas.map((pf) => (
+                <div
+                  key={pf.id}
+                  className="group relative flex items-center gap-1.5 rounded px-2 py-1.5 text-[10px] hover:bg-[var(--surface-hover)] cursor-pointer transition-colors"
+                  style={{ color: 'var(--muted)', border: '1px solid var(--border)' }}
+                  onClick={() => setFormula(pf.formula)}
+                  title={pf.formula}
+                >
+                  <WandSparkles className="h-2.5 w-2.5 shrink-0" style={{ color: 'var(--primary)' }} />
+                  <span className="truncate flex-1">{pf.name}</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handlePinDelete(pf.id); }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-[var(--surface-hover)] cursor-pointer"
+                    style={{ color: 'var(--muted)' }}
+                    title="删除"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-4 text-center text-[10px]" style={{ color: 'var(--muted)' }}>
+              暂无固定公式<br/>在历史记录中点击 <Pin className="inline h-2.5 w-2.5" /> 固定
+            </div>
+          )}
         </div>
       </div>
 
@@ -376,25 +410,41 @@ export function FormulaPage() {
                 {historyEntries.length > 0 ? (
                   <div className="rounded-lg border overflow-y-auto max-h-52 divide-y divide-[var(--border)]" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
                     {historyEntries.map((entry) => (
-                      <button
+                      <div
                         key={entry.id}
-                        onClick={() => { setFormula(entry.formula); }}
-                        className="flex w-full items-start gap-2.5 px-3 py-2 text-left text-xs transition-colors hover:bg-[var(--surface-hover)] cursor-pointer"
+                        className="group flex w-full items-start gap-2.5 px-3 py-2 text-left text-xs transition-colors hover:bg-[var(--surface-hover)]"
                         style={{ color: 'var(--ink)' }}
                       >
-                        <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: 'var(--muted)' }} />
-                        <div className="min-w-0 flex-1">
-                          <code className="block truncate font-mono text-[10px]" style={{ color: 'var(--primary)' }}>{entry.formula}</code>
-                          <span className="mt-0.5 block text-[9px]" style={{ color: 'var(--muted)' }}>
-                            {entry.columnsKey}
-                          </span>
-                        </div>
-                      </button>
+                        <button
+                          onClick={() => { setFormula(entry.formula); }}
+                          className="flex items-start gap-2.5 flex-1 min-w-0 cursor-pointer text-left"
+                        >
+                          <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: 'var(--muted)' }} />
+                          <div className="min-w-0 flex-1">
+                            <code className="block truncate font-mono text-[10px]" style={{ color: 'var(--primary)' }}>{entry.formula}</code>
+                            <span className="mt-0.5 block text-[9px]" style={{ color: 'var(--muted)' }}>
+                              {entry.columnsKey}
+                            </span>
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => {
+                            const name = entry.formula.match(/^=(\w+)\(/)?.[1] ?? '公式';
+                            setPinName(name);
+                            setPinDialog({ open: true, formula: entry.formula, columnsKey: entry.columnsKey });
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-1 rounded hover:bg-[var(--surface-hover)] cursor-pointer mt-0.5"
+                          style={{ color: 'var(--muted)' }}
+                          title="固定到快捷公式"
+                        >
+                          <Pin className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 ) : (
                   <div className="h-32 border border-dashed rounded-lg flex items-center justify-center text-xs text-center p-4" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
-                    暂无历史公式记录<br/>点击左侧模板或直接输入公式
+                    暂无历史公式记录<br/>应用公式后历史将显示在此处
                   </div>
                 )}
               </div>
@@ -426,5 +476,53 @@ export function FormulaPage() {
         )}
       </div>
     </div>
+
+    {/* Pin Dialog */}
+    {pinDialog.open && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.4)' }}
+        onClick={() => { setPinDialog({ open: false, formula: '', columnsKey: '' }); setPinName(''); }}
+      >
+        <div
+          className="w-80 rounded-lg border p-4 shadow-xl"
+          style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="text-xs font-semibold mb-3" style={{ color: 'var(--ink)' }}>固定公式</h3>
+          <code className="block truncate font-mono text-[10px] mb-3 p-2 rounded" style={{ background: 'var(--bg)', color: 'var(--primary)', border: '1px solid var(--border)' }}>
+            {pinDialog.formula}
+          </code>
+          <input
+            ref={pinInputRef}
+            className="h-9 w-full rounded-md px-3 text-xs mb-3 focus-visible:outline-[var(--primary)]"
+            style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
+            placeholder="输入快捷公式名称"
+            value={pinName}
+            onChange={(e) => setPinName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handlePinSubmit(); }}
+            autoFocus
+          />
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => { setPinDialog({ open: false, formula: '', columnsKey: '' }); setPinName(''); }}
+              className="rounded-md px-3 py-1.5 text-xs font-medium hover:bg-[var(--surface-hover)] cursor-pointer"
+              style={{ color: 'var(--muted)', border: '1px solid var(--border)' }}
+            >
+              取消
+            </button>
+            <button
+              onClick={handlePinSubmit}
+              disabled={!pinName.trim()}
+              className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
+              style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+            >
+              确定
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   );
 }

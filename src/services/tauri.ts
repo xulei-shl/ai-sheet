@@ -3,7 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import type { AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
 import type { ModelConfig } from '../types/config';
 import type { Prompt, PromptInput } from '../types/prompt';
-import type { FormulaCacheEntry } from '../types/formula';
+import type { FormulaCacheEntry, PinnedFormula } from '../types/formula';
 import type {
   ColumnInfo,
   SampleData,
@@ -85,6 +85,20 @@ export function saveFormulaCache(
 
 export function touchFormulaCache(id: number) {
   return invoke<void>('touch_formula_cache', { id });
+}
+
+// Pinned Formulas
+
+export function getPinnedFormulas() {
+  return invoke<PinnedFormula[]>('get_pinned_formulas');
+}
+
+export function addPinnedFormula(name: string, formula: string, columnsKey: string) {
+  return invoke<number>('add_pinned_formula', { name, formula, columnsKey });
+}
+
+export function deletePinnedFormula(id: number) {
+  return invoke<void>('delete_pinned_formula', { id });
 }
 
 // Prompts

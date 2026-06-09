@@ -7,3 +7,11 @@ export interface FormulaCacheEntry {
   accessedAt: string;
   createdAt: string;
 }
+
+export interface PinnedFormula {
+  id: number;
+  name: string;
+  formula: string;
+  columnsKey: string;
+  createdAt: string;
+}

@@ -49,11 +49,21 @@ const MIGRATIONS: &[&str] = &[
     );",
     // v6: use_proxy column for per-model proxy toggle
     "ALTER TABLE models ADD COLUMN use_proxy INTEGER NOT NULL DEFAULT 1;",
+    // v7: pinned_formulas table
+    "CREATE TABLE IF NOT EXISTS pinned_formulas (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        name        TEXT NOT NULL,
+        formula     TEXT NOT NULL,
+        columns_key TEXT NOT NULL DEFAULT '',
+        created_at  TEXT NOT NULL
+    );",
 ];
 
 pub fn run(conn: &Connection) -> AppResult<()> {
     for sql in MIGRATIONS {
-        conn.execute(sql, [])?;
+        if let Err(e) = conn.execute(sql, []) {
+            eprintln!("Migration warning (non-fatal): {}", e);
+        }
     }
     Ok(())
 }

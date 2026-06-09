@@ -28,20 +28,20 @@ export function getPlaceholderForPrompt(name: string): string {
   return PLACEHOLDER_MAP[name] ?? DEFAULT_PLACEHOLDER;
 }
 
-// ── Quick action prompt filtering ──────────────────────────
+// ── Quick action names ──────────────────────────────────────
 
-const LEGACY_QUICK_ACTION_NAMES = ['Excel公式生成', '提示词生成'];
+export const QUICK_ACTION_NAMES: Record<string, string> = {
+  formula: 'Excel公式生成',
+  prompt: '提示词生成',
+};
 
-export function getQuickActionPrompts(prompts: Prompt[]): Prompt[] {
-  // Primary: filter by category
-  const byCategory = prompts.filter((p) => p.category === QUICK_ACTION_CATEGORY);
-  if (byCategory.length > 0) {
-    return byCategory.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
-  }
+export const QUICK_ACTION_LABELS: Record<string, string> = {
+  formula: '公式生成',
+  prompt: '提示词生成',
+};
 
-  // Fallback: match by legacy names (for backward compatibility before seed runs)
-  const byName = prompts.filter((p) => LEGACY_QUICK_ACTION_NAMES.includes(p.name));
-  return byName.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+export function findPromptByName(prompts: Prompt[], name: string): Prompt | undefined {
+  return prompts.find((p) => p.name === name);
 }
 
 // ── Prompt construction ────────────────────────────────────

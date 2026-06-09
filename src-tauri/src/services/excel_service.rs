@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use calamine::{open_workbook, Data, Reader, Xlsx};
@@ -159,8 +160,9 @@ impl ExcelService {
     pub fn write_results(req: &WriteResultsRequest) -> AppResult<()> {
         use rust_xlsxwriter::*;
 
-        let mut workbook: Xlsx<_> = open_workbook(&req.path)
-            .map_err(|e| AppError::Service(format!("Failed to open workbook: {}", e)))?;
+        let mut workbook: Xlsx<_> = open_workbook(&req.path).map_err(|e| {
+            map_open_error(e, &req.path)
+        })?;
 
         let range = workbook
             .worksheet_range(&req.sheet)
@@ -182,9 +184,21 @@ impl ExcelService {
             .map(|row| row.iter().map(|c| cell_to_string(c)).collect())
             .collect();
 
+        // Build a map of original formulas to preserve them
+        let formula_range = workbook
+            .worksheet_formula(&req.sheet)
+            .map_err(|e| AppError::Service(format!("Failed to read formulas: {}", e)))?;
+        let (start_row, start_col) = formula_range.start().unwrap_or((0, 0));
+        let formula_map: HashMap<(u32, u16), String> = formula_range
+            .cells()
+            .filter(|(_, _, f)| !f.is_empty())
+            .map(|(r, c, f)| ((r as u32 + start_row, c as u16 + start_col as u16), f.clone()))
+            .collect();
+
         let tmp_path = format!("{}.tmp", req.path);
         let mut new_book = Workbook::new();
         let sheet = new_book.add_worksheet();
+        sheet.set_name(&req.sheet)?;
 
         let header_format = Format::new().set_bold();
 
@@ -194,7 +208,14 @@ impl ExcelService {
 
         for (row_i, row) in data_rows.iter().enumerate() {
             for (col_j, value) in row.iter().enumerate() {
-                sheet.write_string((row_i + 1) as u32, col_j as u16, value.as_str())?;
+                let excel_row = (row_i + 1) as u32;
+                let pos = (excel_row, col_j as u16);
+                if let Some(orig_f) = formula_map.get(&pos) {
+                    let formula = Formula::new(orig_f.as_str());
+                    sheet.write_formula(excel_row, col_j as u16, formula)?;
+                } else {
+                    sheet.write_string(excel_row, col_j as u16, value.as_str())?;
+                }
             }
         }
 
@@ -205,7 +226,13 @@ impl ExcelService {
 
         new_book.save(&tmp_path)?;
 
-        std::fs::rename(&tmp_path, &req.path)?;
+        std::fs::rename(&tmp_path, &req.path).map_err(|e| {
+            if e.kind() == std::io::ErrorKind::PermissionDenied {
+                AppError::Service("文件被其他程序（如 Excel）占用，请先关闭文件后重试".into())
+            } else {
+                AppError::Io(e)
+            }
+        })?;
 
         Ok(())
     }
@@ -213,8 +240,9 @@ impl ExcelService {
     pub fn apply_formula(req: &ApplyFormulaRequest) -> AppResult<()> {
         use rust_xlsxwriter::*;
 
-        let mut workbook: Xlsx<_> = open_workbook(&req.path)
-            .map_err(|e| AppError::Service(format!("Failed to open workbook: {}", e)))?;
+        let mut workbook: Xlsx<_> = open_workbook(&req.path).map_err(|e| {
+            map_open_error(e, &req.path)
+        })?;
 
         let range = workbook
             .worksheet_range(&req.sheet)
@@ -243,9 +271,21 @@ impl ExcelService {
             .map(|row| row.iter().map(|c| cell_to_string(c)).collect())
             .collect();
 
+        // Build a map of original formulas to preserve them
+        let formula_range = workbook
+            .worksheet_formula(&req.sheet)
+            .map_err(|e| AppError::Service(format!("Failed to read formulas: {}", e)))?;
+        let (start_row, start_col) = formula_range.start().unwrap_or((0, 0));
+        let formula_map: HashMap<(u32, u16), String> = formula_range
+            .cells()
+            .filter(|(_, _, f)| !f.is_empty())
+            .map(|(r, c, f)| ((r as u32 + start_row, c as u16 + start_col as u16), f.clone()))
+            .collect();
+
         let tmp_path = format!("{}.tmp", req.path);
         let mut new_book = Workbook::new();
         let sheet = new_book.add_worksheet();
+        sheet.set_name(&req.sheet)?;
 
         let header_format = Format::new().set_bold();
 
@@ -253,22 +293,38 @@ impl ExcelService {
             sheet.write_string_with_format(0, col_i as u16, header.as_str(), &header_format)?;
         }
 
+        let append_mode = req.strategy == "append" && col_idx >= data_rows.first().map_or(0, |r| r.len());
+
         for (row_i, row) in data_rows.iter().enumerate() {
-            for (col_j, value) in row.iter().enumerate() {
+            let col_count = if append_mode { col_idx + 1 } else { row.len() };
+            for col_j in 0..col_count {
+                let excel_row = (row_i + 1) as u32;
                 if col_j == col_idx {
-                    let excel_row = (row_i + 1) as u32;
                     let formula_str = req.formula.replace("{}", &(excel_row + 1).to_string());
                     let formula = Formula::new(formula_str.as_str());
                     sheet.write_formula(excel_row, col_j as u16, formula)?;
                 } else {
-                    sheet.write_string((row_i + 1) as u32, col_j as u16, value.as_str())?;
+                    let pos = (excel_row, col_j as u16);
+                    if let Some(orig_f) = formula_map.get(&pos) {
+                        let formula = Formula::new(orig_f.as_str());
+                        sheet.write_formula(excel_row, col_j as u16, formula)?;
+                    } else {
+                        let value = row.get(col_j).map(|s| s.as_str()).unwrap_or("");
+                        sheet.write_string(excel_row, col_j as u16, value)?;
+                    }
                 }
             }
         }
 
         new_book.save(&tmp_path)?;
 
-        std::fs::rename(&tmp_path, &req.path)?;
+        std::fs::rename(&tmp_path, &req.path).map_err(|e| {
+            if e.kind() == std::io::ErrorKind::PermissionDenied {
+                AppError::Service("文件被其他程序（如 Excel）占用，请先关闭文件后重试".into())
+            } else {
+                AppError::Io(e)
+            }
+        })?;
 
         Ok(())
     }
@@ -316,6 +372,17 @@ impl ExcelService {
             result_column: result_column.to_string(),
         })
     }
+}
+
+fn map_open_error(e: calamine::XlsxError, path: &str) -> AppError {
+    if let calamine::XlsxError::Io(io_err) = &e {
+        if io_err.kind() == std::io::ErrorKind::PermissionDenied {
+            return AppError::Service(
+                "文件被其他程序（如 Excel）占用，请先关闭文件后重试".into(),
+            );
+        }
+    }
+    AppError::Service(format!("无法打开工作簿「{}」: {}", path, e))
 }
 
 fn cell_to_string(cell: &Data) -> String {
@@ -433,12 +500,118 @@ mod tests {
             sheet: "Sheet1".into(),
             column: "Score".into(),
             formula: "=RANK({})".into(),
+            strategy: "overwrite".into(),
         };
         ExcelService::apply_formula(&req).unwrap();
 
         // Verify by re-reading
         let data = ExcelService::get_column_data(path.to_str().unwrap(), "Sheet1", &["Score".into()]).unwrap();
         assert_eq!(data.rows.len(), 3);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn test_apply_formula_append() {
+        let path = create_test_xlsx();
+        let req = ApplyFormulaRequest {
+            path: path.to_str().unwrap().to_string(),
+            sheet: "Sheet1".into(),
+            column: "Result".into(),
+            formula: "=CONCAT(A{}, B{})".into(),
+            strategy: "append".into(),
+        };
+        ExcelService::apply_formula(&req).unwrap();
+
+        // Verify the new column header exists and formula was written
+        let cols = ExcelService::get_column_names(path.to_str().unwrap(), "Sheet1").unwrap();
+        assert_eq!(cols.len(), 3);
+        assert_eq!(cols[2].name, "Result");
+
+        let data = ExcelService::get_column_data(path.to_str().unwrap(), "Sheet1", &["Result".into()]).unwrap();
+        assert_eq!(data.rows.len(), 3);
+        // Each row should have a non-empty value (the cached "0" from formula)
+        assert!(!data.rows[0][0].is_empty());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn test_apply_formula_preserves_sheet_name() {
+        let path = create_test_xlsx();
+        // Overwrite the default "Sheet1" sheet name via a different test scenario
+        // The existing create_test_xlsx always uses "Sheet1", so we verify the sheet name is preserved
+        let req = ApplyFormulaRequest {
+            path: path.to_str().unwrap().to_string(),
+            sheet: "Sheet1".into(),
+            column: "Score".into(),
+            formula: "=UPPER(A{})".into(),
+            strategy: "overwrite".into(),
+        };
+        ExcelService::apply_formula(&req).unwrap();
+
+        // Verify the sheet name is still "Sheet1" after round-trip
+        let info = ExcelService::get_info(path.to_str().unwrap()).unwrap();
+        assert_eq!(info.sheets.len(), 1);
+        assert_eq!(info.sheets[0].name, "Sheet1");
+        let _ = std::fs::remove_file(&path);
+    }
+
+    fn create_test_xlsx_with_formula() -> PathBuf {
+        let tmp = std::env::temp_dir().join(format!("test-formula-{}.xlsx", std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        let mut workbook = Workbook::new();
+        let sheet = workbook.add_worksheet();
+        sheet.set_name("Sheet1").unwrap();
+        sheet.write_string(0, 0, "Name").unwrap();
+        sheet.write_string(0, 1, "Score").unwrap();
+        sheet.write_string(0, 2, "Grade").unwrap();
+        sheet.write_string(1, 0, "Alice").unwrap();
+        sheet.write_number(1, 1, 95.0).unwrap();
+        sheet.write_formula(1, 2, Formula::new("=IF(B2>=90,\"A\",\"B\")")).unwrap();
+        sheet.write_string(2, 0, "Bob").unwrap();
+        sheet.write_number(2, 1, 87.0).unwrap();
+        sheet.write_formula(2, 2, Formula::new("=IF(B3>=90,\"A\",\"B\")")).unwrap();
+        sheet.write_string(3, 0, "Charlie").unwrap();
+        sheet.write_number(3, 1, 92.0).unwrap();
+        sheet.write_formula(3, 2, Formula::new("=IF(B4>=90,\"A\",\"B\")")).unwrap();
+        workbook.save(tmp.to_str().unwrap()).unwrap();
+        tmp
+    }
+
+    #[test]
+    fn test_apply_formula_preserves_existing_formulas() {
+        let path = create_test_xlsx_with_formula();
+        // Apply a formula to the Score column
+        let req = ApplyFormulaRequest {
+            path: path.to_str().unwrap().to_string(),
+            sheet: "Sheet1".into(),
+            column: "Score".into(),
+            formula: "=RANK({})".into(),
+            strategy: "overwrite".into(),
+        };
+        ExcelService::apply_formula(&req).unwrap();
+
+        // Verify the Grade column still has formulas
+        let formula_range = {
+            let mut wb: Xlsx<_> = open_workbook(path.to_str().unwrap()).unwrap();
+            wb.worksheet_formula("Sheet1").unwrap()
+        };
+        let (start_row, start_col) = formula_range.start().unwrap_or((0, 0));
+        let formulas: Vec<(u32, u16, String)> = formula_range
+            .cells()
+            .filter(|(_, _, f)| !f.is_empty())
+            .map(|(r, c, f)| (r as u32 + start_row, c as u16 + start_col as u16, f.clone()))
+            .collect();
+        // Should have 6 formulas: 3 original Grade formulas + 3 new Score formulas
+        assert_eq!(formulas.len(), 6, "Expected 6 formula cells, got {:?}", formulas);
+        // Verify the Grade formulas (col 2) are preserved
+        for (r, c, f) in &formulas {
+            if *c == 2 {
+                assert!(f.contains("IF"), "Expected Grade formula at ({}, {}), got: {}", r, c, f);
+            }
+            if *c == 1 {
+                assert!(f.contains("RANK"), "Expected RANK formula at ({}, {}), got: {}", r, c, f);
+            }
+        }
         let _ = std::fs::remove_file(&path);
     }
 

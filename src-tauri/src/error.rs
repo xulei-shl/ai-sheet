@@ -23,7 +23,16 @@ pub enum AppError {
 
 impl From<rust_xlsxwriter::XlsxError> for AppError {
     fn from(e: rust_xlsxwriter::XlsxError) -> Self {
-        AppError::Excel(e.to_string())
+        match &e {
+            rust_xlsxwriter::XlsxError::IoError(io_err)
+                if io_err.kind() == std::io::ErrorKind::PermissionDenied =>
+            {
+                AppError::Service(
+                    "文件被其他程序（如 Excel）占用，请先关闭文件后重试".into(),
+                )
+            }
+            _ => AppError::Excel(e.to_string()),
+        }
     }
 }
 

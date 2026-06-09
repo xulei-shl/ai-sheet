@@ -1,0 +1,839 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The `ChartSeries` struct represents a chart series."><title>ChartSeries in rust_xlsxwriter::chart - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Chart<wbr>Series</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.delete_from_legend" title="delete_from_legend">delete_from_legend</a></li><li><a href="#method.new" title="new">new</a></li><li><a href="#method.set_categories" title="set_categories">set_categories</a></li><li><a href="#method.set_custom_data_labels" title="set_custom_data_labels">set_custom_data_labels</a></li><li><a href="#method.set_data_label" title="set_data_label">set_data_label</a></li><li><a href="#method.set_format" title="set_format">set_format</a></li><li><a href="#method.set_gap" title="set_gap">set_gap</a></li><li><a href="#method.set_invert_if_negative" title="set_invert_if_negative">set_invert_if_negative</a></li><li><a href="#method.set_invert_if_negative_color" title="set_invert_if_negative_color">set_invert_if_negative_color</a></li><li><a href="#method.set_marker" title="set_marker">set_marker</a></li><li><a href="#method.set_name" title="set_name">set_name</a></li><li><a href="#method.set_overlap" title="set_overlap">set_overlap</a></li><li><a href="#method.set_point_colors" title="set_point_colors">set_point_colors</a></li><li><a href="#method.set_points" title="set_points">set_points</a></li><li><a href="#method.set_secondary_axis" title="set_secondary_axis">set_secondary_axis</a></li><li><a href="#method.set_smooth" title="set_smooth">set_smooth</a></li><li><a href="#method.set_trendline" title="set_trendline">set_trendline</a></li><li><a href="#method.set_values" title="set_values">set_values</a></li><li><a href="#method.set_x_error_bars" title="set_x_error_bars">set_x_error_bars</a></li><li><a href="#method.set_y_error_bars" title="set_y_error_bars">set_y_error_bars</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-ChartSeries" title="Clone">Clone</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-ChartSeries" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-ChartSeries" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-ChartSeries" title="Send">Send</a></li><li><a href="#impl-Sync-for-ChartSeries" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-ChartSeries" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-ChartSeries" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In rust_<wbr>xlsxwriter::<wbr>chart</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a>::<wbr><a href="index.html">chart</a></div><h1>Struct <span class="struct">ChartSeries</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/chart.rs.html#6685-6704">Source</a> </span></div><pre class="rust item-decl"><code>pub struct ChartSeries { <span class="comment">/* private fields */</span> }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The <code>ChartSeries</code> struct represents a chart series.</p>
+<p>A chart in Excel can contain one of more data series. The <code>ChartSeries</code>
+struct represents the Category and Value ranges, and the formatting and
+options for the chart series.</p>
+<p>It is used in conjunction with the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> struct.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>A simple chart example using the <code>rust_xlsxwriter</code> library.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// This code is available in examples/doc_chart_simple.rs
+
+</span><span class="kw">use </span>rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Add some data for the chart.
+    </span>worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="number">50</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">1</span>, <span class="number">0</span>, <span class="number">30</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="number">40</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a new chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file.
+    </span>workbook.save(<span class="string">"chart.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-ChartSeries" class="impl"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#6707-8281">Source</a><a href="#impl-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.new" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#6796-6817">Source</a><h4 class="code-header">pub fn <a href="#method.new" class="fn">new</a>() -&gt; <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Create a new chart series object.</p>
+<p>Create a new chart series object. A chart in Excel must contain at least
+one data series. The <code>ChartSeries</code> struct represents the category and
+value ranges, and the formatting and options for the chart series.</p>
+<p>It is used in conjunction with the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> struct.</p>
+<p>A chart series is usually created via the <a href="struct.Chart.html#method.add_series" title="method rust_xlsxwriter::chart::Chart::add_series"><code>Chart::add_series()</code></a>
+method, see the first example below. However, if required you can create
+a standalone <code>ChartSeries</code> object and add it to a chart via the
+<a href="struct.Chart.html#method.push_series" title="method rust_xlsxwriter::chart::Chart::push_series"><code>Chart::push_series()</code></a> method, see the second example below.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<p>An example of creating a chart series via <a href="struct.Chart.html#method.add_series" title="method rust_xlsxwriter::chart::Chart::add_series"><code>Chart::add_series()</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>An example of creating a chart series as a standalone object and then
+adding it to a chart via the <a href="struct.Chart.html#method.push_series" title="method rust_xlsxwriter::chart::Chart::push_series"><code>Chart::push_series()</code></a> method.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Create a chart series and set the range for the values.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>series = ChartSeries::new();
+    series.set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>);
+
+    <span class="comment">// Add the data series to the chart.
+    </span>chart.push_series(<span class="kw-2">&amp;</span>series);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file for both examples:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_values" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#6888-6894">Source</a><h4 class="code-header">pub fn <a href="#method.set_values" class="fn">set_values</a>&lt;T&gt;(&amp;mut self, range: T) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a><div class="where">where
+    T: <a class="trait" href="trait.IntoChartRange.html" title="trait rust_xlsxwriter::chart::IntoChartRange">IntoChartRange</a>,</div></h4></section></summary><div class="docblock"><p>Add a values range to a chart series.</p>
+<p>All chart series in Excel must have a data range that defines the range
+of values for the series. In Excel this is typically a range like
+<code>"Sheet1!$B$1:$B$5"</code>.</p>
+<p>This is the most important property of a series and is the only
+mandatory option for every chart object. This series values links the
+chart with the worksheet data that it displays. The data range can be
+set using a formula as shown in the first part of the example below or
+using a list of values as shown in the second part.</p>
+<h5 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h5>
+<ul>
+<li><code>range</code>: The range property which can be one of two generic types:
+<ul>
+<li>A string with an Excel like range formula such as
+<code>"Sheet1!$A$1:$A$3"</code>.</li>
+<li>A tuple that can be used to create the range programmatically using
+a sheet name and zero indexed row and column values like:
+<code>("Sheet1", 0, 0, 2, 0)</code> (this gives the same range as the previous
+string value).</li>
+</ul>
+</li>
+</ul>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<p>A chart example demonstrating setting the chart series values.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>);
+
+    <span class="comment">// Add another data series to the chart using the alternative tuple syntax
+    // to describe the range. This method is better when you need to create the
+    // ranges programmatically to match the data range in the worksheet.
+    </span>chart.add_series().set_values((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>));
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_values.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_categories" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#6974-6980">Source</a><h4 class="code-header">pub fn <a href="#method.set_categories" class="fn">set_categories</a>&lt;T&gt;(&amp;mut self, range: T) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a><div class="where">where
+    T: <a class="trait" href="trait.IntoChartRange.html" title="trait rust_xlsxwriter::chart::IntoChartRange">IntoChartRange</a>,</div></h4></section></summary><div class="docblock"><p>Add a category range chart series.</p>
+<p>This method sets the chart category labels. The category is more or less
+the same as the X axis. In most chart types the categories property is
+optional and the chart will just assume a sequential series from <code>1..n</code>.
+The exception to this is the Scatter chart types for which a category
+range is mandatory in Excel.</p>
+<p>The data range can be set using a formula as shown in the first part of
+the example below or using a list of values as shown in the second part.</p>
+<h5 id="parameters-1"><a class="doc-anchor" href="#parameters-1">§</a>Parameters</h5>
+<ul>
+<li><code>range</code>: The range property which can be one of two generic types:
+<ul>
+<li>A string with an Excel like range formula such as
+<code>"Sheet1!$A$1:$A$3"</code>.</li>
+<li>A tuple that can be used to create the range programmatically using
+a sheet name and zero indexed row and column values like:
+<code>("Sheet1", 0, 0, 2, 0)</code> (this gives the same range as the previous
+string value).</li>
+</ul>
+</li>
+</ul>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<p>A chart example demonstrating setting the chart series categories and
+values.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$1:$A$3"</span>)
+        .set_values(<span class="string">"Sheet1!$B$1:$B$3"</span>);
+
+    <span class="comment">// Add another data series to the chart using the alternative tuple syntax
+    // to describe the range. This method is better when you need to create the
+    // ranges programmatically to match the data range in the worksheet.
+    </span>chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>))
+        .set_values((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>));
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_categories.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_secondary_axis" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7043-7046">Source</a><h4 class="code-header">pub fn <a href="#method.set_secondary_axis" class="fn">set_secondary_axis</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Plot the chart series on the secondary axis.</p>
+<p>It is possible to add a secondary axis of the same type to a chart by
+setting the <code>secondary_axis</code> property of the series. See <a href="index.html#secondary-axes" title="mod rust_xlsxwriter::chart">Chart Secondary
+Axes</a></p>
+<h5 id="parameters-2"><a class="doc-anchor" href="#parameters-2">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is off by default.</li>
+</ul>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<p>A chart example demonstrating setting a secondary Y axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Configure a series that defaults to the primary axis.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>);
+
+    <span class="comment">// Configure another series with a secondary axis.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$B$1:$B$6"</span>)
+        .set_secondary_axis(<span class="bool-val">true</span>);
+
+    <span class="comment">// Add some axis labels.
+    </span>chart.y_axis().set_name(<span class="string">"Y axis"</span>);
+    chart.y2_axis().set_name(<span class="string">"Y2 axis"</span>);
+
+    <span class="comment">// Move the legend to the bottom for clarity.
+    </span>chart.legend().set_position(ChartLegendPosition::Bottom);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart_with_offset(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart, <span class="number">5</span>, <span class="number">5</span>)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"chart.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_name" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7140-7146">Source</a><h4 class="code-header">pub fn <a href="#method.set_name" class="fn">set_name</a>&lt;T&gt;(&amp;mut self, name: T) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a><div class="where">where
+    T: <a class="trait" href="trait.IntoChartRange.html" title="trait rust_xlsxwriter::chart::IntoChartRange">IntoChartRange</a>,</div></h4></section></summary><div class="docblock"><p>Add a name for a chart series.</p>
+<p>Set the name for the series. The name is displayed in the formula bar.
+For non-Pie/Doughnut charts it is also displayed in the legend. The name
+property is optional and if it isn’t supplied it will default to <code>Series 1..n</code>. The name can be a simple string, a formula such as <code>Sheet1!$A$1</code>
+or a tuple with a sheet name, row and column such as <code>('Sheet1', 0, 0)</code>.</p>
+<h5 id="parameters-3"><a class="doc-anchor" href="#parameters-3">§</a>Parameters</h5>
+<ul>
+<li><code>range</code>: The range property which can be one of the following generic
+types:
+<ul>
+<li>A simple string title.</li>
+<li>A string with an Excel like range formula such as <code>"Sheet1!$A$1"</code>.</li>
+<li>A tuple that can be used to create the range programmatically using
+a sheet name and zero indexed row and column values like:
+<code>("Sheet1", 0, 0)</code> (this gives the same range as the previous
+string value).</li>
+</ul>
+</li>
+</ul>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<p>A chart example demonstrating setting the chart series name.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series with a simple string name.
+    </span>chart
+        .add_series()
+        .set_name(<span class="string">"Year to date"</span>)
+        .set_categories(<span class="string">"Sheet1!$A$2:$A$4"</span>)
+        .set_values(<span class="string">"Sheet1!$B$2:$B$4"</span>);
+
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range/name.
+    </span>chart
+        .add_series()
+        .set_name(<span class="string">"Sheet1!$C$1"</span>)
+        .set_categories(<span class="string">"Sheet1!$A$2:$A$4"</span>)
+        .set_values(<span class="string">"Sheet1!$C$2:$C$4"</span>);
+
+    <span class="comment">// Add another data series to the chart using the alternative tuple syntax
+    // to describe the range/name. This method is better when you need to create
+    // the ranges programmatically to match the data range in the worksheet.
+    </span>chart
+        .add_series()
+        .set_name((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">3</span>))
+        .set_categories((<span class="string">"Sheet1"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>))
+        .set_values((<span class="string">"Sheet1"</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>));
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_name.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_format" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7171-7177">Source</a><h4 class="code-header">pub fn <a href="#method.set_format" class="fn">set_format</a>&lt;T&gt;(&amp;mut self, format: T) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a><div class="where">where
+    T: <a class="trait" href="trait.IntoChartFormat.html" title="trait rust_xlsxwriter::chart::IntoChartFormat">IntoChartFormat</a>,</div></h4></section></summary><div class="docblock"><p>Set the formatting properties for a chart series.</p>
+<p>Set the formatting properties for a chart series via a <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a>
+object or a sub struct that implements <a href="trait.IntoChartFormat.html" title="trait rust_xlsxwriter::chart::IntoChartFormat"><code>IntoChartFormat</code></a>.</p>
+<p>The formatting that can be applied via a <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a> object are:</p>
+<ul>
+<li><a href="struct.ChartFormat.html#method.set_solid_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_solid_fill"><code>ChartFormat::set_solid_fill()</code></a>: Set the <a href="struct.ChartSolidFill.html" title="struct rust_xlsxwriter::chart::ChartSolidFill"><code>ChartSolidFill</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_pattern_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_pattern_fill"><code>ChartFormat::set_pattern_fill()</code></a>: Set the <a href="struct.ChartPatternFill.html" title="struct rust_xlsxwriter::chart::ChartPatternFill"><code>ChartPatternFill</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_gradient_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_gradient_fill"><code>ChartFormat::set_gradient_fill()</code></a>: Set the <a href="struct.ChartGradientFill.html" title="struct rust_xlsxwriter::chart::ChartGradientFill"><code>ChartGradientFill</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_no_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_no_fill"><code>ChartFormat::set_no_fill()</code></a>: Turn off the fill for the chart object.</li>
+<li><a href="struct.ChartFormat.html#method.set_line" title="method rust_xlsxwriter::chart::ChartFormat::set_line"><code>ChartFormat::set_line()</code></a>: Set the <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_border" title="method rust_xlsxwriter::chart::ChartFormat::set_border"><code>ChartFormat::set_border()</code></a>: Set the <a href="type.ChartBorder.html" title="type rust_xlsxwriter::chart::ChartBorder"><code>ChartBorder</code></a> properties.
+A synonym for <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> depending on context.</li>
+<li><a href="struct.ChartFormat.html#method.set_no_line" title="method rust_xlsxwriter::chart::ChartFormat::set_no_line"><code>ChartFormat::set_no_line()</code></a>: Turn off the line for the chart object.</li>
+<li><a href="struct.ChartFormat.html#method.set_no_border" title="method rust_xlsxwriter::chart::ChartFormat::set_no_border"><code>ChartFormat::set_no_border()</code></a>: Turn off the border for the chart object.</li>
+</ul>
+<h5 id="parameters-4"><a class="doc-anchor" href="#parameters-4">§</a>Parameters</h5>
+<p><code>format</code>: A <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a> struct reference or a sub struct that will
+convert into a <code>ChartFormat</code> instance. See the docs for
+<a href="trait.IntoChartFormat.html" title="trait rust_xlsxwriter::chart::IntoChartFormat"><code>IntoChartFormat</code></a> for details.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_marker" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7244-7247">Source</a><h4 class="code-header">pub fn <a href="#method.set_marker" class="fn">set_marker</a>(&amp;mut self, marker: &amp;<a class="struct" href="struct.ChartMarker.html" title="struct rust_xlsxwriter::chart::ChartMarker">ChartMarker</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the markers for a chart series.</p>
+<p>Set the markers and marker properties for a data series using a
+<a href="struct.ChartMarker.html" title="struct rust_xlsxwriter::chart::ChartMarker"><code>ChartMarker</code></a> instance. In general only Line, Scatter and Radar chart
+support markers.</p>
+<h5 id="parameters-5"><a class="doc-anchor" href="#parameters-5">§</a>Parameters</h5>
+<p><code>marker</code>: A <a href="struct.ChartMarker.html" title="struct rust_xlsxwriter::chart::ChartMarker"><code>ChartMarker</code></a> instance.</p>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<p>An example of adding markers to a Line chart.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Add a data series with formatting.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_marker(
+            ChartMarker::new()
+                .set_type(ChartMarkerType::Square)
+                .set_size(<span class="number">10</span>)
+                .set_format(
+                    ChartFormat::new().set_solid_fill(
+                        ChartSolidFill::new().set_color(<span class="string">"#FF0000"</span>)),
+                ),
+        );
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_marker.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_data_label" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7302-7305">Source</a><h4 class="code-header">pub fn <a href="#method.set_data_label" class="fn">set_data_label</a>(
+    &amp;mut self,
+    data_label: &amp;<a class="struct" href="struct.ChartDataLabel.html" title="struct rust_xlsxwriter::chart::ChartDataLabel">ChartDataLabel</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the data labels for a chart series.</p>
+<p>Set the data labels and marker properties for a data series using a
+<a href="struct.ChartDataLabel.html" title="struct rust_xlsxwriter::chart::ChartDataLabel"><code>ChartDataLabel</code></a> instance.</p>
+<h5 id="parameters-6"><a class="doc-anchor" href="#parameters-6">§</a>Parameters</h5>
+<p><code>data_label</code>: A <a href="struct.ChartDataLabel.html" title="struct rust_xlsxwriter::chart::ChartDataLabel"><code>ChartDataLabel</code></a> instance.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<p>An example of adding data labels to a chart series.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_data_label(ChartDataLabel::new().show_value());
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_data_labels.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_custom_data_labels" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7632-7640">Source</a><h4 class="code-header">pub fn <a href="#method.set_custom_data_labels" class="fn">set_custom_data_labels</a>(
+    &amp;mut self,
+    data_labels: &amp;[<a class="struct" href="struct.ChartDataLabel.html" title="struct rust_xlsxwriter::chart::ChartDataLabel">ChartDataLabel</a>],
+) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set custom data labels for a data series.</p>
+<p>The <a href="struct.ChartSeries.html#method.set_data_label" title="method rust_xlsxwriter::chart::ChartSeries::set_data_label"><code>ChartSeries::set_data_label()</code></a> method sets the data label
+properties for every label in a series but it is occasionally required
+to set separate properties for individual data labels, or set a custom
+display value, or format or hide some of the labels. This can be
+achieved with the <code>set_custom_data_labels()</code> method, see the examples
+below.</p>
+<h5 id="parameters-7"><a class="doc-anchor" href="#parameters-7">§</a>Parameters</h5>
+<p><code>data_labels</code>: A slice of <a href="struct.ChartDataLabel.html" title="struct rust_xlsxwriter::chart::ChartDataLabel"><code>ChartDataLabel</code></a> objects.</p>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<p>An example of adding custom data labels to a chart series. This is
+useful when you want to label the points of a data series with
+information that isn’t contained in the value or category names.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Create some custom data labels.
+    </span><span class="kw">let </span>data_labels = [
+        ChartDataLabel::new().set_value(<span class="string">"Alice"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"Bob"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"Carol"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"Dave"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"Eve"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"Frank"</span>).to_custom(),
+    ];
+
+    <span class="comment">// Add a data series.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_custom_data_labels(<span class="kw-2">&amp;</span>data_labels);
+
+    <span class="comment">// Turn legend off for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels1.png"></p>
+<p>This example shows how to get the data from cells. In Excel this is a
+single command called “Value from Cells” but in <code>rust_xlsxwriter</code> it
+needs to be broken down into a cell reference for each data label.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Create some custom data labels.
+    </span><span class="kw">let </span>data_labels = [
+        ChartDataLabel::new().set_value(<span class="string">"=Sheet1!$B$1"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"=Sheet1!$B$2"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"=Sheet1!$B$3"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"=Sheet1!$B$4"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"=Sheet1!$B$5"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"=Sheet1!$B$6"</span>).to_custom(),
+    ];
+
+    <span class="comment">// Add a data series.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_custom_data_labels(<span class="kw-2">&amp;</span>data_labels);
+
+    <span class="comment">// Turn legend off for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels2.png"></p>
+<p>This example shows how to add default/non-custom data labels along with
+custom data labels. This is done in two ways: with an explicit
+<code>default()</code> data label and with an implicit default for points that
+aren’t covered at the end of the list.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Create some custom data labels.
+    </span><span class="kw">let </span>data_labels = [
+        ChartDataLabel::default(),
+        ChartDataLabel::default(),
+        ChartDataLabel::new().set_value(<span class="string">"Alice"</span>).to_custom(),
+        ChartDataLabel::new().set_value(<span class="string">"Bob"</span>).to_custom(),
+        <span class="comment">// All other points after this will get a default label.
+    </span>];
+
+    <span class="comment">// Add a data series.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_custom_data_labels(<span class="kw-2">&amp;</span>data_labels);
+
+    <span class="comment">// Turn legend off for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels3.png"></p>
+<p>This example shows how to hide some of the data labels and keep others
+visible.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Create some custom data labels.
+    </span><span class="kw">let </span>data_labels = [
+        ChartDataLabel::default(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::default(),
+    ];
+
+    <span class="comment">// Add a data series.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_custom_data_labels(<span class="kw-2">&amp;</span>data_labels);
+
+    <span class="comment">// Turn legend off for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels4.png"></p>
+<p>This example shows how to format some of the data labels and leave the
+rest with the default formatting.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Create some custom data labels.
+    </span><span class="kw">let </span>data_labels = [
+        ChartDataLabel::new()
+            .set_value(<span class="string">"Start"</span>)
+            .set_format(
+                ChartFormat::new()
+                    .set_border(ChartLine::new().set_color(<span class="string">"#FF0000"</span>))
+                    .set_solid_fill(ChartSolidFill::new().set_color(<span class="string">"#FFFF00"</span>)),
+            )
+            .to_custom(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::new().set_hidden().to_custom(),
+        ChartDataLabel::new()
+            .set_value(<span class="string">"End"</span>)
+            .set_format(
+                ChartFormat::new()
+                    .set_border(ChartLine::new().set_color(<span class="string">"#FF0000"</span>))
+                    .set_solid_fill(ChartSolidFill::new().set_color(<span class="string">"#FFFF00"</span>)),
+            )
+            .to_custom(),
+    ];
+
+    <span class="comment">// Add a data series.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_custom_data_labels(<span class="kw-2">&amp;</span>data_labels);
+
+    <span class="comment">// Turn legend off for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels5.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_points" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7714-7717">Source</a><h4 class="code-header">pub fn <a href="#method.set_points" class="fn">set_points</a>(&amp;mut self, points: &amp;[<a class="struct" href="struct.ChartPoint.html" title="struct rust_xlsxwriter::chart::ChartPoint">ChartPoint</a>]) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the formatting and properties for points in a chart series.</p>
+<p>The meaning of “point” varies between chart types. For a Line chart a point
+is a line segment; in a Column chart a point is a an individual bar; and in
+a Pie chart a point is a pie segment.</p>
+<p>A point is represented by the <a href="struct.ChartPoint.html" title="struct rust_xlsxwriter::chart::ChartPoint"><code>ChartPoint</code></a> struct.</p>
+<p>Chart points are most commonly used for Pie and Doughnut charts to format
+individual segments of the chart. In all other chart types the formatting
+happens at the chart series level.</p>
+<h5 id="parameters-8"><a class="doc-anchor" href="#parameters-8">§</a>Parameters</h5>
+<p><code>points</code>: A slice of <a href="struct.ChartPoint.html" title="struct rust_xlsxwriter::chart::ChartPoint"><code>ChartPoint</code></a> objects.</p>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<p>An example of formatting the individual segments of a Pie chart.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Some point object with formatting to use in the Pie chart.
+    </span><span class="kw">let </span>points = <span class="macro">vec!</span>[
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color(<span class="string">"#FF0000"</span>)),
+        ),
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color(<span class="string">"#FFC000"</span>)),
+        ),
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color(<span class="string">"#FFFF00"</span>)),
+        ),
+    ];
+
+    <span class="comment">// Create a simple Pie chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new_pie();
+
+    <span class="comment">// Add a data series with formatting.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>)
+        .set_points(<span class="kw-2">&amp;</span>points);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_set_points.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_point_colors" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7781-7787">Source</a><h4 class="code-header">pub fn <a href="#method.set_point_colors" class="fn">set_point_colors</a>(
+    &amp;mut self,
+    colors: &amp;[impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="enum" href="../enum.Color.html" title="enum rust_xlsxwriter::Color">Color</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a>],
+) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the colors for points in a chart series.</p>
+<p>As explained above, in the section on <a href="struct.ChartSeries.html#method.set_points" title="method rust_xlsxwriter::chart::ChartSeries::set_points"><code>ChartSeries::set_points()</code></a>, the
+most common use case for point formatting is to set the formatting of
+individual segments of Pie charts, or in particular to set the colors of
+pie segments. For this simple use case the <a href="struct.ChartSeries.html#method.set_points" title="method rust_xlsxwriter::chart::ChartSeries::set_points"><code>ChartSeries::set_points()</code></a>
+method can be overly verbose.</p>
+<p>As a syntactic shortcut the <code>set_point_colors()</code> method allows you to
+set the colors of chart points with a simpler interface.</p>
+<p>Compare the example below with the previous more general example which
+both produce the same result.</p>
+<h5 id="parameters-9"><a class="doc-anchor" href="#parameters-9">§</a>Parameters</h5>
+<p><code>colors</code>: a slice of <a href="../enum.Color.html" title="enum rust_xlsxwriter::Color"><code>Color</code></a> enum values or types that will convert
+into <a href="../enum.Color.html" title="enum rust_xlsxwriter::Color"><code>Color</code></a>.</p>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<p>An example of setting the individual segment colors of a Pie chart.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new_pie();
+
+    <span class="comment">// Add a data series with formatting.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>)
+        .set_point_colors(<span class="kw-2">&amp;</span>[<span class="string">"#FF000"</span>, <span class="string">"#FFC000"</span>, <span class="string">"#FFFF00"</span>]);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_set_points.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_trendline" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7857-7860">Source</a><h4 class="code-header">pub fn <a href="#method.set_trendline" class="fn">set_trendline</a>(&amp;mut self, trendline: &amp;<a class="struct" href="struct.ChartTrendline.html" title="struct rust_xlsxwriter::chart::ChartTrendline">ChartTrendline</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the trendline for a chart series.</p>
+<p>Excel allows you to add a trendline to a data series that represents the
+trend or regression of the data using different types of fit. A
+<a href="struct.ChartTrendline.html" title="struct rust_xlsxwriter::chart::ChartTrendline"><code>ChartTrendline</code></a> struct reference is used to represents the options of
+Excel trendlines and can be added to a series via the
+<a href="struct.ChartSeries.html#method.set_trendline" title="method rust_xlsxwriter::chart::ChartSeries::set_trendline"><code>ChartSeries::set_trendline()</code></a> method.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/trendline_options.png"></p>
+<h5 id="parameters-10"><a class="doc-anchor" href="#parameters-10">§</a>Parameters</h5>
+<p><code>trendline</code>: A <a href="struct.ChartTrendline.html" title="struct rust_xlsxwriter::chart::ChartTrendline"><code>ChartTrendline</code></a> reference.</p>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<p>An example of adding a trendline to a chart data series. The options
+used are shown in the image above.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Add some data for the chart.
+    </span>worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="number">11.1</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">1</span>, <span class="number">0</span>, <span class="number">18.8</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="number">33.2</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">3</span>, <span class="number">0</span>, <span class="number">37.5</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">4</span>, <span class="number">0</span>, <span class="number">52.1</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">5</span>, <span class="number">0</span>, <span class="number">58.9</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a trendline.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>trendline = ChartTrendline::new();
+    trendline
+        .set_type(ChartTrendlineType::Linear)
+        .display_equation(<span class="bool-val">true</span>)
+        .display_r_squared(<span class="bool-val">true</span>);
+
+    <span class="comment">// Create a new chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Add a data series with a trendline.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_trendline(<span class="kw-2">&amp;</span>trendline);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file.
+    </span>workbook.save(<span class="string">"chart.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_trendline_intro.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_y_error_bars" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7930-7933">Source</a><h4 class="code-header">pub fn <a href="#method.set_y_error_bars" class="fn">set_y_error_bars</a>(
+    &amp;mut self,
+    error_bars: &amp;<a class="struct" href="struct.ChartErrorBars.html" title="struct rust_xlsxwriter::chart::ChartErrorBars">ChartErrorBars</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the vertical error bars for a chart series.</p>
+<p>Error bars on Excel charts allow you to show margins of error for a series
+based on measures such as Standard Deviation, Standard Error, Fixed values,
+Percentages or even custom defined ranges.</p>
+<p>The <code>ChartErrorBars</code> struct represents the error bars for a chart series.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_error_bars_options.png"></p>
+<h5 id="parameters-11"><a class="doc-anchor" href="#parameters-11">§</a>Parameters</h5>
+<p><code>error_bars</code>: A <a href="struct.ChartErrorBars.html" title="struct rust_xlsxwriter::chart::ChartErrorBars"><code>ChartErrorBars</code></a> reference.</p>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<p>An example of adding error bars to a chart data series.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Add a data series with error bars.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_y_error_bars(
+            ChartErrorBars::new()
+                .set_type(ChartErrorBarsType::StandardError)
+                .set_format(ChartLine::new().set_color(<span class="string">"#FF0000"</span>)),
+        );
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_error_bars_intro.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_x_error_bars" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#7946-7949">Source</a><h4 class="code-header">pub fn <a href="#method.set_x_error_bars" class="fn">set_x_error_bars</a>(
+    &amp;mut self,
+    error_bars: &amp;<a class="struct" href="struct.ChartErrorBars.html" title="struct rust_xlsxwriter::chart::ChartErrorBars">ChartErrorBars</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the horizontal error bars for a chart series.</p>
+<p>See <a href="struct.ChartSeries.html#method.set_y_error_bars" title="method rust_xlsxwriter::chart::ChartSeries::set_y_error_bars"><code>ChartSeries::set_y_error_bars()</code></a> above for a description of error
+bars and their properties.</p>
+<p>Horizontal error bars can only be set in Excel for Scatter and Bar charts.</p>
+<h5 id="parameters-12"><a class="doc-anchor" href="#parameters-12">§</a>Parameters</h5>
+<p><code>error_bars</code>: A <a href="struct.ChartErrorBars.html" title="struct rust_xlsxwriter::chart::ChartErrorBars"><code>ChartErrorBars</code></a> reference.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_overlap" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#8014-8019">Source</a><h4 class="code-header">pub fn <a href="#method.set_overlap" class="fn">set_overlap</a>(&amp;mut self, overlap: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.i8.html">i8</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the series overlap for a chart/bar chart.</p>
+<p>Set the overlap between series in a Bar/Column chart. The range is -100
+&lt;= overlap &lt;= 100 and the default is 0.</p>
+<p>Note, In Excel this property is only available for Bar and Column charts
+and also only needs to be applied to one of the data series of the
+chart.</p>
+<h5 id="parameters-13"><a class="doc-anchor" href="#parameters-13">§</a>Parameters</h5>
+<ul>
+<li><code>overlap</code>: Overlap percentage of columns in Bar/Column charts. The
+range is -100 &lt;= overlap &lt;= 100 and the default is 0.</li>
+</ul>
+<h5 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h5>
+<p>an example of setting the chart series gap and overlap. Note that it
+only needs to be applied to one of the series in the chart.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure the data series and add a gap/overlap. Note that it only needs
+    // to be applied to one of the series in the chart.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$4"</span>)
+        .set_overlap(<span class="number">37</span>)
+        .set_gap(<span class="number">70</span>);
+
+    chart.add_series().set_values(<span class="string">"Sheet1!$B$1:$B$4"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"chart.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_overlap.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_gap" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#8037-8042">Source</a><h4 class="code-header">pub fn <a href="#method.set_gap" class="fn">set_gap</a>(&amp;mut self, gap: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u16.html">u16</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the gap width for a chart/bar chart.</p>
+<p>Set the gap width between series in a Bar/Column chart. The range is 0
+&lt;= gap &lt;= 500 and the default is 150.</p>
+<p>Note, In Excel this property is only available for Bar and Column charts
+and also only needs to be applied to one of the data series of the
+chart.</p>
+<h5 id="parameters-14"><a class="doc-anchor" href="#parameters-14">§</a>Parameters</h5>
+<ul>
+<li><code>gap</code>: Gap percentage of columns in Bar/Column charts. The range is 0
+&lt;= gap &lt;= 500 and the default is 150.</li>
+</ul>
+<p>See the example for <a href="struct.ChartSeries.html#method.set_overlap" title="method rust_xlsxwriter::chart::ChartSeries::set_overlap"><code>ChartSeries::set_overlap()</code></a> above.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_smooth" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#8059-8062">Source</a><h4 class="code-header">pub fn <a href="#method.set_smooth" class="fn">set_smooth</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set line type charts to smooth for a series.</p>
+<p>Line and Scatter charts can have a linear or smoothed line connecting
+their data points. Some chart types such as <a href="enum.ChartType.html#variant.ScatterSmooth" title="variant rust_xlsxwriter::chart::ChartType::ScatterSmooth"><code>ChartType::ScatterSmooth</code></a> have
+smoothed series by default and some such as
+<a href="enum.ChartType.html#variant.ScatterStraight" title="variant rust_xlsxwriter::chart::ChartType::ScatterStraight"><code>ChartType::ScatterStraight</code></a> don’t.</p>
+<p>The <code>ChartSeries::set_smooth()</code> method can be used to turn on/off the
+smooth property for a series.</p>
+<h5 id="parameters-15"><a class="doc-anchor" href="#parameters-15">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. The default depends on the chart
+type.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_invert_if_negative" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#8121-8124">Source</a><h4 class="code-header">pub fn <a href="#method.set_invert_if_negative" class="fn">set_invert_if_negative</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Invert the color for negative values in a column/bar chart series.</p>
+<p>Bar and Column charts in Excel offer a series property called “Invert if
+negative”. This isn’t available for other types of charts.</p>
+<p>The negative values are shown as a white solid fill with a black border.
+To set the color of the negative part of the bar/column see
+<a href="struct.ChartSeries.html#method.set_invert_if_negative_color" title="method rust_xlsxwriter::chart::ChartSeries::set_invert_if_negative_color"><code>ChartSeries::set_invert_if_negative_color()</code></a> below.</p>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<p>A chart example demonstrating setting the “Invert if negative” property
+for a chart series.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series and set the "Invert if negative" property.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>)
+        .set_invert_if_negative();
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_invert_if_negative.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_invert_if_negative_color" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#8190-8197">Source</a><h4 class="code-header">pub fn <a href="#method.set_invert_if_negative_color" class="fn">set_invert_if_negative_color</a>(
+    &amp;mut self,
+    color: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="enum" href="../enum.Color.html" title="enum rust_xlsxwriter::Color">Color</a>&gt;,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Set the inverted color for negative values in a column/bar chart series.</p>
+<p>Bar and Column charts in Excel offer a series property called “Invert if
+negative” (see <a href="struct.ChartSeries.html#method.set_invert_if_negative" title="method rust_xlsxwriter::chart::ChartSeries::set_invert_if_negative"><code>ChartSeries::set_invert_if_negative()</code></a> above).</p>
+<p>The negative values are usually shown as a white solid fill with a black
+border but the <code>set_invert_if_negative_color()</code> method can be use to set
+a user defined color. This also requires that you set a
+<a href="struct.ChartSolidFill.html" title="struct rust_xlsxwriter::chart::ChartSolidFill"><code>ChartSolidFill</code></a> for the series.</p>
+<h5 id="parameters-16"><a class="doc-anchor" href="#parameters-16">§</a>Parameters</h5>
+<ul>
+<li><code>color</code>: The inverse color property defined by a <a href="../enum.Color.html" title="enum rust_xlsxwriter::Color"><code>Color</code></a> enum value.</li>
+</ul>
+<h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
+<p>A chart example demonstrating setting the “Invert if negative” property
+and associated color for a chart series. This also requires that you set
+a solid fill color for the series.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series and set the "Invert if negative" property and color.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>)
+        .set_format(ChartSolidFill::new().set_color(<span class="string">"#4C9900"</span>))
+        .set_invert_if_negative_color(<span class="string">"#FF6666"</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_invert_if_negative_color.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.delete_from_legend" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#8277-8280">Source</a><h4 class="code-header">pub fn <a href="#method.delete_from_legend" class="fn">delete_from_legend</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class="docblock"><p>Delete/hide the series name from the chart legend.</p>
+<p>The <code>delete_from_legend()</code> method deletes/hides the series name from the
+chart legend. This is sometimes required if there are a lot of secondary
+series and their names are cluttering the chart legend.</p>
+<p>Note, to hide all the names in the chart legend you should use the
+<a href="struct.ChartLegend.html#method.set_hidden" title="method rust_xlsxwriter::chart::ChartLegend::set_hidden"><code>ChartLegend::set_hidden()</code></a> method instead.</p>
+<p>See also the <a href="struct.ChartTrendline.html#method.delete_from_legend" title="method rust_xlsxwriter::chart::ChartTrendline::delete_from_legend"><code>ChartTrendline::delete_from_legend()</code></a> and the
+<a href="struct.ChartLegend.html#method.delete_entries" title="method rust_xlsxwriter::chart::ChartLegend::delete_entries"><code>ChartLegend::delete_entries()</code></a> methods.</p>
+<h5 id="parameters-17"><a class="doc-anchor" href="#parameters-17">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is off by default.</li>
+</ul>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<p>A chart example demonstrating deleting/hiding a series name from the
+chart legend.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a series whose name will appear in the legend.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>);
+
+    <span class="comment">// Add a series but delete/hide its names from the legend.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$B$1:$B$3"</span>)
+        .delete_from_legend(<span class="bool-val">true</span>);
+
+    <span class="comment">// Add a series whose name will appear in the legend.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$C$1:$C$3"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend.png"></p>
+<p>The default display without deleting the names from the legend would
+look like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend2.png"></p>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-ChartSeries" class="impl"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#6684">Source</a><a href="#impl-Clone-for-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#6684">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#213-215">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-ChartSeries" class="impl"><a href="#impl-Freeze-for-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section><section id="impl-RefUnwindSafe-for-ChartSeries" class="impl"><a href="#impl-RefUnwindSafe-for-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section><section id="impl-Send-for-ChartSeries" class="impl"><a href="#impl-Send-for-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section><section id="impl-Sync-for-ChartSeries" class="impl"><a href="#impl-Sync-for-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section><section id="impl-Unpin-for-ChartSeries" class="impl"><a href="#impl-Unpin-for-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section><section id="impl-UnwindSafe-for-ChartSeries" class="impl"><a href="#impl-UnwindSafe-for-ChartSeries" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">ChartSeries</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.89.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#209">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#211">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#217">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#218">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#483">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#485">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#774">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#757-759">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#767">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#82-84">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#86">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#87">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#91">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#813-815">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#817">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#820">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#798-800">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#802">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#805">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main></body></html>

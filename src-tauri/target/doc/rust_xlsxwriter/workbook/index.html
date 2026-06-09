@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Working with Workbooks"><title>rust_xlsxwriter::workbook - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module workbook</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#working-with-workbooks" title="Working with Workbooks">Working with Workbooks</a></li><li><a href="#contents" title="Contents">Contents</a></li><li><a href="#creating-and-saving-an-xlsx-file" title="Creating and saving an xlsx file">Creating and saving an xlsx file</a></li><li><a href="#checksum-of-a-saved-file" title="Checksum of a saved file">Checksum of a saved file</a></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a></div><h1>Module <span>workbook</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/workbook.rs.html#7-2592">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="working-with-workbooks"><a class="doc-anchor" href="#working-with-workbooks">§</a>Working with Workbooks</h2>
+<p>The <a href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook"><code>Workbook</code></a> struct represents an Excel file in it’s entirety. It is the
+starting point for creating a new Excel xlsx file.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>_worksheet = workbook.add_worksheet();
+
+    workbook.save(<span class="string">"workbook.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
+<p>For more details on the Worksheet APIs for see the <a href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet"><code>Worksheet</code></a>
+documentation and the sections below.</p>
+<h2 id="contents"><a class="doc-anchor" href="#contents">§</a>Contents</h2>
+<ul>
+<li><a href="#creating-and-saving-an-xlsx-file">Creating and saving an xlsx file</a></li>
+<li><a href="#checksum-of-a-saved-file">Checksum of a saved file</a></li>
+</ul>
+<h2 id="creating-and-saving-an-xlsx-file"><a class="doc-anchor" href="#creating-and-saving-an-xlsx-file">§</a>Creating and saving an xlsx file</h2>
+<p>Creating a  <a href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook"><code>Workbook</code></a> struct instance to represent an Excel xlsx file is
+done via the <a href="struct.Workbook.html#method.new" title="associated function rust_xlsxwriter::workbook::Workbook::new"><code>Workbook::new()</code></a> method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+</code></pre></div>
+<p>Once you are finished writing data via a worksheet you can save it with the
+<a href="struct.Workbook.html#method.save" title="method rust_xlsxwriter::workbook::Workbook::save"><code>Workbook::save()</code></a> method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>_worksheet = workbook.add_worksheet();
+
+    workbook.save(<span class="string">"workbook.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>This will you a simple output file like the following.</p>
+<img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
+<p>The  <code>save()</code> method takes a <a href="https://doc.rust-lang.org/1.89.0/std/path/index.html" title="mod std::path"><code>std::path</code></a> or path/filename string. You can
+also save the xlsx file data to a <code>Vec&lt;u8&gt;</code> buffer via the
+<a href="struct.Workbook.html#method.save_to_buffer" title="method rust_xlsxwriter::workbook::Workbook::save_to_buffer"><code>Workbook::save_to_buffer()</code></a> method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+    worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>buf = workbook.save_to_buffer()<span class="question-mark">?</span>;
+
+    <span class="macro">println!</span>(<span class="string">"File size: {}"</span>, buf.len());
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>This can be useful if you intend to stream the data.</p>
+<h2 id="checksum-of-a-saved-file"><a class="doc-anchor" href="#checksum-of-a-saved-file">§</a>Checksum of a saved file</h2>
+<p>A common issue that occurs with <code>rust_xlsxwriter</code>, but also with Excel, is
+that running the same program twice doesn’t generate the same file, byte for
+byte. This can cause issues with applications that do checksumming for
+testing purposes.</p>
+<p>For example consider the following simple <code>rust_xlsxwriter</code> program:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"properties.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>If we run this several times, with a small delay, we will get different
+checksums as shown below:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo run --example doc_properties_checksum1
+
+$ sum properties.xlsx
+62457 6 properties.xlsx
+
+$ sleep 2
+
+$ cargo run --example doc_properties_checksum1
+
+$ sum properties.xlsx
+56692 6 properties.xlsx # Different to previous.</code></pre></div>
+<p>This is due to a file creation datetime that is included in the file and
+which changes each time a new file is created.</p>
+<p>The relevant section of the <code>docProps/core.xml</code> sub-file in the xlsx format
+looks like this:</p>
+<div class="example-wrap"><pre class="language-xml"><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+&lt;cp:coreProperties&gt;
+  &lt;dc:creator/&gt;
+  &lt;cp:lastModifiedBy/&gt;
+  &lt;dcterms:created xsi:type=&quot;dcterms:W3CDTF&quot;&gt;2023-01-08T00:23:58Z&lt;/dcterms:created&gt;
+  &lt;dcterms:modified xsi:type=&quot;dcterms:W3CDTF&quot;&gt;2023-01-08T00:23:58Z&lt;/dcterms:modified&gt;
+&lt;/cp:coreProperties&gt;</code></pre></div>
+<p>If required this can be avoided by setting a constant creation date in the
+document properties metadata:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{DocProperties, ExcelDateTime, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Create a file creation date for the file.
+    </span><span class="kw">let </span>date = ExcelDateTime::from_ymd(<span class="number">2023</span>, <span class="number">1</span>, <span class="number">1</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add it to the document metadata.
+    </span><span class="kw">let </span>properties = DocProperties::new().set_creation_datetime(<span class="kw-2">&amp;</span>date);
+    workbook.set_properties(<span class="kw-2">&amp;</span>properties);
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+    worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"properties.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Then we will get the same checksum for the same output every time:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo run --example doc_properties_checksum2
+
+$ sum properties.xlsx 8914 6 properties.xlsx
+
+$ sleep 2
+
+$ cargo run --example doc_properties_checksum2
+
+$ sum properties.xlsx 8914 6 properties.xlsx # Same as previous</code></pre></div>
+<p>For more details see <a href="../struct.DocProperties.html" title="struct rust_xlsxwriter::DocProperties"><code>DocProperties</code></a> and <a href="struct.Workbook.html#method.set_properties" title="method rust_xlsxwriter::workbook::Workbook::set_properties"><code>Workbook::set_properties()</code></a>.</p>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></dt><dd>The <code>Workbook</code> struct represents an Excel file in its entirety. It is the
+starting point for creating a new Excel xlsx file.</dd></dl></section></div></main></body></html>

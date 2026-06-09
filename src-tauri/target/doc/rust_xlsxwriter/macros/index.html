@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Working with VBA Macros"><title>rust_xlsxwriter::macros - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module macros</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#working-with-vba-macros" title="Working with VBA Macros">Working with VBA Macros</a></li><li><a href="#the-excel-xlsm-file-format" title="The Excel XLSM file format">The Excel XLSM file format</a></li><li><a href="#how-vba-macros-are-included-in-rust_xlsxwriter" title="How VBA macros are included in `rust_xlsxwriter`">How VBA macros are included in <code>rust_xlsxwriter</code></a></li><li><a href="#the-vba_extract-utility" title="The `vba_extract` utility">The <code>vba_extract</code> utility</a></li><li><a href="#adding-vba-macros-to-a-rust_xlsxwriter-file" title="Adding VBA macros to a `rust_xlsxwriter` file">Adding VBA macros to a <code>rust_xlsxwriter</code> file</a></li><li><a href="#setting-the-vba-object-names" title="Setting the VBA object names">Setting the VBA object names</a></li><li><a href="#adding-a-vba-macro-signature-file-to-an-rust_xlsxwriter-file" title="Adding a VBA macro signature file to an `rust_xlsxwriter` file">Adding a VBA macro signature file to an <code>rust_xlsxwriter</code> file</a></li><li><a href="#what-to-do-if-it-doesnt-work" title="What to do if it doesn’t work">What to do if it doesn’t work</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a></div><h1>Module <span>macros</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/macros.rs.html#1-316">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="working-with-vba-macros"><a class="doc-anchor" href="#working-with-vba-macros">§</a>Working with VBA Macros</h2>
+<p>This section explains how to add a VBA file containing functions or macros to an
+<code>rust_xlsxwriter</code> file.</p>
+<img src="https://rustxlsxwriter.github.io/images/app_macros.png">
+<h2 id="the-excel-xlsm-file-format"><a class="doc-anchor" href="#the-excel-xlsm-file-format">§</a>The Excel XLSM file format</h2>
+<p>An Excel <code>xlsm</code> file is structurally the same as an <code>xlsx</code> file except that it
+contains an additional <code>vbaProject.bin</code> binary file containing VBA functions
+and/or macros.</p>
+<p>Excel <code>xlsm</code> files are subject to additional security checks and warning when
+loaded:</p>
+<img src="https://rustxlsxwriter.github.io/images/doc_macros_warning.png">
+<h2 id="how-vba-macros-are-included-in-rust_xlsxwriter"><a class="doc-anchor" href="#how-vba-macros-are-included-in-rust_xlsxwriter">§</a>How VBA macros are included in <code>rust_xlsxwriter</code></h2>
+<p>The <code>vbaProject.bin</code> in a <code>xlsm</code> file is a binary OLE COM container. This was
+the format used in older <code>xls</code> versions of Excel prior to Excel 2007. Unlike
+other components of an xlsx/xlsm file the data isn’t stored in XML format.
+Instead the functions and macros as stored as a pre-parsed binary format. As
+such it wouldn’t be feasible to programmatically define macros and create a
+<code>vbaProject.bin</code> file from scratch (at least not in the remaining lifespan and
+interest levels of the author).</p>
+<p>Instead, as a workaround, a utility is used to extract <code>vbaProject.bin</code> files
+from existing xlsm files which you can then add to <code>rust_xlsxwriter</code> files.</p>
+<h2 id="the-vba_extract-utility"><a class="doc-anchor" href="#the-vba_extract-utility">§</a>The <code>vba_extract</code> utility</h2>
+<p>The Rust <a href="https://crates.io/crates/vba_extract"><code>vba_extract</code></a> utility is used
+to extract the <code>vbaProject.bin</code> binary from an Excel <code>xlsm</code> file. The utility
+can be installed via <code>cargo</code>:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo install vba_extract</code></pre></div>
+<p>Once <code>vba_extract</code> is installed it can be used as follows:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ vba_extract macro_file.xlsm
+
+Extracted: vbaProject.bin</code></pre></div>
+<p>If the VBA project is signed, <code>vba_extract</code> also extracts the
+<code>vbaProjectSignature.bin</code> file from the xlsm file (see below).</p>
+<p>The syntax and options for <code>vba_extract</code> are:</p>
+<div class="example-wrap"><pre class="language-text"><code>$ vba_extract --help
+
+Utility to extract a `vbaProject.bin` binary from an Excel xlsm macro file
+for insertion into an `rust_xlsxwriter` file. If the macros are digitally
+signed, it also extracts a `vbaProjectSignature.bin` file.
+
+Usage: vba_extract [OPTIONS] &lt;FILENAME_XLSM&gt;
+
+Arguments:
+  &lt;FILENAME_XLSM&gt;
+          Input Excel xlsm filename
+
+Options:
+  -o, --output-macro-filename &lt;OUTPUT_MACRO_FILENAME&gt;
+          Output vba macro filename
+
+          [default: vbaProject.bin]
+
+  -s, --output-sig-filename &lt;OUTPUT_SIG_FILENAME&gt;
+          Output vba signature filename (if present in the parent file)
+
+          [default: vbaProjectSignature.bin]
+
+  -h, --help
+          Print help (see a summary with &#39;-h&#39;)
+
+  -V, --version
+          Print version</code></pre></div><h2 id="adding-vba-macros-to-a-rust_xlsxwriter-file"><a class="doc-anchor" href="#adding-vba-macros-to-a-rust_xlsxwriter-file">§</a>Adding VBA macros to a <code>rust_xlsxwriter</code> file</h2>
+<p>Once the <code>vbaProject.bin</code> file has been extracted it can be added to the
+<code>rust_xlsxwriter</code> workbook using the
+<a href="../workbook/struct.Workbook.html#method.add_vba_project" title="method rust_xlsxwriter::workbook::Workbook::add_vba_project"><code>Workbook::add_vba_project()</code></a> method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    workbook.add_vba_project(<span class="string">"examples/vbaProject.bin"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Here is a complete example which adds a macro file with a dialog. It also uses a
+button, via <a href="../worksheet/struct.Worksheet.html#method.insert_button" title="method rust_xlsxwriter::worksheet::Worksheet::insert_button"><code>Worksheet::insert_button()</code></a>, to
+trigger the macro:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Button, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add the VBA macro file.
+    </span>workbook.add_vba_project(<span class="string">"examples/vbaProject.bin"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a worksheet and some text.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Widen the first column for clarity.
+    </span>worksheet.set_column_width(<span class="number">0</span>, <span class="number">30</span>)<span class="question-mark">?</span>;
+
+    worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="string">"Press the button to say hello:"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a button tied to a macro in the VBA project.
+    </span><span class="kw">let </span>button = Button::new()
+        .set_caption(<span class="string">"Press Me"</span>)
+        .set_macro(<span class="string">"say_hello"</span>)
+        .set_width(<span class="number">80</span>)
+        .set_height(<span class="number">30</span>);
+
+    worksheet.insert_button(<span class="number">2</span>, <span class="number">1</span>, <span class="kw-2">&amp;</span>button)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk. Note the `.xlsm` extension. This is required by
+    // Excel or it raise a warning.
+    </span>workbook.save(<span class="string">"macros.xlsm"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>The macro in this example is the following VBA code:</p>
+<div class="example-wrap"><pre class="language-basic"><code>Sub say_hello()
+    MsgBox (&quot;Hello from Rust!&quot;)
+End Sub</code></pre></div>
+<p>Output file after running macro:</p>
+<img src="https://rustxlsxwriter.github.io/images/app_macros.png">
+<p>If the VBA file contains functions you can then refer to them in calculations
+using <a href="../worksheet/struct.Worksheet.html#method.write_formula" title="method rust_xlsxwriter::worksheet::Worksheet::write_formula"><code>Worksheet::write_formula()</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    worksheet.write_formula(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"=MyMortgageCalc(200000, 25)"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Note</strong>: Excel files that contain functions and macros must use an <code>.xlsm</code>
+extension or else Excel will complain and possibly not open the file.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Note the `.xlsm` extension.
+    </span>workbook.save(<span class="string">"macros.xlsm"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Here is the dialog that appears when a valid <code>xlsm</code> file is incorrectly given a
+<code>xlsx</code> extension:</p>
+<img src="https://rustxlsxwriter.github.io/images/doc_macros_wrong_extension.png">
+<h2 id="setting-the-vba-object-names"><a class="doc-anchor" href="#setting-the-vba-object-names">§</a>Setting the VBA object names</h2>
+<p>VBA macros generally refer to workbook and worksheet objects via names such as
+<code>ThisWorkbook</code> and <code>Sheet1</code>, <code>Sheet2</code> etc.</p>
+<p>If the imported macro uses other names you can set them using the
+<a href="../workbook/struct.Workbook.html#method.set_vba_name" title="method rust_xlsxwriter::workbook::Workbook::set_vba_name"><code>Workbook::set_vba_name()</code></a> and
+<a href="../worksheet/struct.Worksheet.html#method.set_vba_name" title="method rust_xlsxwriter::worksheet::Worksheet::set_vba_name"><code>Worksheet::set_vba_name()</code></a> methods as
+follows.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    workbook.set_vba_name(<span class="string">"MyWorkbook"</span>)<span class="question-mark">?</span>;
+    worksheet.set_vba_name(<span class="string">"MySheet1"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Note</strong>: If you are using a non-English version of Excel you need to pay
+particular attention to the workbook/worksheet naming that your version of Excel
+uses and add the correct VBA names. You can find the names that are used in the
+VBA editor:</p>
+<img src="https://rustxlsxwriter.github.io/images/doc_macros_editor.png">
+<p>You can also find them by unzipping the <code>xlsm</code> file and grepping the component
+XML files. The following shows how to do that using system <code>unzip</code> and libxml’s
+<a href="http://xmlsoft.org/xmllint.html">xmllint</a> to format the XML for clarity</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ unzip myfile.xlsm -d myfile
+$ xmllint --format `find myfile -name &quot;*.xml&quot; | xargs` | grep &quot;Pr.*codeName&quot;
+
+    &lt;workbookPr codeName=&quot;MyWorkbook&quot; defaultThemeVersion=&quot;124226&quot;/&gt;
+    &lt;sheetPr codeName=&quot;MySheet&quot;/&gt;</code></pre></div><h2 id="adding-a-vba-macro-signature-file-to-an-rust_xlsxwriter-file"><a class="doc-anchor" href="#adding-a-vba-macro-signature-file-to-an-rust_xlsxwriter-file">§</a>Adding a VBA macro signature file to an <code>rust_xlsxwriter</code> file</h2>
+<p>VBA macros can be signed in Excel to allow for further control over execution.
+The signature part is added to the <code>xlsm</code> file in another binary called <code>vbaProjectSignature.bin</code>.</p>
+<p>The <code>vba_extract</code> utility will extract the <code>vbaProject.bin</code> and
+<code>vbaProjectSignature.bin</code> files from an <code>xlsm</code> file with signed macros.</p>
+<p>These files can be added to a <code>rust_xlsxwriter</code> file using the
+<a href="../workbook/struct.Workbook.html#method.add_vba_project_with_signature" title="method rust_xlsxwriter::workbook::Workbook::add_vba_project_with_signature"><code>Workbook::add_vba_project_with_signature()</code></a>
+method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    workbook.add_vba_project_with_signature(
+        <span class="string">"examples/vbaProject.bin"</span>,
+        <span class="string">"examples/vbaProjectSignature.bin"</span>,
+    )<span class="question-mark">?</span>;</code></pre></div>
+<h2 id="what-to-do-if-it-doesnt-work"><a class="doc-anchor" href="#what-to-do-if-it-doesnt-work">§</a>What to do if it doesn’t work</h2>
+<p>The <code>rust_xlsxwriter</code> test suite contains several tests to ensure that this
+feature works and there is a working example shown above. However, there is no
+guarantee that it will work in all cases. Some trial and error may be required
+and some knowledge of VBA will certainly help. If things don’t work out here are
+some things to try:</p>
+<ol>
+<li>
+<p>Start with a simple macro file, ensure that it works, and then add
+complexity.</p>
+</li>
+<li>
+<p>Check the code names that macros use to refer to the workbook and worksheets
+(see above). In general VBA uses a code name of
+<code>ThisWorkbook</code> to refer to the current workbook and the sheet name (such as
+<code>Sheet1</code>) to refer to the worksheets. These are the defaults used by
+<code>rust_xlsxwriter</code>. If the macro uses other names, or the macro was extracted
+from an non-English language version of Excel, then you can specify these
+using the workbook and worksheet <code>set_vba_name</code> methods.</p>
+</li>
+</ol>
+</div></details></section></div></main></body></html>

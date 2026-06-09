@@ -1,0 +1,602 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A getting started tutorial for `rust_xlsxwriter`."><title>rust_xlsxwriter::tutorial - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module tutorial</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#introduction" title="Introduction">Introduction</a></li><li><a href="#getting-started" title="Getting started">Getting started</a><ul><li><a href="#create-a-sample-project" title="Create a sample project">Create a sample project</a></li><li><a href="#add-rust_xlsxwriter-to-cargotoml" title="Add `rust_xlsxwriter` to Cargo.toml">Add <code>rust_xlsxwriter</code> to Cargo.toml</a></li><li><a href="#modify-mainrs" title="Modify main.rs">Modify main.rs</a></li><li><a href="#run-the-application" title="Run the application">Run the application</a></li></ul></li><li><a href="#tutorial" title="Tutorial">Tutorial</a><ul><li><a href="#reading-ahead" title="Reading ahead">Reading ahead</a></li><li><a href="#tutorial-part-1-adding-data-to-a-worksheet" title="Tutorial Part 1: Adding data to a worksheet">Tutorial Part 1: Adding data to a worksheet</a></li><li><a href="#tutorial-part-2-adding-some-formatting" title="Tutorial Part 2: Adding some formatting">Tutorial Part 2: Adding some formatting</a></li><li><a href="#tutorial-part-3-adding-dates-and-more-formatting" title="Tutorial Part 3: Adding dates and more formatting">Tutorial Part 3: Adding dates and more formatting</a></li><li><a href="#tutorial-part-4-adding-a-chart" title="Tutorial Part 4: Adding a chart">Tutorial Part 4: Adding a chart</a></li><li><a href="#tutorial-part-5-making-the-code-more-programmatic" title="Tutorial Part 5: Making the code more programmatic">Tutorial Part 5: Making the code more programmatic</a></li></ul></li><li><a href="#next-steps" title="Next steps">Next steps</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a></div><h1>Module <span>tutorial</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/tutorial.rs.html#1-750">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A getting started tutorial for <code>rust_xlsxwriter</code>.</p>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#getting-started">Getting started</a>
+<ul>
+<li><a href="#create-a-sample-project">Create a sample project</a></li>
+<li><a href="#add-rust_xlsxwriter-to-cargotoml">Add <code>rust_xlsxwriter</code> to Cargo.toml</a></li>
+<li><a href="#modify-mainrs">Modify main.rs</a></li>
+<li><a href="#run-the-application">Run the application</a></li>
+</ul>
+</li>
+<li><a href="#tutorial">Tutorial</a>
+<ul>
+<li><a href="#reading-ahead">Reading ahead</a></li>
+<li><a href="#tutorial-part-1-adding-data-to-a-worksheet">Tutorial Part 1: Adding data to a worksheet</a></li>
+<li><a href="#tutorial-part-2-adding-some-formatting">Tutorial Part 2: Adding some formatting</a></li>
+<li><a href="#tutorial-part-3-adding-dates-and-more-formatting">Tutorial Part 3: Adding dates and more formatting</a></li>
+<li><a href="#tutorial-part-4-adding-a-chart">Tutorial Part 4: Adding a chart</a></li>
+<li><a href="#tutorial-part-5-making-the-code-more-programmatic">Tutorial Part 5: Making the code more programmatic</a></li>
+</ul>
+</li>
+<li><a href="#next-steps">Next steps</a></li>
+</ul>
+<h2 id="introduction"><a class="doc-anchor" href="#introduction">§</a>Introduction</h2>
+<p>The <code>rust_xlsxwriter</code> library is a Rust library for writing Excel files in
+the xlsx format.</p>
+<img src="https://rustxlsxwriter.github.io/images/demo.png">
+<p>It can be used to write text, numbers, dates and formulas to multiple worksheets
+in a new Excel 2007+ xlsx file. It has a focus on performance and on fidelity
+with the file format created by Excel.</p>
+<p>This document is a tutorial on getting started with <code>rust_xlsxwriter</code> and for
+using it to write Excel xlsx files.</p>
+<h2 id="getting-started"><a class="doc-anchor" href="#getting-started">§</a>Getting started</h2>
+<p>To use the <code>rust_xlsxwriter</code> in an application or in another library you
+will need add it as a dependency to the <code>Cargo.toml</code> file of your project.</p>
+<p>To demonstrate the steps required we will start with a small sample application.</p>
+<h3 id="create-a-sample-project"><a class="doc-anchor" href="#create-a-sample-project">§</a>Create a sample project</h3>
+<p>Create a new Rust command-line application as follows:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo new hello-xlsx</code></pre></div>
+<p>Change to the new <code>hello-xlsx</code> directory:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cd hello-xlsx</code></pre></div>
+<p>The directory structure will look like the following:</p>
+<div class="example-wrap"><pre class="language-bash"><code>hello-xlsx/
+├── Cargo.toml
+└── src
+    └── main.rs</code></pre></div><h3 id="add-rust_xlsxwriter-to-cargotoml"><a class="doc-anchor" href="#add-rust_xlsxwriter-to-cargotoml">§</a>Add <code>rust_xlsxwriter</code> to Cargo.toml</h3>
+<p>Add the <code>rust_xlsxwriter</code> dependency to the project <code>Cargo.toml</code> file:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo add rust_xlsxwriter</code></pre></div><h3 id="modify-mainrs"><a class="doc-anchor" href="#modify-mainrs">§</a>Modify main.rs</h3>
+<p>Modify the <code>src/main.rs</code> file so it looks like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// This code is available in examples/app_hello_world.rs
+</span><span class="kw">use </span>rust_xlsxwriter::{Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Write a string to cell (0, 0) = A1.
+    </span>worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a number to cell (1, 0) = A2.
+    </span>worksheet.write(<span class="number">1</span>, <span class="number">0</span>, <span class="number">12345</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"hello.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h3 id="run-the-application"><a class="doc-anchor" href="#run-the-application">§</a>Run the application</h3>
+<p>Run the application as follows:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo run</code></pre></div>
+<p>This will create an output file called <code>hello.xlsx</code> which should look something
+like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/hello.png">
+<p>Once you have the “hello world” application working you can move on to a
+slightly more realistic tutorial example.</p>
+<h2 id="tutorial"><a class="doc-anchor" href="#tutorial">§</a>Tutorial</h2>
+<p>To look at some of the basic but more useful features of the
+<code>rust_xlsxwriter</code> library we will create an application to summarize some
+monthly expenses into a spreadsheet.</p>
+<h3 id="reading-ahead"><a class="doc-anchor" href="#reading-ahead">§</a>Reading ahead</h3>
+<p>The tutorial presents a simple direct approach so as not to confuse the reader
+with information that isn’t required for an initial understanding. If there is
+more advanced information that might be interesting at a later stage it will be
+highlighted in a “Reading ahead” section like this:</p>
+<blockquote>
+<p><strong>Reading ahead</strong>:</p>
+<p>Some more advanced information.</p>
+</blockquote>
+<h3 id="tutorial-part-1-adding-data-to-a-worksheet"><a class="doc-anchor" href="#tutorial-part-1-adding-data-to-a-worksheet">§</a>Tutorial Part 1: Adding data to a worksheet</h3>
+<p>To add some sample expense data to a worksheet we could start with a simple
+program like the following:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// This code is available in examples/app_tutorial1.rs
+</span><span class="kw">use </span>rust_xlsxwriter::{Formula, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Some sample data we want to write to a spreadsheet.
+    </span><span class="kw">let </span>expenses = <span class="macro">vec!</span>[
+        (<span class="string">"Rent"</span>, <span class="number">2000</span>),
+        (<span class="string">"Gas"</span>, <span class="number">200</span>),
+        (<span class="string">"Food"</span>, <span class="number">500</span>),
+        (<span class="string">"Gym"</span>, <span class="number">100</span>),
+    ];
+
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Iterate over the data and write it out row by row.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>row = <span class="number">0</span>;
+    <span class="kw">for </span>expense <span class="kw">in </span><span class="kw-2">&amp;</span>expenses {
+        worksheet.write(row, <span class="number">0</span>, expense.<span class="number">0</span>)<span class="question-mark">?</span>;
+        worksheet.write(row, <span class="number">1</span>, expense.<span class="number">1</span>)<span class="question-mark">?</span>;
+        row += <span class="number">1</span>;
+    }
+
+    <span class="comment">// Write a total using a formula.
+    </span>worksheet.write(row, <span class="number">0</span>, <span class="string">"Total"</span>)<span class="question-mark">?</span>;
+    worksheet.write(row, <span class="number">1</span>, Formula::new(<span class="string">"=SUM(B1:B4)"</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"tutorial1.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>If we run this program we should get a spreadsheet that looks like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/tutorial1.png">
+<p>This is a simple program but it demonstrates some of the steps that would apply
+to any <code>rust_xlsxwriter</code> program.</p>
+<p>The first step is to create a new workbook object using the
+<a href="../workbook/struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook"><code>Workbook</code></a> constructor
+<a href="../workbook/struct.Workbook.html#method.new" title="associated function rust_xlsxwriter::workbook::Workbook::new"><code>Workbook::new()</code></a>:</p>
+<div class="example-wrap"><pre class="language-text"><code>let mut workbook = Workbook::new();</code></pre></div>
+<p><strong>Note</strong>, <code>rust_xlsxwriter</code> can only create new files. It cannot read or modify
+existing files.</p>
+<p>The workbook object is then used to add a new worksheet via the
+<a href="../workbook/struct.Workbook.html#method.add_worksheet" title="method rust_xlsxwriter::workbook::Workbook::add_worksheet"><code>Workbook::add_worksheet()</code></a> method:</p>
+<div class="example-wrap"><pre class="language-text"><code>let worksheet = workbook.add_worksheet();</code></pre></div>
+<p>The worksheet will have a standard Excel name, in this case “Sheet1”. You can
+specify the worksheet name using the
+<a href="../worksheet/struct.Worksheet.html#method.set_name" title="method rust_xlsxwriter::worksheet::Worksheet::set_name"><code>Worksheet::set_name()</code></a> method.</p>
+<p>We then iterate over the data and use the
+<a href="../worksheet/struct.Worksheet.html#method.write" title="method rust_xlsxwriter::worksheet::Worksheet::write"><code>Worksheet::write()</code></a> method which converts common Rust
+types to the equivalent Excel types and writes them to the specified <code>row, col</code>
+location in the worksheet:</p>
+<div class="example-wrap"><pre class="language-text"><code>    for expense in &amp;expenses {
+        worksheet.write(row, 0, expense.0)?;
+        worksheet.write(row, 1, expense.1)?;
+        row += 1;
+    }</code></pre></div>
+<blockquote>
+<p><strong>Reading ahead</strong>:</p>
+<p>There are other type specific write methods such as
+<a href="../worksheet/struct.Worksheet.html#method.write_string" title="method rust_xlsxwriter::worksheet::Worksheet::write_string"><code>Worksheet::write_string()</code></a> and
+<a href="../worksheet/struct.Worksheet.html#method.write_number" title="method rust_xlsxwriter::worksheet::Worksheet::write_number"><code>Worksheet::write_number()</code></a>. However, these
+aren’t generally required and thanks to Rust’s monomorphization the
+performance of the generic <code>write()</code> method is just as fast.</p>
+<p>There are also worksheet methods for writing arrays of data or arrays of
+arrays of data that can be useful in cases where the data to be added is in
+a vector format:</p>
+<ul>
+<li><a href="../worksheet/struct.Worksheet.html#method.write_row" title="method rust_xlsxwriter::worksheet::Worksheet::write_row"><code>Worksheet::write_row()</code></a></li>
+<li><a href="../worksheet/struct.Worksheet.html#method.write_column" title="method rust_xlsxwriter::worksheet::Worksheet::write_column"><code>Worksheet::write_column()</code></a></li>
+<li><a href="../worksheet/struct.Worksheet.html#method.write_row_matrix" title="method rust_xlsxwriter::worksheet::Worksheet::write_row_matrix"><code>Worksheet::write_row_matrix()</code></a></li>
+<li><a href="../worksheet/struct.Worksheet.html#method.write_column_matrix" title="method rust_xlsxwriter::worksheet::Worksheet::write_column_matrix"><code>Worksheet::write_column_matrix()</code></a></li>
+<li><a href="../worksheet/struct.Worksheet.html#method.write_row_with_format" title="method rust_xlsxwriter::worksheet::Worksheet::write_row_with_format"><code>Worksheet::write_row_with_format()</code></a></li>
+<li><a href="../worksheet/struct.Worksheet.html#method.write_column_with_format" title="method rust_xlsxwriter::worksheet::Worksheet::write_column_with_format"><code>Worksheet::write_column_with_format()</code></a></li>
+</ul>
+</blockquote>
+<p>Throughout <code>rust_xlsxwriter</code> rows and columns are zero indexed. So the first
+cell in a worksheet <code>(0, 0)</code> is equivalent to the Excel notation of <code>A1</code>.</p>
+<p>To calculate the total of the items in the second column we add a
+<a href="../struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>:</p>
+<div class="example-wrap"><pre class="language-text"><code>    worksheet.write(row, 1, Formula::new(&quot;=SUM(B1:B4)&quot;))?;</code></pre></div>
+<p>Finally, we save and close the Excel file via the
+<a href="../workbook/struct.Workbook.html#method.save" title="method rust_xlsxwriter::workbook::Workbook::save"><code>Workbook::save()</code></a> method which will generate the
+spreadsheet shown in the image above.:</p>
+<div class="example-wrap"><pre class="language-text"><code>    workbook.save(&quot;tutorial1.xlsx&quot;)?;</code></pre></div>
+<blockquote>
+<p><strong>Reading ahead</strong>:</p>
+<p>The <a href="../workbook/struct.Workbook.html#method.save" title="method rust_xlsxwriter::workbook::Workbook::save"><code>Workbook::save()</code></a> method takes a <a href="https://doc.rust-lang.org/1.89.0/std/path/index.html" title="mod std::path"><code>std::path</code></a>
+argument which can be a <code>Path</code>, <code>PathBuf</code> or a filename string. It is also
+possible to save to a byte vector using
+<a href="../workbook/struct.Workbook.html#method.save_to_buffer" title="method rust_xlsxwriter::workbook::Workbook::save_to_buffer"><code>Workbook::save_to_buffer()</code></a>.</p>
+</blockquote>
+<h3 id="tutorial-part-2-adding-some-formatting"><a class="doc-anchor" href="#tutorial-part-2-adding-some-formatting">§</a>Tutorial Part 2: Adding some formatting</h3>
+<p>The previous example converted the required data into an Excel file but it
+looked a little bare. To make the information clearer we can add some
+simple formatting, like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/tutorial2.png">
+<p>The differences here are that we have added “Item” and “Cost” column headers in
+a bold font, we have formatted the currency in the second column and we have
+made the “Total” string bold.</p>
+<p>To do this programmatically we can extend our code as follows:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// This code is available in examples/app_tutorial2.rs
+</span><span class="kw">use </span>rust_xlsxwriter::{Format, Formula, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Some sample data we want to write to a spreadsheet.
+    </span><span class="kw">let </span>expenses = <span class="macro">vec!</span>[
+        (<span class="string">"Rent"</span>, <span class="number">2000</span>),
+        (<span class="string">"Gas"</span>, <span class="number">200</span>),
+        (<span class="string">"Food"</span>, <span class="number">500</span>),
+        (<span class="string">"Gym"</span>, <span class="number">100</span>),
+    ];
+
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a bold format to use to highlight cells.
+    </span><span class="kw">let </span>bold = Format::new().set_bold();
+
+    <span class="comment">// Add a number format for cells with money values.
+    </span><span class="kw">let </span>money_format = Format::new().set_num_format(<span class="string">"$#,##0"</span>);
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Write some column headers.
+    </span>worksheet.write_with_format(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Item"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">1</span>, <span class="string">"Cost"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+
+    <span class="comment">// Iterate over the data and write it out row by row.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>row = <span class="number">1</span>;
+    <span class="kw">for </span>expense <span class="kw">in </span><span class="kw-2">&amp;</span>expenses {
+        worksheet.write(row, <span class="number">0</span>, expense.<span class="number">0</span>)<span class="question-mark">?</span>;
+        worksheet.write_with_format(row, <span class="number">1</span>, expense.<span class="number">1</span>, <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+        row += <span class="number">1</span>;
+    }
+
+    <span class="comment">// Write a total using a formula.
+    </span>worksheet.write_with_format(row, <span class="number">0</span>, <span class="string">"Total"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(row, <span class="number">1</span>, Formula::new(<span class="string">"=SUM(B2:B5)"</span>), <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"tutorial2.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>The main difference between this and the previous program is that we have added
+two <a href="../struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a> objects that we can use to format cells in the
+spreadsheet.</p>
+<p><code>Format</code> objects represent all the formatting properties that can be applied
+to a cell in Excel such as fonts, number formatting, colors and borders. This is
+explained in more detail in the <a href="../struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a> struct documentation.</p>
+<p>For now we will avoid getting into the details of <code>Format</code> and just use a
+limited amount of the its functionality to add some simple formatting:</p>
+<div class="example-wrap"><pre class="language-text"><code>    // Add a bold format to use to highlight cells.
+    let bold = Format::new().set_bold();
+
+    // Add a number format for cells with money values.
+    let money_format = Format::new().set_num_format(&quot;$#,##0&quot;);</code></pre></div>
+<p>We can use these formats with the
+<a href="../worksheet/struct.Worksheet.html#method.write_with_format" title="method rust_xlsxwriter::worksheet::Worksheet::write_with_format"><code>Worksheet::write_with_format()</code></a> method
+which writes data and formatting together, like these examples from the code:</p>
+<div class="example-wrap"><pre class="language-text"><code>    worksheet.write_with_format(0, 0, &quot;Item&quot;, &amp;bold)?;
+
+    worksheet.write_with_format(row, 1, expense.1, &amp;money_format)?;
+
+    worksheet.write_with_format(row, 1, Formula::new(&quot;=SUM(B2:B5)&quot;), &amp;money_format)?;</code></pre></div><h3 id="tutorial-part-3-adding-dates-and-more-formatting"><a class="doc-anchor" href="#tutorial-part-3-adding-dates-and-more-formatting">§</a>Tutorial Part 3: Adding dates and more formatting</h3>
+<p>Let’s extend the application a little bit more to add some dates to the data:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>expenses = [
+        (<span class="string">"Rent"</span>, <span class="number">2000</span>, <span class="string">"2022-09-01"</span>),
+        (<span class="string">"Gas"</span>, <span class="number">200</span>, <span class="string">"2022-09-05"</span>),
+        (<span class="string">"Food"</span>, <span class="number">500</span>, <span class="string">"2022-09-21"</span>),
+        (<span class="string">"Gym"</span>, <span class="number">100</span>, <span class="string">"2022-09-28"</span>),
+    ];</code></pre></div>
+<p>The corresponding spreadsheet will look like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/tutorial3.png">
+<p>The differences here are that we have added a “Date” column with formatting and
+made that column a little wider to accommodate the dates.</p>
+<p>To do this we can extend our program as follows:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// This code is available in examples/app_tutorial3.rs
+</span><span class="kw">use </span>rust_xlsxwriter::{ExcelDateTime, Format, Formula, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Some sample data we want to write to a spreadsheet.
+    </span><span class="kw">let </span>expenses = <span class="macro">vec!</span>[
+        (<span class="string">"Rent"</span>, <span class="number">2000</span>, <span class="string">"2022-09-01"</span>),
+        (<span class="string">"Gas"</span>, <span class="number">200</span>, <span class="string">"2022-09-05"</span>),
+        (<span class="string">"Food"</span>, <span class="number">500</span>, <span class="string">"2022-09-21"</span>),
+        (<span class="string">"Gym"</span>, <span class="number">100</span>, <span class="string">"2022-09-28"</span>),
+    ];
+
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a bold format to use to highlight cells.
+    </span><span class="kw">let </span>bold = Format::new().set_bold();
+
+    <span class="comment">// Add a number format for cells with money values.
+    </span><span class="kw">let </span>money_format = Format::new().set_num_format(<span class="string">"$#,##0"</span>);
+
+    <span class="comment">// Add a number format for cells with dates.
+    </span><span class="kw">let </span>date_format = Format::new().set_num_format(<span class="string">"d mmm yyyy"</span>);
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Write some column headers.
+    </span>worksheet.write_with_format(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Item"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">1</span>, <span class="string">"Cost"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">2</span>, <span class="string">"Date"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+
+    <span class="comment">// Adjust the date column width for clarity.
+    </span>worksheet.set_column_width(<span class="number">2</span>, <span class="number">15</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Iterate over the data and write it out row by row.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>row = <span class="number">1</span>;
+    <span class="kw">for </span>expense <span class="kw">in </span><span class="kw-2">&amp;</span>expenses {
+        worksheet.write(row, <span class="number">0</span>, expense.<span class="number">0</span>)<span class="question-mark">?</span>;
+        worksheet.write_with_format(row, <span class="number">1</span>, expense.<span class="number">1</span>, <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>date = ExcelDateTime::parse_from_str(expense.<span class="number">2</span>)<span class="question-mark">?</span>;
+        worksheet.write_with_format(row, <span class="number">2</span>, <span class="kw-2">&amp;</span>date, <span class="kw-2">&amp;</span>date_format)<span class="question-mark">?</span>;
+
+        row += <span class="number">1</span>;
+    }
+
+    <span class="comment">// Write a total using a formula.
+    </span>worksheet.write_with_format(row, <span class="number">0</span>, <span class="string">"Total"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(row, <span class="number">1</span>, Formula::new(<span class="string">"=SUM(B2:B5)"</span>), <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"tutorial3.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Dates and times in Excel are floating point numbers that have a format applied
+to display them in the desired way. To handle dates and times with
+<code>rust_xlsxwriter</code> we create them using a <a href="../struct.ExcelDateTime.html" title="struct rust_xlsxwriter::ExcelDateTime"><code>ExcelDateTime</code></a>
+instance and format them with an Excel number format.</p>
+<blockquote>
+<p><strong>Reading ahead</strong>:</p>
+</blockquote>
+<blockquote>
+<p>If you enable the <code>chrono</code> feature in <code>rust_xlsxwriter</code>  you can also use
+<a href="https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html"><code>chrono::NaiveDateTime</code></a>, <a href="https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html"><code>chrono::NaiveDate</code></a> or <a href="https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html"><code>chrono::NaiveTime</code></a>
+instances.</p>
+</blockquote>
+<p>In the example above we create the <code>ExcelDateTime</code> instance from the date
+strings in our input data and then add a number format it so that it appears
+correctly in Excel:</p>
+<div class="example-wrap"><pre class="language-text"><code>        let date = ExcelDateTime::parse_from_str(expense.2)?;
+        worksheet.write_with_format(row, 2, &amp;date, &amp;date_format)?;</code></pre></div>
+<p>Another addition to our program is the make the “Date” column wider for
+clarity using the
+<a href="crate::Worksheet.set_column_width"><code>Worksheet::set_column_width()</code></a> method.</p>
+<div class="example-wrap"><pre class="language-text"><code>    worksheet.set_column_width(2, 15)?;</code></pre></div><h3 id="tutorial-part-4-adding-a-chart"><a class="doc-anchor" href="#tutorial-part-4-adding-a-chart">§</a>Tutorial Part 4: Adding a chart</h3>
+<p>To extend our example a little further let’s add a Pie chart to show the
+relative sizes of the outgoing expenses to get a spreadsheet that will look like
+this:</p>
+<img src="https://rustxlsxwriter.github.io/images/tutorial4.png">
+<p>We use the <a href="../chart/struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> struct to represent the chart.</p>
+<p>The <a href="../chart/struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> struct has a lot of configuration options and
+sub-structs to replicate Excel’s chart features but as an initial demonstration
+we will just add the data series to which the chart refers. Here is the updated
+code with the chart addition at the end.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// This code is available in examples/app_tutorial4.rs
+</span><span class="kw">use </span>rust_xlsxwriter::{Chart, ExcelDateTime, Format, Formula, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Some sample data we want to write to a spreadsheet.
+    </span><span class="kw">let </span>expenses = <span class="macro">vec!</span>[
+        (<span class="string">"Rent"</span>, <span class="number">2000</span>, <span class="string">"2022-09-01"</span>),
+        (<span class="string">"Gas"</span>, <span class="number">200</span>, <span class="string">"2022-09-05"</span>),
+        (<span class="string">"Food"</span>, <span class="number">500</span>, <span class="string">"2022-09-21"</span>),
+        (<span class="string">"Gym"</span>, <span class="number">100</span>, <span class="string">"2022-09-28"</span>),
+    ];
+
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a bold format to use to highlight cells.
+    </span><span class="kw">let </span>bold = Format::new().set_bold();
+
+    <span class="comment">// Add a number format for cells with money values.
+    </span><span class="kw">let </span>money_format = Format::new().set_num_format(<span class="string">"$#,##0"</span>);
+
+    <span class="comment">// Add a number format for cells with dates.
+    </span><span class="kw">let </span>date_format = Format::new().set_num_format(<span class="string">"d mmm yyyy"</span>);
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Write some column headers.
+    </span>worksheet.write_with_format(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Item"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">1</span>, <span class="string">"Cost"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">2</span>, <span class="string">"Date"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+
+    <span class="comment">// Adjust the date column width for clarity.
+    </span>worksheet.set_column_width(<span class="number">2</span>, <span class="number">15</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Iterate over the data and write it out row by row.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>row = <span class="number">1</span>;
+    <span class="kw">for </span>expense <span class="kw">in </span><span class="kw-2">&amp;</span>expenses {
+        worksheet.write(row, <span class="number">0</span>, expense.<span class="number">0</span>)<span class="question-mark">?</span>;
+        worksheet.write_with_format(row, <span class="number">1</span>, expense.<span class="number">1</span>, <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>date = ExcelDateTime::parse_from_str(expense.<span class="number">2</span>)<span class="question-mark">?</span>;
+        worksheet.write_with_format(row, <span class="number">2</span>, <span class="kw-2">&amp;</span>date, <span class="kw-2">&amp;</span>date_format)<span class="question-mark">?</span>;
+
+        row += <span class="number">1</span>;
+    }
+
+    <span class="comment">// Write a total using a formula.
+    </span>worksheet.write_with_format(row, <span class="number">0</span>, <span class="string">"Total"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(row, <span class="number">1</span>, Formula::new(<span class="string">"=SUM(B2:B5)"</span>), <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a chart to display the expenses.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new_pie();
+
+    <span class="comment">// Configure the data series for the chart.
+    </span>chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$2:$A$5"</span>)
+        .set_values(<span class="string">"Sheet1!$B$2:$B$5"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">1</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"tutorial4.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>See the documentation for <a href="../chart/struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> for more information.</p>
+<h3 id="tutorial-part-5-making-the-code-more-programmatic"><a class="doc-anchor" href="#tutorial-part-5-making-the-code-more-programmatic">§</a>Tutorial Part 5: Making the code more programmatic</h3>
+<p>The previous example worked as expected but it it contained some hard-coded cell
+ranges like <code>set_values("Sheet1!$B$2:$B$5")</code> and <code>Formula::new("=SUM(B2:B5)")</code>.
+If our example changed to have a different number of data items then we would
+have to manually change the code to adjust for the new ranges.</p>
+<p>Fortunately, these hard-coded values are only used for the sake of a tutorial and
+<code>rust_xlsxwriter</code> provides APIs to handle these more programmatically.</p>
+<p>Let’s start by looking at the chart ranges:</p>
+<div class="example-wrap"><pre class="language-text"><code>    chart
+        .add_series()
+        .set_categories(&quot;Sheet1!$A$2:$A$5&quot;)
+        .set_values(&quot;Sheet1!$B$2:$B$5&quot;);</code></pre></div>
+<p>In general <code>rust_xlsxwriter</code> always provides numeric APIs for any ranges in
+Excel but when it makes ergonomic sense it also provides <strong>secondary</strong> string
+based APIs. The previous example uses one of these secondary string based APIs
+for demonstration purposes but for real applications you would set the chart
+ranges using 5-tuple values like this:</p>
+<div class="example-wrap"><pre class="language-text"><code>    chart
+        .add_series()
+        .set_categories((&quot;Sheet1&quot;, first_row, item_col, last_row, item_col))
+        .set_values((&quot;Sheet1&quot;, first_row, cost_col, last_row, cost_col));</code></pre></div>
+<p>Where the range values are set or calculated in the code with something like the
+following:</p>
+<div class="example-wrap"><pre class="language-text"><code>    let first_row = 1;
+    let last_row = first_row + (expenses.len() as u32) - 1;
+    let item_col = 0;
+    let cost_col = 1;</code></pre></div>
+<p>This allows the range to change dynamically if we add new elements to our <code>data</code>
+vector and ensures that the worksheet name is quoted properly (when
+required).</p>
+<p>The other section of the code that had a hard-coded string is the formula
+<code>"=SUM(B2:B5)"</code>. There isn’t a single API change that can be applied to ranges
+in formulas but <code>rust_xlsxwriter</code> provides several utility functions that can
+convert numbers to string ranges. For example the
+<a href="../utility/fn.cell_range.html" title="fn rust_xlsxwriter::utility::cell_range"><code>cell_range()</code></a> function which takes zero indexed
+numbers and converts them to a string range like <code>B2:B5</code>:</p>
+<div class="example-wrap"><pre class="language-text"><code>    let range = cell_range(first_row, cost_col, last_row, cost_col);
+    let formula = format!(&quot;=SUM({range})&quot;);
+    worksheet.write_with_format(row, 1, Formula::new(formula), &amp;money_format)?;</code></pre></div>
+<blockquote>
+<p><strong>Reading ahead</strong>:</p>
+<p>The <code>cell_range()</code> function and other similar functions are detailed in the
+<a href="../utility/index.html" title="mod rust_xlsxwriter::utility"><code>utility</code></a> documentation.</p>
+</blockquote>
+<p>Adding these improvements our application changes to the following:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// This code is available in examples/app_tutorial5.rs
+</span><span class="kw">use </span>rust_xlsxwriter::{cell_range, Chart, ExcelDateTime, Format, Formula, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Some sample data we want to write to a spreadsheet.
+    </span><span class="kw">let </span>expenses = <span class="macro">vec!</span>[
+        (<span class="string">"Rent"</span>, <span class="number">2000</span>, <span class="string">"2022-09-01"</span>),
+        (<span class="string">"Gas"</span>, <span class="number">200</span>, <span class="string">"2022-09-05"</span>),
+        (<span class="string">"Food"</span>, <span class="number">500</span>, <span class="string">"2022-09-21"</span>),
+        (<span class="string">"Gym"</span>, <span class="number">100</span>, <span class="string">"2022-09-28"</span>),
+    ];
+
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a bold format to use to highlight cells.
+    </span><span class="kw">let </span>bold = Format::new().set_bold();
+
+    <span class="comment">// Add a number format for cells with money values.
+    </span><span class="kw">let </span>money_format = Format::new().set_num_format(<span class="string">"$#,##0"</span>);
+
+    <span class="comment">// Add a number format for cells with dates.
+    </span><span class="kw">let </span>date_format = Format::new().set_num_format(<span class="string">"d mmm yyyy"</span>);
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Write some column headers.
+    </span>worksheet.write_with_format(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Item"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">1</span>, <span class="string">"Cost"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">2</span>, <span class="string">"Date"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+
+    <span class="comment">// Adjust the date column width for clarity.
+    </span>worksheet.set_column_width(<span class="number">2</span>, <span class="number">15</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Iterate over the data and write it out row by row.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>row = <span class="number">1</span>;
+    <span class="kw">for </span>expense <span class="kw">in </span><span class="kw-2">&amp;</span>expenses {
+        worksheet.write(row, <span class="number">0</span>, expense.<span class="number">0</span>)<span class="question-mark">?</span>;
+        worksheet.write_with_format(row, <span class="number">1</span>, expense.<span class="number">1</span>, <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>date = ExcelDateTime::parse_from_str(expense.<span class="number">2</span>)<span class="question-mark">?</span>;
+        worksheet.write_with_format(row, <span class="number">2</span>, <span class="kw-2">&amp;</span>date, <span class="kw-2">&amp;</span>date_format)<span class="question-mark">?</span>;
+
+        row += <span class="number">1</span>;
+    }
+
+    <span class="comment">// For clarity, define some variables to use in the formula and chart ranges.
+    // Row and column numbers are all zero-indexed.
+    </span><span class="kw">let </span>first_row = <span class="number">1</span>; <span class="comment">// Skip the header row.
+    </span><span class="kw">let </span>last_row = first_row + (expenses.len() <span class="kw">as </span>u32) - <span class="number">1</span>;
+    <span class="kw">let </span>item_col = <span class="number">0</span>;
+    <span class="kw">let </span>cost_col = <span class="number">1</span>;
+
+    <span class="comment">// Write a total using a formula.
+    </span>worksheet.write_with_format(row, <span class="number">0</span>, <span class="string">"Total"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>range = cell_range(first_row, cost_col, last_row, cost_col);
+    <span class="kw">let </span>formula = <span class="macro">format!</span>(<span class="string">"=SUM({range})"</span>);
+    worksheet.write_with_format(row, <span class="number">1</span>, Formula::new(formula), <span class="kw-2">&amp;</span>money_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a chart to display the expenses.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new_pie();
+
+    <span class="comment">// Configure the data series for the chart.
+    </span>chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, first_row, item_col, last_row, item_col))
+        .set_values((<span class="string">"Sheet1"</span>, first_row, cost_col, last_row, cost_col));
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">1</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"tutorial5.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>This gives the same output to the previous version, but it is now future proof
+for any changes to our input data:</p>
+<img src="https://rustxlsxwriter.github.io/images/tutorial5.png">
+<h2 id="next-steps"><a class="doc-anchor" href="#next-steps">§</a>Next steps</h2>
+<p>Once you have completed this simple application you can looks through the
+following resources for more information:</p>
+<ul>
+<li>
+<p>The main API <a href="../index.html">documentation for the library</a>. Click on the
+<code>rust_xlsxwriter</code> logo at the top left to get back to the start.</p>
+</li>
+<li>
+<p><a href="../cookbook/index.html" title="mod rust_xlsxwriter::cookbook">Cookbook</a> to see other examples that you can use to get you
+started.</p>
+</li>
+<li>
+<p>The <a href="../workbook/struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook"><code>Workbook</code></a> APIs and introduction.</p>
+</li>
+<li>
+<p>The <a href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet"><code>Worksheet</code></a> APIs and introduction.</p>
+</li>
+<li>
+<p>The <a href="../struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a> APIs and introduction.</p>
+</li>
+<li>
+<p>The <a href="../chart/struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> APIs and introduction.</p>
+</li>
+<li>
+<p>The <a href="../struct.Table.html" title="struct rust_xlsxwriter::Table"><code>Table</code></a> APIs and introduction.</p>
+</li>
+<li>
+<p><a href="https://rustxlsxwriter.github.io/index.html">User Guide</a>: Some longer explanations of parts of <code>rust_xlsxwriter</code> API.</p>
+</li>
+<li>
+<p><a href="../changelog/index.html" title="mod rust_xlsxwriter::changelog">Release Notes</a>.</p>
+</li>
+<li>
+<p><a href="https://github.com/jmcnamara/rust_xlsxwriter/issues/1">Roadmap of planned features</a>.</p>
+</li>
+</ul>
+</div></details></section></div></main></body></html>

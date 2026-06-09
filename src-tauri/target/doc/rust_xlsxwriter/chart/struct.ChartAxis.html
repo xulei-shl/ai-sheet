@@ -1,0 +1,834 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The `ChartAxis` struct represents a chart axis."><title>ChartAxis in rust_xlsxwriter::chart - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Chart<wbr>Axis</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.set_automatic_axis" title="set_automatic_axis">set_automatic_axis</a></li><li><a href="#method.set_crossing" title="set_crossing">set_crossing</a></li><li><a href="#method.set_date_axis" title="set_date_axis">set_date_axis</a></li><li><a href="#method.set_display_unit_type" title="set_display_unit_type">set_display_unit_type</a></li><li><a href="#method.set_display_units_visible" title="set_display_units_visible">set_display_units_visible</a></li><li><a href="#method.set_font" title="set_font">set_font</a></li><li><a href="#method.set_format" title="set_format">set_format</a></li><li><a href="#method.set_hidden" title="set_hidden">set_hidden</a></li><li><a href="#method.set_label_alignment" title="set_label_alignment">set_label_alignment</a></li><li><a href="#method.set_label_interval" title="set_label_interval">set_label_interval</a></li><li><a href="#method.set_label_layout" title="set_label_layout">set_label_layout</a></li><li><a href="#method.set_label_position" title="set_label_position">set_label_position</a></li><li><a href="#method.set_log_base" title="set_log_base">set_log_base</a></li><li><a href="#method.set_major_gridlines" title="set_major_gridlines">set_major_gridlines</a></li><li><a href="#method.set_major_gridlines_line" title="set_major_gridlines_line">set_major_gridlines_line</a></li><li><a href="#method.set_major_tick_type" title="set_major_tick_type">set_major_tick_type</a></li><li><a href="#method.set_major_unit" title="set_major_unit">set_major_unit</a></li><li><a href="#method.set_major_unit_date_type" title="set_major_unit_date_type">set_major_unit_date_type</a></li><li><a href="#method.set_max" title="set_max">set_max</a></li><li><a href="#method.set_max_date" title="set_max_date">set_max_date</a></li><li><a href="#method.set_min" title="set_min">set_min</a></li><li><a href="#method.set_min_date" title="set_min_date">set_min_date</a></li><li><a href="#method.set_minor_gridlines" title="set_minor_gridlines">set_minor_gridlines</a></li><li><a href="#method.set_minor_gridlines_line" title="set_minor_gridlines_line">set_minor_gridlines_line</a></li><li><a href="#method.set_minor_tick_type" title="set_minor_tick_type">set_minor_tick_type</a></li><li><a href="#method.set_minor_unit" title="set_minor_unit">set_minor_unit</a></li><li><a href="#method.set_minor_unit_date_type" title="set_minor_unit_date_type">set_minor_unit_date_type</a></li><li><a href="#method.set_name" title="set_name">set_name</a></li><li><a href="#method.set_name_font" title="set_name_font">set_name_font</a></li><li><a href="#method.set_num_format" title="set_num_format">set_num_format</a></li><li><a href="#method.set_position_between_ticks" title="set_position_between_ticks">set_position_between_ticks</a></li><li><a href="#method.set_reverse" title="set_reverse">set_reverse</a></li><li><a href="#method.set_text_axis" title="set_text_axis">set_text_axis</a></li><li><a href="#method.set_tick_interval" title="set_tick_interval">set_tick_interval</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-ChartAxis" title="Clone">Clone</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-ChartAxis" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-ChartAxis" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-ChartAxis" title="Send">Send</a></li><li><a href="#impl-Sync-for-ChartAxis" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-ChartAxis" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-ChartAxis" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In rust_<wbr>xlsxwriter::<wbr>chart</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a>::<wbr><a href="index.html">chart</a></div><h1>Struct <span class="struct">ChartAxis</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/chart.rs.html#10547-10579">Source</a> </span></div><pre class="rust item-decl"><code>pub struct ChartAxis { <span class="comment">/* private fields */</span> }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The <code>ChartAxis</code> struct represents a chart axis.</p>
+<p>Used in conjunction with the <a href="struct.Chart.html#method.x_axis" title="method rust_xlsxwriter::chart::Chart::x_axis"><code>Chart::x_axis()</code></a> and <a href="struct.Chart.html#method.y_axis" title="method rust_xlsxwriter::chart::Chart::y_axis"><code>Chart::y_axis()</code></a>.</p>
+<p>It is used in conjunction with the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> struct.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>A chart example demonstrating setting properties of the axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>);
+
+    <span class="comment">// Set the chart axis titles.
+    </span>chart.x_axis().set_name(<span class="string">"Test number"</span>);
+    chart.y_axis().set_name(<span class="string">"Sample length (mm)"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name.png">
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-ChartAxis" class="impl"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10581-12359">Source</a><a href="#impl-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.set_name" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10678-10684">Source</a><h4 class="code-header">pub fn <a href="#method.set_name" class="fn">set_name</a>&lt;T&gt;(&amp;mut self, name: T) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a><div class="where">where
+    T: <a class="trait" href="trait.IntoChartRange.html" title="trait rust_xlsxwriter::chart::IntoChartRange">IntoChartRange</a>,</div></h4></section></summary><div class="docblock"><p>Add a title for a chart axis.</p>
+<p>Set the name (title) for the chart axis.</p>
+<p>The name can be a simple string, a formula such as <code>Sheet1!$A$1</code> or a
+tuple with a sheet name, row and column such as <code>('Sheet1', 0, 0)</code>.</p>
+<h5 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h5>
+<ul>
+<li><code>range</code>: The range property which can be one of the following generic
+types:
+<ul>
+<li>A simple string title.</li>
+<li>A string with an Excel like range formula such as <code>"Sheet1!$A$1"</code>.</li>
+<li>A tuple that can be used to create the range programmatically using
+a sheet name and zero indexed row and column values like:
+<code>("Sheet1", 0, 0)</code> (this gives the same range as the previous
+string value).</li>
+</ul>
+</li>
+</ul>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<p>A chart example demonstrating setting the title of chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$3"</span>);
+
+    <span class="comment">// Set the chart axis titles.
+    </span>chart.x_axis().set_name(<span class="string">"Test number"</span>);
+    chart.y_axis().set_name(<span class="string">"Sample length (mm)"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_name_font" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10761-10764">Source</a><h4 class="code-header">pub fn <a href="#method.set_name_font" class="fn">set_name_font</a>(&amp;mut self, font: &amp;<a class="struct" href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont">ChartFont</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the font properties of a chart axis title.</p>
+<p>Set the font properties of a chart axis name/title using a <a href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont"><code>ChartFont</code></a>
+reference. Example font properties that can be set are:</p>
+<ul>
+<li><a href="struct.ChartFont.html#method.set_bold" title="method rust_xlsxwriter::chart::ChartFont::set_bold"><code>ChartFont::set_bold()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_italic" title="method rust_xlsxwriter::chart::ChartFont::set_italic"><code>ChartFont::set_italic()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_name" title="method rust_xlsxwriter::chart::ChartFont::set_name"><code>ChartFont::set_name()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_size" title="method rust_xlsxwriter::chart::ChartFont::set_size"><code>ChartFont::set_size()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_rotation" title="method rust_xlsxwriter::chart::ChartFont::set_rotation"><code>ChartFont::set_rotation()</code></a></li>
+</ul>
+<p>See <a href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont"><code>ChartFont</code></a> for full details.</p>
+<p>The name font property for an axis represents the font for the axis
+title. To set the font for the category or value numbers use the
+<a href="struct.ChartAxis.html#method.set_font" title="method rust_xlsxwriter::chart::ChartAxis::set_font"><code>ChartAxis::set_font()</code></a> method.</p>
+<h5 id="parameters-1"><a class="doc-anchor" href="#parameters-1">§</a>Parameters</h5>
+<p><code>font</code>: A <a href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont"><code>ChartFont</code></a> struct reference to represent the font
+properties.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<p>An example of setting the font for a chart axis title.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>);
+
+    <span class="comment">// Set the font.
+    </span>chart
+        .x_axis()
+        .set_name(<span class="string">"X-Axis"</span>)
+        .set_name_font(ChartFont::new().set_bold().set_color(<span class="string">"#FF0000"</span>));
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_name_font.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_format" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10789-10795">Source</a><h4 class="code-header">pub fn <a href="#method.set_format" class="fn">set_format</a>&lt;T&gt;(&amp;mut self, format: T) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a><div class="where">where
+    T: <a class="trait" href="trait.IntoChartFormat.html" title="trait rust_xlsxwriter::chart::IntoChartFormat">IntoChartFormat</a>,</div></h4></section></summary><div class="docblock"><p>Set the formatting properties for a chart axis.</p>
+<p>Set the formatting properties for a chart axis via a <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a>
+object or a sub struct that implements <a href="trait.IntoChartFormat.html" title="trait rust_xlsxwriter::chart::IntoChartFormat"><code>IntoChartFormat</code></a>.</p>
+<p>The formatting that can be applied via a <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a> object are:</p>
+<ul>
+<li><a href="struct.ChartFormat.html#method.set_solid_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_solid_fill"><code>ChartFormat::set_solid_fill()</code></a>: Set the <a href="struct.ChartSolidFill.html" title="struct rust_xlsxwriter::chart::ChartSolidFill"><code>ChartSolidFill</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_pattern_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_pattern_fill"><code>ChartFormat::set_pattern_fill()</code></a>: Set the <a href="struct.ChartPatternFill.html" title="struct rust_xlsxwriter::chart::ChartPatternFill"><code>ChartPatternFill</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_gradient_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_gradient_fill"><code>ChartFormat::set_gradient_fill()</code></a>: Set the <a href="struct.ChartGradientFill.html" title="struct rust_xlsxwriter::chart::ChartGradientFill"><code>ChartGradientFill</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_no_fill" title="method rust_xlsxwriter::chart::ChartFormat::set_no_fill"><code>ChartFormat::set_no_fill()</code></a>: Turn off the fill for the chart object.</li>
+<li><a href="struct.ChartFormat.html#method.set_line" title="method rust_xlsxwriter::chart::ChartFormat::set_line"><code>ChartFormat::set_line()</code></a>: Set the <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> properties.</li>
+<li><a href="struct.ChartFormat.html#method.set_border" title="method rust_xlsxwriter::chart::ChartFormat::set_border"><code>ChartFormat::set_border()</code></a>: Set the <a href="type.ChartBorder.html" title="type rust_xlsxwriter::chart::ChartBorder"><code>ChartBorder</code></a> properties.
+A synonym for <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> depending on context.</li>
+<li><a href="struct.ChartFormat.html#method.set_no_line" title="method rust_xlsxwriter::chart::ChartFormat::set_no_line"><code>ChartFormat::set_no_line()</code></a>: Turn off the line for the chart object.</li>
+<li><a href="struct.ChartFormat.html#method.set_no_border" title="method rust_xlsxwriter::chart::ChartFormat::set_no_border"><code>ChartFormat::set_no_border()</code></a>: Turn off the border for the chart object.</li>
+</ul>
+<h5 id="parameters-2"><a class="doc-anchor" href="#parameters-2">§</a>Parameters</h5>
+<p><code>format</code>: A <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a> struct reference or a sub struct that will
+convert into a <code>ChartFormat</code> instance. See the docs for
+<a href="trait.IntoChartFormat.html" title="trait rust_xlsxwriter::chart::IntoChartFormat"><code>IntoChartFormat</code></a> for details.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_font" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10872-10885">Source</a><h4 class="code-header">pub fn <a href="#method.set_font" class="fn">set_font</a>(&amp;mut self, font: &amp;<a class="struct" href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont">ChartFont</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the font properties of a chart axis.</p>
+<p>Set the font properties of a chart axis using a <a href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont"><code>ChartFont</code></a> reference.
+Example font properties that can be set are:</p>
+<ul>
+<li><a href="struct.ChartFont.html#method.set_bold" title="method rust_xlsxwriter::chart::ChartFont::set_bold"><code>ChartFont::set_bold()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_italic" title="method rust_xlsxwriter::chart::ChartFont::set_italic"><code>ChartFont::set_italic()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_name" title="method rust_xlsxwriter::chart::ChartFont::set_name"><code>ChartFont::set_name()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_size" title="method rust_xlsxwriter::chart::ChartFont::set_size"><code>ChartFont::set_size()</code></a></li>
+<li><a href="struct.ChartFont.html#method.set_rotation" title="method rust_xlsxwriter::chart::ChartFont::set_rotation"><code>ChartFont::set_rotation()</code></a></li>
+</ul>
+<p>See <a href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont"><code>ChartFont</code></a> for full details.</p>
+<p>The font property for an axis represents the font for the category or
+value names or numbers. To set the font for the axis name/title use the
+<a href="struct.ChartAxis.html#method.set_name_font" title="method rust_xlsxwriter::chart::ChartAxis::set_name_font"><code>ChartAxis::set_name_font()</code></a> method.</p>
+<h5 id="parameters-3"><a class="doc-anchor" href="#parameters-3">§</a>Parameters</h5>
+<p><code>font</code>: A <a href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont"><code>ChartFont</code></a> struct reference to represent the font
+properties.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<p>An example of setting the font for a chart axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>);
+
+    <span class="comment">// Set the font for an axis.
+    </span>chart.x_axis().set_font(
+        ChartFont::new()
+            .set_bold()
+            .set_italic()
+            .set_name(<span class="string">"Consolas"</span>)
+            .set_color(<span class="string">"#FF0000"</span>),
+    );
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_font.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_num_format" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10951-10954">Source</a><h4 class="code-header">pub fn <a href="#method.set_num_format" class="fn">set_num_format</a>(
+    &amp;mut self,
+    num_format: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the number format for a chart axis.</p>
+<p>Excel plots/displays data in charts with the same number formatting that
+it has in the worksheet. The <code>set_num_format()</code> method allows you to
+override this and controls whether a number is displayed as an integer,
+a floating point number, a date, a currency value or some other user
+defined format.</p>
+<p>See also <a href="../struct.Format.html#number-format-categories" title="struct rust_xlsxwriter::Format">Number Format Categories</a> and <a href="../struct.Format.html#number-formats-in-different-locales" title="struct rust_xlsxwriter::Format">Number Formats in different
+locales</a> in the documentation for <a href="../struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a>.</p>
+<h5 id="parameters-4"><a class="doc-anchor" href="#parameters-4">§</a>Parameters</h5>
+<ul>
+<li><code>num_format</code>: The number format property.</li>
+</ul>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<p>A chart example demonstrating setting the number format a chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>);
+
+    <span class="comment">// Set the chart axis number format.
+    </span>chart.y_axis().set_num_format(<span class="string">"0.00%"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_num_format.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_date_axis" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11038-11048">Source</a><h4 class="code-header">pub fn <a href="#method.set_date_axis" class="fn">set_date_axis</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the category axis as a date axis.</p>
+<p>In general the “Category” axis (usually the X-axis) in Excel charts is
+made up of evenly spaced categories. This type of axis doesn’t support
+features such as maximum and minimum even if the categories are numbers.
+The two exceptions to this are the “Value” axes used in Scatter charts
+and “Date” axes. Date axes are a combination of “Category” and “Value”
+axes and they support features of both types of axes.</p>
+<p>In order to have a date axes in your chart you need to have a range of
+Date/Time values in a worksheet that the
+<a href="struct.ChartSeries.html#method.set_categories" title="method rust_xlsxwriter::chart::ChartSeries::set_categories"><code>ChartSeries::set_categories()</code></a> refer to. You can then use the
+<code>set_date_axis()</code> method turns on the “date axis” property for a chart
+axis.</p>
+<p>See <a href="index.html#chart-value-and-category-axes" title="mod rust_xlsxwriter::chart">Chart Value and Category Axes</a> for an explanation of the
+difference between Value and Category axes in Excel.</p>
+<h5 id="parameters-5"><a class="doc-anchor" href="#parameters-5">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is off by default.</li>
+</ul>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<p>A chart example demonstrating setting a date axis for a chart.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>))
+        .set_values((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">1</span>));
+
+    <span class="comment">// Set the axis as a date axis.
+    </span>chart.x_axis().set_date_axis(<span class="bool-val">true</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_date_axis.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_text_axis" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11056-11059">Source</a><h4 class="code-header">pub fn <a href="#method.set_text_axis" class="fn">set_text_axis</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the category axis as a text axis.</p>
+<h5 id="parameters-6"><a class="doc-anchor" href="#parameters-6">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is off by default.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_automatic_axis" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11067-11070">Source</a><h4 class="code-header">pub fn <a href="#method.set_automatic_axis" class="fn">set_automatic_axis</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the category axis as an automatic axis - generally the default.</p>
+<h5 id="parameters-7"><a class="doc-anchor" href="#parameters-7">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is off by default.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_crossing" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11153-11157">Source</a><h4 class="code-header">pub fn <a href="#method.set_crossing" class="fn">set_crossing</a>(&amp;mut self, crossing: <a class="enum" href="enum.ChartAxisCrossing.html" title="enum rust_xlsxwriter::chart::ChartAxisCrossing">ChartAxisCrossing</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the crossing point for the opposite axis.</p>
+<p>By default Excel sets chart axes to cross at 0. If required you can use
+<a href="struct.ChartAxis.html#method.set_crossing" title="method rust_xlsxwriter::chart::ChartAxis::set_crossing"><code>ChartAxis::set_crossing()</code></a> and <a href="enum.ChartAxisCrossing.html" title="enum rust_xlsxwriter::chart::ChartAxisCrossing"><code>ChartAxisCrossing</code></a> to define
+another point where the opposite axis will cross the current axis.</p>
+<p>The <a href="enum.ChartAxisCrossing.html" title="enum rust_xlsxwriter::chart::ChartAxisCrossing"><code>ChartAxisCrossing</code></a> enum defines values like <code>max</code> and <code>min</code> but
+also allows you to define a category value for X-axes (except for
+Scatter and Date axes) and an actual value for Y-axes and Scatter and
+Date axes.</p>
+<h5 id="parameters-8"><a class="doc-anchor" href="#parameters-8">§</a>Parameters</h5>
+<ul>
+<li><code>crossing</code>: A <a href="enum.ChartAxisCrossing.html" title="enum rust_xlsxwriter::chart::ChartAxisCrossing"><code>ChartAxisCrossing</code></a> enum value.</li>
+</ul>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<p>A chart example demonstrating setting the point where the axes will
+cross.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$1:$A$5"</span>)
+        .set_values(<span class="string">"Sheet1!$B$1:$B$5"</span>);
+
+    <span class="comment">// Set the X-axis crossing at a category index.
+    </span>chart
+        .x_axis()
+        .set_crossing(ChartAxisCrossing::CategoryNumber(<span class="number">3</span>));
+
+    <span class="comment">// Set the Y-axis crossing at a value.
+    </span>chart
+        .y_axis()
+        .set_crossing(ChartAxisCrossing::AxisValue(<span class="number">20.0</span>));
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_crossing1.png"></p>
+<p>For reference here is the default chart without default crossings:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_crossing2.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_reverse" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11209-11212">Source</a><h4 class="code-header">pub fn <a href="#method.set_reverse" class="fn">set_reverse</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Reverse the direction of the axis categories or values.</p>
+<p>Reverse the direction that the axis data is plotted in from left to
+right or top to bottom.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<p>A chart example demonstrating reversing the plotting direction of the
+chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Reverse the axis.
+    </span>chart.x_axis().set_reverse();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_reverse.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_max" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11281-11287">Source</a><h4 class="code-header">pub fn <a href="#method.set_max" class="fn">set_max</a>&lt;T&gt;(&amp;mut self, max: T) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a><div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.f64.html">f64</a>&gt;,</div></h4></section></summary><div class="docblock"><p>Set the maximum value for an axis.</p>
+<p>Set the maximum bound to be displayed for an axis.</p>
+<p>Maximum and minimum chart axis values can only be set for chart “Value”
+axes and “Category Date” axes in Excel. You cannot set a maximum or
+minimum value for “Category” axes even if the category values are
+numbers. See <a href="index.html#chart-value-and-category-axes" title="mod rust_xlsxwriter::chart">Chart Value and Category Axes</a> for an explanation of the
+difference between Value and Category axes in Excel.</p>
+<p>See also <a href="struct.ChartAxis.html#method.set_max_date" title="method rust_xlsxwriter::chart::ChartAxis::set_max_date"><code>ChartAxis::set_max_date()</code></a> below.</p>
+<h5 id="parameters-9"><a class="doc-anchor" href="#parameters-9">§</a>Parameters</h5>
+<p><code>max</code> - The maximum bound for the axes.</p>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<p>A chart example demonstrating setting the axes bounds for chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Set the value axes bounds.
+    </span>chart.y_axis().set_min(-<span class="number">60</span>);
+    chart.y_axis().set_max(<span class="number">60</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_max.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_min" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11299-11305">Source</a><h4 class="code-header">pub fn <a href="#method.set_min" class="fn">set_min</a>&lt;T&gt;(&amp;mut self, min: T) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a><div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.f64.html">f64</a>&gt;,</div></h4></section></summary><div class="docblock"><p>Set the minimum value for an axis.</p>
+<p>Set the minimum bound to be displayed for an axis.</p>
+<p>See <a href="struct.ChartAxis.html#method.set_max" title="method rust_xlsxwriter::chart::ChartAxis::set_max"><code>ChartAxis::set_max()</code></a> above for a full explanation and example.</p>
+<h5 id="parameters-10"><a class="doc-anchor" href="#parameters-10">§</a>Parameters</h5>
+<p><code>min</code> - The minimum bound for the axes.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_max_date" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11383-11386">Source</a><h4 class="code-header">pub fn <a href="#method.set_max_date" class="fn">set_max_date</a>(
+    &amp;mut self,
+    datetime: impl <a class="trait" href="../trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime">IntoExcelDateTime</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the maximum date value for a date axis.</p>
+<p>Set the maximum date/time bound to be displayed for a date axis. This is
+just a syntactic helper around <a href="struct.ChartAxis.html#method.set_max" title="method rust_xlsxwriter::chart::ChartAxis::set_max"><code>ChartAxis::set_max()</code></a> to allow dates
+that support the <a href="../trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a> trait to be passed to the API.</p>
+<h5 id="parameters-11"><a class="doc-anchor" href="#parameters-11">§</a>Parameters</h5>
+<p><code>datetime</code> - A date/time instance that implements <a href="../trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a>.</p>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<p>A chart example demonstrating setting the maximum and minimum values for a
+date axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">0</span>))
+        .set_values((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">6</span>, <span class="number">1</span>));
+
+    <span class="comment">// Set the axis as a date axis.
+    </span>chart.x_axis().set_date_axis(<span class="bool-val">true</span>);
+
+    <span class="comment">// Set the min and max date values for the chart.
+    </span><span class="kw">let </span>min_date = ExcelDateTime::parse_from_str(<span class="string">"2024-01-02"</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>max_date = ExcelDateTime::parse_from_str(<span class="string">"2024-01-06"</span>)<span class="question-mark">?</span>;
+
+    chart.x_axis().set_min_date(min_date);
+    chart.x_axis().set_max_date(max_date);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_max_date.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_min_date" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11398-11401">Source</a><h4 class="code-header">pub fn <a href="#method.set_min_date" class="fn">set_min_date</a>(
+    &amp;mut self,
+    datetime: impl <a class="trait" href="../trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime">IntoExcelDateTime</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the minimum date value for a date axis.</p>
+<p>Set the minimum date/time bound to be displayed for a date axis. This is
+just a syntactic helper around <a href="struct.ChartAxis.html#method.set_min" title="method rust_xlsxwriter::chart::ChartAxis::set_min"><code>ChartAxis::set_min()</code></a> to allow dates
+that support the <a href="../trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a> trait to be passed to the API.</p>
+<h5 id="parameters-12"><a class="doc-anchor" href="#parameters-12">§</a>Parameters</h5>
+<p><code>datetime</code> - A date/time instance that implements <a href="../trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_major_unit" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11467-11479">Source</a><h4 class="code-header">pub fn <a href="#method.set_major_unit" class="fn">set_major_unit</a>&lt;T&gt;(&amp;mut self, value: T) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a><div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.f64.html">f64</a>&gt;,</div></h4></section></summary><div class="docblock"><p>Set the increment of the major units in the axis range.</p>
+<p>Note, Excel only supports major/minor units for “Value” axes. In general
+you cannot set major/minor units for a X/Category axis even if the
+category values are numbers. See <a href="index.html#chart-value-and-category-axes" title="mod rust_xlsxwriter::chart">Chart Value and Category Axes</a> for an
+explanation of the difference between Value and Category axes in Excel.</p>
+<h5 id="parameters-13"><a class="doc-anchor" href="#parameters-13">§</a>Parameters</h5>
+<p><code>value</code> - The major unit for the axes.</p>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<p>A chart example demonstrating setting the units for chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Turn on the minor gridlines.
+    </span>chart.y_axis().set_minor_gridlines(<span class="bool-val">true</span>);
+
+    <span class="comment">// Set the value axes major and minor units.
+    </span>chart.y_axis().set_major_unit(<span class="number">20</span>);
+    chart.y_axis().set_minor_unit(<span class="number">5</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_unit.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_minor_unit" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11490-11502">Source</a><h4 class="code-header">pub fn <a href="#method.set_minor_unit" class="fn">set_minor_unit</a>&lt;T&gt;(&amp;mut self, value: T) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a><div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.f64.html">f64</a>&gt;,</div></h4></section></summary><div class="docblock"><p>Set the increment of the minor units in the axis range.</p>
+<p>See <a href="struct.ChartAxis.html#method.set_major_unit" title="method rust_xlsxwriter::chart::ChartAxis::set_major_unit"><code>ChartAxis::set_major_unit()</code></a> above for a full explanation and
+example.</p>
+<h5 id="parameters-14"><a class="doc-anchor" href="#parameters-14">§</a>Parameters</h5>
+<p><code>value</code> - The major unit for the axes.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_display_unit_type" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11571-11575">Source</a><h4 class="code-header">pub fn <a href="#method.set_display_unit_type" class="fn">set_display_unit_type</a>(
+    &amp;mut self,
+    unit_type: <a class="enum" href="enum.ChartAxisDisplayUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDisplayUnitType">ChartAxisDisplayUnitType</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the display unit type such as Thousands, Millions, or other units.</p>
+<p>If the Value axis in your chart has very large numbers you can set the
+unit type to one of the following Excel values:</p>
+<ul>
+<li>Hundreds</li>
+<li>Thousands</li>
+<li>Ten Thousands</li>
+<li>Hundred Thousands</li>
+<li>Millions</li>
+<li>Ten Millions</li>
+<li>Hundred Millions</li>
+<li>Billions</li>
+<li>Trillions</li>
+</ul>
+<h5 id="parameters-15"><a class="doc-anchor" href="#parameters-15">§</a>Parameters</h5>
+<ul>
+<li><code>unit</code>: A <a href="enum.ChartAxisDateUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDateUnitType"><code>ChartAxisDateUnitType</code></a> enum value.</li>
+</ul>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<p>A chart example demonstrating setting the units of the Value/Y-axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Set the units for the axis.
+    </span>chart
+        .y_axis()
+        .set_display_unit_type(ChartAxisDisplayUnitType::Millions);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_display_unit_type.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_display_units_visible" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11583-11586">Source</a><h4 class="code-header">pub fn <a href="#method.set_display_units_visible" class="fn">set_display_units_visible</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Make the display units visible (if they have been set).</p>
+<h5 id="parameters-16"><a class="doc-anchor" href="#parameters-16">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_major_unit_date_type" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11594-11597">Source</a><h4 class="code-header">pub fn <a href="#method.set_major_unit_date_type" class="fn">set_major_unit_date_type</a>(
+    &amp;mut self,
+    unit_type: <a class="enum" href="enum.ChartAxisDateUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDateUnitType">ChartAxisDateUnitType</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the major unit type as days, months or years.</p>
+<h5 id="parameters-17"><a class="doc-anchor" href="#parameters-17">§</a>Parameters</h5>
+<ul>
+<li><code>unit</code>: A <a href="enum.ChartAxisDateUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDateUnitType"><code>ChartAxisDateUnitType</code></a> enum value.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_minor_unit_date_type" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11605-11608">Source</a><h4 class="code-header">pub fn <a href="#method.set_minor_unit_date_type" class="fn">set_minor_unit_date_type</a>(
+    &amp;mut self,
+    unit_type: <a class="enum" href="enum.ChartAxisDateUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDateUnitType">ChartAxisDateUnitType</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the minor unit type as days, months or years.</p>
+<h5 id="parameters-18"><a class="doc-anchor" href="#parameters-18">§</a>Parameters</h5>
+<ul>
+<li><code>unit</code>: A <a href="enum.ChartAxisDateUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDateUnitType"><code>ChartAxisDateUnitType</code></a> enum value.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_label_alignment" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11616-11619">Source</a><h4 class="code-header">pub fn <a href="#method.set_label_alignment" class="fn">set_label_alignment</a>(
+    &amp;mut self,
+    alignment: <a class="enum" href="enum.ChartAxisLabelAlignment.html" title="enum rust_xlsxwriter::chart::ChartAxisLabelAlignment">ChartAxisLabelAlignment</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the alignment of the axis labels relative to the tick mark.</p>
+<h5 id="parameters-19"><a class="doc-anchor" href="#parameters-19">§</a>Parameters</h5>
+<ul>
+<li><code>unit</code>: A <a href="enum.ChartAxisDateUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDateUnitType"><code>ChartAxisDateUnitType</code></a> enum value.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_major_gridlines" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11678-11681">Source</a><h4 class="code-header">pub fn <a href="#method.set_major_gridlines" class="fn">set_major_gridlines</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Turn on/off major gridlines for a chart axis.</p>
+<p>Major gridlines are on by default for Y/Value axes but off for
+X/Category axes.</p>
+<h5 id="parameters-20"><a class="doc-anchor" href="#parameters-20">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is off by default for X axes.</li>
+</ul>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<p>A chart example demonstrating turning off the major gridlines for chart
+axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Turn off the major gridlines, they are on by default.
+    </span>chart.y_axis().set_major_gridlines(<span class="bool-val">false</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_gridlines.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_minor_gridlines" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11738-11741">Source</a><h4 class="code-header">pub fn <a href="#method.set_minor_gridlines" class="fn">set_minor_gridlines</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Turn on/off minor gridlines for a chart axis.</p>
+<p>Minor gridlines are off by default.</p>
+<h5 id="parameters-21"><a class="doc-anchor" href="#parameters-21">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is off by default.</li>
+</ul>
+<h5 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h5>
+<p>A chart example demonstrating turning on the minor gridlines for chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Turn on the minor gridlines. The Y-axis major gridlines are on by
+    // default.
+    </span>chart.y_axis().set_minor_gridlines(<span class="bool-val">true</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_minor_gridlines.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_major_gridlines_line" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11800-11804">Source</a><h4 class="code-header">pub fn <a href="#method.set_major_gridlines_line" class="fn">set_major_gridlines_line</a>(&amp;mut self, line: &amp;<a class="struct" href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine">ChartLine</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the line formatting for a chart axis major gridlines.</p>
+<p>See the <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> struct for details on the line properties that can
+be set.</p>
+<h5 id="parameters-22"><a class="doc-anchor" href="#parameters-22">§</a>Parameters</h5>
+<ul>
+<li><code>line</code>: A <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> struct reference.</li>
+</ul>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<p>A chart example demonstrating formatting the major gridlines for chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Format the major gridlines.
+    </span>chart
+        .y_axis()
+        .set_major_gridlines_line(ChartLine::new().set_color(<span class="string">"#FF0000"</span>));
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_gridlines_line.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_minor_gridlines_line" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11863-11867">Source</a><h4 class="code-header">pub fn <a href="#method.set_minor_gridlines_line" class="fn">set_minor_gridlines_line</a>(&amp;mut self, line: &amp;<a class="struct" href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine">ChartLine</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the line formatting for a chart axis minor gridlines.</p>
+<p>See the <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> struct for details on the line properties that can
+be set.</p>
+<h5 id="parameters-23"><a class="doc-anchor" href="#parameters-23">§</a>Parameters</h5>
+<ul>
+<li><code>line</code>: A <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> struct reference.</li>
+</ul>
+<h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
+<p>A chart example demonstrating formatting the minor gridlines for chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Format the minor gridlines.
+    </span>chart
+        .y_axis()
+        .set_minor_gridlines_line(ChartLine::new().set_color(<span class="string">"#FF0000"</span>));
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_minor_gridlines_line.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_label_position" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#11926-11929">Source</a><h4 class="code-header">pub fn <a href="#method.set_label_position" class="fn">set_label_position</a>(
+    &amp;mut self,
+    position: <a class="enum" href="enum.ChartAxisLabelPosition.html" title="enum rust_xlsxwriter::chart::ChartAxisLabelPosition">ChartAxisLabelPosition</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the label position for the axis.</p>
+<p>The label position defines where the values/categories for the axis are
+displayed. The position is controlled via <a href="enum.ChartAxisLabelPosition.html" title="enum rust_xlsxwriter::chart::ChartAxisLabelPosition"><code>ChartAxisLabelPosition</code></a> enum.</p>
+<h5 id="parameters-24"><a class="doc-anchor" href="#parameters-24">§</a>Parameters</h5>
+<ul>
+<li><code>position</code>: A <a href="enum.ChartAxisLabelPosition.html" title="enum rust_xlsxwriter::chart::ChartAxisLabelPosition"><code>ChartAxisLabelPosition</code></a> enum value.</li>
+</ul>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<p>A chart example demonstrating setting the label position for an axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Set the axis label position to the bottom of the chart.
+    </span>chart
+        .x_axis()
+        .set_label_position(ChartAxisLabelPosition::Low);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_label_position.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_position_between_ticks" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12000-12003">Source</a><h4 class="code-header">pub fn <a href="#method.set_position_between_ticks" class="fn">set_position_between_ticks</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the axis position on or between the tick marks.</p>
+<p>In Excel there are two “Axis position” options for Category axes: “On
+tick marks” and “Between tick marks”. This property has different
+default value for different chart types and isn’t available for some
+chart types like Scatter. The <code>set_position_between_ticks()</code> method can
+be used to change the default value.</p>
+<p>Note, this property is only applicable to Category axes, see <a href="index.html#chart-value-and-category-axes" title="mod rust_xlsxwriter::chart">Chart
+Value and Category Axes</a> for an explanation of the difference between
+Value and Category axes in Excel.</p>
+<h5 id="parameters-25"><a class="doc-anchor" href="#parameters-25">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. Its default value depends on the
+chart type.</li>
+</ul>
+<h5 id="examples-17"><a class="doc-anchor" href="#examples-17">§</a>Examples</h5>
+<p>A chart example demonstrating setting the axes data position relative to
+the tick marks. Notice that by setting the data columns “on” the tick
+the first and last columns are cut off by the plot area.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Set the axes data position relative to the tick marks.
+    </span>chart.x_axis().set_position_between_ticks(<span class="bool-val">false</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_position_between_ticks.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_label_interval" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12065-12068">Source</a><h4 class="code-header">pub fn <a href="#method.set_label_interval" class="fn">set_label_interval</a>(&amp;mut self, interval: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u16.html">u16</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the interval of the axis labels.</p>
+<p>Set the interval of the axis labels for Category axes. This value is 1
+by default, i.e., there is one label shown per category. If needed it
+can be set to another value.</p>
+<p>Note, this property is only applicable to Category axes, see [Chart
+Value and Category Axes] for an explanation of the difference between
+Value and Category axes in Excel.</p>
+<h5 id="parameters-26"><a class="doc-anchor" href="#parameters-26">§</a>Parameters</h5>
+<ul>
+<li><code>interval</code>: The interval for the category labels. The default is 1.</li>
+</ul>
+<h5 id="examples-18"><a class="doc-anchor" href="#examples-18">§</a>Examples</h5>
+<p>A chart example demonstrating setting the label interval for an axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Set the interval for the axis labels.
+    </span>chart.x_axis().set_label_interval(<span class="number">2</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_label_interval.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_tick_interval" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12130-12133">Source</a><h4 class="code-header">pub fn <a href="#method.set_tick_interval" class="fn">set_tick_interval</a>(&amp;mut self, interval: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u16.html">u16</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the interval of the axis ticks.</p>
+<p>Set the interval of the axis ticks for Category axes. This value is 1
+by default, i.e., there is one tick shown per category. If needed it
+can be set to another value.</p>
+<p>Note, this property is only applicable to Category axes, see [Chart
+Value and Category Axes] for an explanation of the difference between
+Value and Category axes in Excel.</p>
+<h5 id="parameters-27"><a class="doc-anchor" href="#parameters-27">§</a>Parameters</h5>
+<ul>
+<li><code>interval</code>: The interval for the category ticks. The default is 1.</li>
+</ul>
+<h5 id="examples-19"><a class="doc-anchor" href="#examples-19">§</a>Examples</h5>
+<p>A chart example demonstrating setting the tick interval for an axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Set the interval for the axis ticks.
+    </span>chart.x_axis().set_tick_interval(<span class="number">2</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_tick_interval.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_major_tick_type" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12200-12203">Source</a><h4 class="code-header">pub fn <a href="#method.set_major_tick_type" class="fn">set_major_tick_type</a>(
+    &amp;mut self,
+    tick_type: <a class="enum" href="enum.ChartAxisTickType.html" title="enum rust_xlsxwriter::chart::ChartAxisTickType">ChartAxisTickType</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the type of major tick for the axis.</p>
+<p>Excel supports 4 types of tick position:</p>
+<ul>
+<li>None</li>
+<li>Inside only</li>
+<li>Outside only</li>
+<li>Cross - inside and outside</li>
+</ul>
+<h5 id="parameters-28"><a class="doc-anchor" href="#parameters-28">§</a>Parameters</h5>
+<ul>
+<li><code>tick_type</code>: a <a href="enum.ChartAxisTickType.html" title="enum rust_xlsxwriter::chart::ChartAxisTickType"><code>ChartAxisTickType</code></a> enum value.</li>
+</ul>
+<h5 id="examples-20"><a class="doc-anchor" href="#examples-20">§</a>Examples</h5>
+<p>A chart example demonstrating setting the tick types for chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Set the tick types for chart axes.
+    </span>chart
+        .x_axis()
+        .set_major_tick_type(ChartAxisTickType::None);
+    chart
+        .y_axis()
+        .set_major_tick_type(ChartAxisTickType::Outside)
+        .set_minor_tick_type(ChartAxisTickType::Cross);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_tick_type.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_minor_tick_type" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12214-12217">Source</a><h4 class="code-header">pub fn <a href="#method.set_minor_tick_type" class="fn">set_minor_tick_type</a>(
+    &amp;mut self,
+    tick_type: <a class="enum" href="enum.ChartAxisTickType.html" title="enum rust_xlsxwriter::chart::ChartAxisTickType">ChartAxisTickType</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the type of minor tick for the axis.</p>
+<p>See <a href="struct.ChartAxis.html#method.set_major_tick_type" title="method rust_xlsxwriter::chart::ChartAxis::set_major_tick_type"><code>ChartAxis::set_major_tick_type()</code></a> above for an explanation and
+example.</p>
+<h5 id="parameters-29"><a class="doc-anchor" href="#parameters-29">§</a>Parameters</h5>
+<ul>
+<li><code>tick_type</code>: a <a href="enum.ChartAxisTickType.html" title="enum rust_xlsxwriter::chart::ChartAxisTickType"><code>ChartAxisTickType</code></a> enum value.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_log_base" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12279-12284">Source</a><h4 class="code-header">pub fn <a href="#method.set_log_base" class="fn">set_log_base</a>(&amp;mut self, base: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u16.html">u16</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the log base of the axis range.</p>
+<p>This property is only applicable to value axes, see <a href="index.html#chart-value-and-category-axes" title="mod rust_xlsxwriter::chart">Chart Value and
+Category Axes</a> for an explanation of the difference between Value and
+Category axes in Excel.</p>
+<h5 id="parameters-30"><a class="doc-anchor" href="#parameters-30">§</a>Parameters</h5>
+<ul>
+<li><code>base</code>: The logarithm base. Should be &gt;= 2.</li>
+</ul>
+<h5 id="examples-21"><a class="doc-anchor" href="#examples-21">§</a>Examples</h5>
+<p>A chart example demonstrating setting the logarithm base for chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Change the default logarithm base for the Y-axis.
+    </span>chart.y_axis().set_log_base(<span class="number">10</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_axis_set_log_base.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_hidden" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12341-12344">Source</a><h4 class="code-header">pub fn <a href="#method.set_hidden" class="fn">set_hidden</a>(&amp;mut self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Hide the chart axis.</p>
+<p>Hide the number or label section of the chart axis.</p>
+<h5 id="parameters-31"><a class="doc-anchor" href="#parameters-31">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off.</li>
+</ul>
+<h5 id="examples-22"><a class="doc-anchor" href="#examples-22">§</a>Examples</h5>
+<p>A chart example demonstrating hiding the chart axes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Hide both axes.
+    </span>chart.x_axis().set_hidden(<span class="bool-val">true</span>);
+    chart.y_axis().set_hidden(<span class="bool-val">true</span>);
+
+    <span class="comment">// Hide legend for clarity.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axis_set_hidden.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_label_layout" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#12355-12358">Source</a><h4 class="code-header">pub fn <a href="#method.set_label_layout" class="fn">set_label_layout</a>(&amp;mut self, layout: &amp;<a class="struct" href="struct.ChartLayout.html" title="struct rust_xlsxwriter::chart::ChartLayout">ChartLayout</a>) -&gt; &amp;mut <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class="docblock"><p>Set the manual position of the chart axis label.</p>
+<p>This method is used to simulate manual positioning of a chart axis
+label. See <a href="struct.ChartLayout.html" title="struct rust_xlsxwriter::chart::ChartLayout"><code>ChartLayout</code></a> for more details.</p>
+<h5 id="parameters-32"><a class="doc-anchor" href="#parameters-32">§</a>Parameters</h5>
+<ul>
+<li><code>layout</code>: A <a href="struct.ChartLayout.html" title="struct rust_xlsxwriter::chart::ChartLayout"><code>ChartLayout</code></a> struct reference.</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-ChartAxis" class="impl"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10546">Source</a><a href="#impl-Clone-for-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../../src/rust_xlsxwriter/chart.rs.html#10546">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#213-215">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-ChartAxis" class="impl"><a href="#impl-Freeze-for-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section><section id="impl-RefUnwindSafe-for-ChartAxis" class="impl"><a href="#impl-RefUnwindSafe-for-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section><section id="impl-Send-for-ChartAxis" class="impl"><a href="#impl-Send-for-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section><section id="impl-Sync-for-ChartAxis" class="impl"><a href="#impl-Sync-for-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section><section id="impl-Unpin-for-ChartAxis" class="impl"><a href="#impl-Unpin-for-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section><section id="impl-UnwindSafe-for-ChartAxis" class="impl"><a href="#impl-UnwindSafe-for-ChartAxis" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">ChartAxis</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.89.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#209">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#211">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#217">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#218">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#483">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#485">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#774">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#757-759">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#767">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#82-84">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#86">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#87">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#91">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#813-815">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#817">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#820">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#798-800">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#802">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#805">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main></body></html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Check that a worksheet name is valid in Excel."><title>check_sheet_name in rust_xlsxwriter::utility - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">check_<wbr>sheet_<wbr>name</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#parameters" title="Parameters">Parameters</a></li><li><a href="#errors" title="Errors">Errors</a></li><li><a href="#examples" title="Examples">Examples</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In rust_<wbr>xlsxwriter::<wbr>utility</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a>::<wbr><a href="index.html">utility</a></div><h1>Function <span class="fn">check_sheet_name</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/utility.rs.html#702-705">Source</a> </span></div><pre class="rust item-decl"><code>pub fn check_sheet_name(name: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.unit.html">()</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Check that a worksheet name is valid in Excel.</p>
+<p>This function checks if an worksheet name is valid according to the Excel
+rules:</p>
+<ul>
+<li>The name is less than 32 characters.</li>
+<li>The name isn’t blank.</li>
+<li>The name doesn’t contain any of the characters: <code>[ ] : * ? / \</code>.</li>
+<li>The name doesn’t start or end with an apostrophe.</li>
+</ul>
+<p>The worksheet name “History” isn’t allowed in English versions of Excel
+since it is a reserved name. However it is allowed in some other language
+versions so this function doesn’t raise it as an error. Overall it is best
+to avoid using it.</p>
+<p>The rules for worksheet names in Excel are explained in the <a href="https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9">Microsoft
+Office documentation</a>.</p>
+<h2 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h2>
+<ul>
+<li><code>name</code>: The worksheet name. It must follow the Excel rules, shown above.</li>
+</ul>
+<h2 id="errors"><a class="doc-anchor" href="#errors">§</a>Errors</h2>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.SheetnameCannotBeBlank" title="variant rust_xlsxwriter::XlsxError::SheetnameCannotBeBlank"><code>XlsxError::SheetnameCannotBeBlank</code></a> - Worksheet name cannot be blank.</li>
+<li><a href="../enum.XlsxError.html#variant.SheetnameLengthExceeded" title="variant rust_xlsxwriter::XlsxError::SheetnameLengthExceeded"><code>XlsxError::SheetnameLengthExceeded</code></a> - Worksheet name exceeds Excel’s
+limit of 31 characters.</li>
+<li><a href="../enum.XlsxError.html#variant.SheetnameContainsInvalidCharacter" title="variant rust_xlsxwriter::XlsxError::SheetnameContainsInvalidCharacter"><code>XlsxError::SheetnameContainsInvalidCharacter</code></a> - Worksheet name cannot
+contain invalid characters: <code>[ ] : * ? / \</code></li>
+<li><a href="../enum.XlsxError.html#variant.SheetnameStartsOrEndsWithApostrophe" title="variant rust_xlsxwriter::XlsxError::SheetnameStartsOrEndsWithApostrophe"><code>XlsxError::SheetnameStartsOrEndsWithApostrophe</code></a> - Worksheet name cannot
+start or end with an apostrophe.</li>
+</ul>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>The following example demonstrates testing for a valid worksheet name.</p>
+<div class="example-wrap"><pre class="language-fail"><code># // This code is available in examples/doc_utility_check_sheet_name.rs
+#
+# use rust_xlsxwriter::{utility, XlsxError};
+#
+fn main() -&gt; Result&lt;(), XlsxError&gt; {
+    // This worksheet name is valid.
+    utility::check_sheet_name(&quot;2030-01-01&quot;)?;
+
+    // This worksheet name isn&#39;t valid due to the forward slashes.
+    utility::check_sheet_name(&quot;2030/01/01&quot;)?;
+
+    Ok(())
+}</code></pre></div></div></details></section></div></main></body></html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Working with Worksheets"><title>rust_xlsxwriter::worksheet - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module worksheet</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#working-with-worksheets" title="Working with Worksheets">Working with Worksheets</a></li><li><a href="#contents" title="Contents">Contents</a></li><li><a href="#creating-worksheets" title="Creating worksheets">Creating worksheets</a><ul><li><a href="#working-with-add_worksheet-and-the-borrow-checker" title="Working with `add_worksheet()` and the borrow checker">Working with <code>add_worksheet()</code> and the borrow checker</a></li><li><a href="#working-with-worksheetnew-and-the-borrow-checker" title="Working with `Worksheet::new()` and the borrow checker">Working with <code>Worksheet::new()</code> and the borrow checker</a></li><li><a href="#using-add_worksheet-versus--worksheetnew" title="Using `add_worksheet()` versus  `Worksheet::new()`">Using <code>add_worksheet()</code> versus  <code>Worksheet::new()</code></a></li></ul></li><li><a href="#chartsheets" title="Chartsheets">Chartsheets</a></li><li><a href="#page-setup" title="Page Setup">Page Setup</a><ul><li><a href="#page-setup---page" title="Page Setup - Page">Page Setup - Page</a></li><li><a href="#page-setup---margins" title="Page Setup - Margins">Page Setup - Margins</a></li><li><a href="#page-setup---headerfooter" title="Page Setup - Header/Footer">Page Setup - Header/Footer</a></li><li><a href="#page-setup---sheet" title="Page Setup - Sheet">Page Setup - Sheet</a></li></ul></li><li><a href="#cell-formatting" title="Cell formatting">Cell formatting</a></li><li><a href="#adding-headers-and-footers" title="Adding Headers and Footers">Adding Headers and Footers</a></li><li><a href="#autofitting-column-widths" title="Autofitting column widths">Autofitting column widths</a></li><li><a href="#working-with-worksheet-tabs" title="Working with worksheet tabs">Working with worksheet tabs</a><ul><li><a href="#worksheet-names" title="Worksheet names">Worksheet names</a></li><li><a href="#setting-the-active-worksheet" title="Setting the active worksheet">Setting the active worksheet</a></li><li><a href="#setting-worksheet-tab-colors" title="Setting worksheet tab colors">Setting worksheet tab colors</a></li><li><a href="#hiding-worksheets" title="Hiding worksheets">Hiding worksheets</a></li><li><a href="#selecting-worksheets" title="Selecting worksheets">Selecting worksheets</a></li></ul></li><li><a href="#worksheet-protection" title="Worksheet protection">Worksheet protection</a><ul><li><a href="#setting-a-protection-password" title="Setting a protection password">Setting a protection password</a></li><li><a href="#choosing-which-worksheet-elements-to-protect" title="Choosing which worksheet elements to protect">Choosing which worksheet elements to protect</a></li><li><a href="#workbook-protection" title="Workbook protection">Workbook protection</a></li><li><a href="#read-only-workbook" title="Read-only workbook">Read-only workbook</a></li></ul></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#traits" title="Traits">Traits</a></li><li><a href="#types" title="Type Aliases">Type Aliases</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a></div><h1>Module <span>worksheet</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/worksheet.rs.html#7-17834">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="working-with-worksheets"><a class="doc-anchor" href="#working-with-worksheets">§</a>Working with Worksheets</h2>
+<p>The <a href="struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet"><code>Worksheet</code></a> struct struct represents an Excel worksheet. It handles
+operations such as writing data to cells or formatting worksheet layout.</p>
+<img src="https://rustxlsxwriter.github.io/images/demo.png">
+<p>Sample code to generate the Excel file shown above.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::<span class="kw-2">*</span>;
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Create some formats to use in the worksheet.
+    </span><span class="kw">let </span>bold_format = Format::new().set_bold();
+    <span class="kw">let </span>decimal_format = Format::new().set_num_format(<span class="string">"0.000"</span>);
+    <span class="kw">let </span>date_format = Format::new().set_num_format(<span class="string">"yyyy-mm-dd"</span>);
+    <span class="kw">let </span>merge_format = Format::new()
+        .set_border(FormatBorder::Thin)
+        .set_align(FormatAlign::Center);
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Set the column width for clarity.
+    </span>worksheet.set_column_width(<span class="number">0</span>, <span class="number">22</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a string without formatting.
+    </span>worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a string with the bold format defined above.
+    </span>worksheet.write_with_format(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"World"</span>, <span class="kw-2">&amp;</span>bold_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some numbers.
+    </span>worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">3</span>, <span class="number">0</span>, <span class="number">2.34</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a number with formatting.
+    </span>worksheet.write_with_format(<span class="number">4</span>, <span class="number">0</span>, <span class="number">3.00</span>, <span class="kw-2">&amp;</span>decimal_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a formula.
+    </span>worksheet.write(<span class="number">5</span>, <span class="number">0</span>, Formula::new(<span class="string">"=SIN(PI()/4)"</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a date.
+    </span><span class="kw">let </span>date = ExcelDateTime::from_ymd(<span class="number">2023</span>, <span class="number">1</span>, <span class="number">25</span>)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">6</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>date, <span class="kw-2">&amp;</span>date_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some links.
+    </span>worksheet.write(<span class="number">7</span>, <span class="number">0</span>, Url::new(<span class="string">"https://www.rust-lang.org"</span>))<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">8</span>, <span class="number">0</span>, Url::new(<span class="string">"https://www.rust-lang.org"</span>).set_text(<span class="string">"Rust"</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some merged cells.
+    </span>worksheet.merge_range(<span class="number">9</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="string">"Merged cells"</span>, <span class="kw-2">&amp;</span>merge_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Insert an image.
+    </span><span class="kw">let </span>image = Image::new(<span class="string">"examples/rust_logo.png"</span>)<span class="question-mark">?</span>;
+    worksheet.insert_image(<span class="number">1</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>image)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"demo.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>For more details on the Worksheet APIs for see the <a href="struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet"><code>Worksheet</code></a>
+documentation and the sections below.</p>
+<h2 id="contents"><a class="doc-anchor" href="#contents">§</a>Contents</h2>
+<ul>
+<li><a href="#creating-worksheets">Creating worksheets</a>
+<ul>
+<li><a href="#working-with-add_worksheet-and-the-borrow-checker">Working with <code>add_worksheet()</code> and the borrow
+checker</a></li>
+<li><a href="#working-with-worksheetnew-and-the-borrow-checker">Working with <code>Worksheet::new()</code> and the borrow
+checker</a></li>
+<li><a href="#using-add_worksheet-versus--worksheetnew">Using <code>add_worksheet()</code> versus
+<code>Worksheet::new()</code></a></li>
+</ul>
+</li>
+<li><a href="#chartsheets">Chartsheets</a></li>
+<li><a href="#page-setup">Page Setup</a>
+<ul>
+<li><a href="#page-setup---page">Page Setup - Page</a></li>
+<li><a href="#page-setup---margins">Page Setup - Margins</a></li>
+<li><a href="#page-setup---headerfooter">Page Setup - Header/Footer</a></li>
+<li><a href="#page-setup---sheet">Page Setup - Sheet</a></li>
+</ul>
+</li>
+<li><a href="#cell-formatting">Cell formatting</a></li>
+<li><a href="#adding-headers-and-footers">Adding Headers and Footers</a></li>
+<li><a href="#autofitting-column-widths">Autofitting column widths</a></li>
+<li><a href="#working-with-worksheet-tabs">Working with worksheet tabs</a>
+<ul>
+<li><a href="#worksheet-names">Worksheet names</a></li>
+<li><a href="#setting-the-active-worksheet">Setting the active worksheet</a></li>
+<li><a href="#setting-worksheet-tab-colors">Setting worksheet tab colors</a></li>
+<li><a href="#hiding-worksheets">Hiding worksheets</a></li>
+<li><a href="#selecting-worksheets">Selecting worksheets</a></li>
+</ul>
+</li>
+<li><a href="#worksheet-protection">Worksheet protection</a>
+<ul>
+<li><a href="#setting-a-protection-password">Setting a protection password</a></li>
+<li><a href="#choosing-which-worksheet-elements-to-protect">Choosing which worksheet elements to
+protect</a></li>
+<li><a href="#workbook-protection">Workbook protection</a></li>
+<li><a href="#read-only-workbook">Read-only workbook</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="creating-worksheets"><a class="doc-anchor" href="#creating-worksheets">§</a>Creating worksheets</h2>
+<p>There are two ways of creating a worksheet object with <code>rust_xlsxwriter</code>:
+via the <a href="../workbook/struct.Workbook.html#method.add_worksheet" title="method rust_xlsxwriter::workbook::Workbook::add_worksheet"><code>Workbook::add_worksheet()</code></a> method and via the
+<a href="struct.Worksheet.html#method.new" title="associated function rust_xlsxwriter::worksheet::Worksheet::new"><code>Worksheet::new()</code></a> constructor.</p>
+<p>The first method ties the worksheet to a workbook object that will
+automatically write the worksheet when the file is saved, whereas the second
+method creates a worksheet that is independent of a workbook. The second
+method has the advantage of keeping the worksheet free of the workbook
+borrow checking until needed, as explained below.</p>
+<h3 id="working-with-add_worksheet-and-the-borrow-checker"><a class="doc-anchor" href="#working-with-add_worksheet-and-the-borrow-checker">§</a>Working with <code>add_worksheet()</code> and the borrow checker</h3>
+<p>Due to borrow checking rules you can only have one active reference to a
+worksheet object created by <a href="../workbook/struct.Workbook.html#method.add_worksheet" title="method rust_xlsxwriter::workbook::Workbook::add_worksheet"><code>Workbook::add_worksheet()</code></a> since that method
+returns a mutable reference to an element of an internal vector.</p>
+<p>For a workbook with multiple worksheets this restriction is generally
+workable if you can create and use the worksheets sequentially since you
+will only need to have one reference at any one time.</p>
+<p>However, if you can’t structure your code to work sequentially then you can
+get a reference to a previously created worksheet using
+<a href="../workbook/struct.Workbook.html#method.worksheet_from_index" title="method rust_xlsxwriter::workbook::Workbook::worksheet_from_index"><code>Workbook::worksheet_from_index()</code></a>. The standard borrow checking rules
+still apply so you will have to give up ownership of any other worksheet
+reference prior to calling this method.</p>
+<p>For example:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Start with a reference to worksheet1.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet1 = workbook.add_worksheet();
+    worksheet1.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// If we don't try to use the workbook1 reference again we can
+    // just switch to using a reference to worksheet2.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = workbook.add_worksheet();
+    worksheet2.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet2 and move back to worksheet1.
+    </span>worksheet1 = workbook.worksheet_from_index(<span class="number">0</span>)<span class="question-mark">?</span>;
+    worksheet1.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet1"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet1 and move back to worksheet2.
+    </span>worksheet2 = workbook.worksheet_from_index(<span class="number">1</span>)<span class="question-mark">?</span>;
+    worksheet2.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet2"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>You can also use <a href="../workbook/struct.Workbook.html#method.worksheet_from_name" title="method rust_xlsxwriter::workbook::Workbook::worksheet_from_name"><code>Workbook::worksheet_from_name()</code></a> to do something similar
+using the worksheet names:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Start with a reference to worksheet1.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet1 = workbook.add_worksheet();
+    <span class="kw">let </span>name1 = worksheet1.name(); <span class="comment">// "Sheet1"
+    </span>worksheet1.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// If we don't try to use the workbook1 reference again we can
+    // just switch to using a reference to worksheet2.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = workbook.add_worksheet().set_name(<span class="string">"Data"</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>name2 = worksheet2.name();
+    worksheet2.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet2 and move back to worksheet1.
+    </span>worksheet1 = workbook.worksheet_from_name(<span class="kw-2">&amp;</span>name1)<span class="question-mark">?</span>;
+    worksheet1.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet1"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet1 and move back to worksheet2.
+    </span>worksheet2 = workbook.worksheet_from_name(<span class="kw-2">&amp;</span>name2)<span class="question-mark">?</span>;
+    worksheet2.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet2"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Additionally can use <a href="../workbook/struct.Workbook.html#method.worksheets_mut" title="method rust_xlsxwriter::workbook::Workbook::worksheets_mut"><code>Workbook::worksheets_mut()</code></a> to get a reference to
+the the vector that holds the worksheets. This can be used, for instance, to
+iterate over all the worksheets in a workbook:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Add three worksheets to the workbook.
+    </span><span class="kw">let </span>_worksheet1 = workbook.add_worksheet();
+    <span class="kw">let </span>_worksheet2 = workbook.add_worksheet();
+    <span class="kw">let </span>_worksheet3 = workbook.add_worksheet();
+
+    <span class="comment">// Write the same data to all three worksheets.
+    </span><span class="kw">for </span>worksheet <span class="kw">in </span>workbook.worksheets_mut() {
+        worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+        worksheet.write_number(<span class="number">1</span>, <span class="number">0</span>, <span class="number">12345</span>)<span class="question-mark">?</span>;
+    }
+
+    <span class="comment">// If you are careful you can use standard slice operations.
+    </span>workbook.worksheets_mut().swap(<span class="number">0</span>, <span class="number">1</span>);</code></pre></div>
+<p>Note the use of the <a href="https://doc.rust-lang.org/1.89.0/std/primitive.slice.html" title="primitive slice">slice</a> operation which gives the following:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/workbook_worksheets_mut.png"></p>
+<p>All three worksheets in the output file have the same data and <code>Sheet2</code> and
+<code>Sheet1</code> have swapped position, as can be seen from the image.</p>
+<h3 id="working-with-worksheetnew-and-the-borrow-checker"><a class="doc-anchor" href="#working-with-worksheetnew-and-the-borrow-checker">§</a>Working with <code>Worksheet::new()</code> and the borrow checker</h3>
+<p>As outlined above it is also possible to create a Worksheet object via
+<a href="struct.Worksheet.html#method.new" title="associated function rust_xlsxwriter::worksheet::Worksheet::new"><code>Worksheet::new()</code></a>, as you would expect. Since this type of Worksheet
+instance isn’t tied to a Workbook it isn’t subject to the additional borrow
+checking rules that entails.</p>
+<p>As such you can create and work with several Worksheet instances and then
+add them to the Workbook when you are finished via the
+<a href="../workbook/struct.Workbook.html#method.push_worksheet" title="method rust_xlsxwriter::workbook::Workbook::push_worksheet"><code>Workbook::push_worksheet()</code></a> method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Create a new workbook.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Create new worksheets.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet1 = Worksheet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = Worksheet::new();
+
+    <span class="comment">// Use the first workbook.
+    </span>worksheet1.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+    worksheet1.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet1"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Use the second workbook.
+    </span>worksheet2.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+    worksheet2.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet2"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add the worksheets to the workbook.
+    </span>workbook.push_worksheet(worksheet1);
+    workbook.push_worksheet(worksheet2);
+
+    <span class="comment">// Save the workbook.
+    </span>workbook.save(<span class="string">"worksheets.xlsx"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<h3 id="using-add_worksheet-versus--worksheetnew"><a class="doc-anchor" href="#using-add_worksheet-versus--worksheetnew">§</a>Using <code>add_worksheet()</code> versus  <code>Worksheet::new()</code></h3>
+<p>Since there are two ways of doing, effectively, the same thing you will
+probably wonder which is best.</p>
+<p>The author mainly uses <code>add_worksheet()</code> and most of the library and
+documentation examples are structured to work with that method. In addition,
+the Excel xlsx file format has very tight coupling between it’s
+sub-components and it is possible that some future <code>rust_xlsxwriter</code>
+functionality will require Worksheets and other Workbook objects to be
+<code>registered</code> with a parent Workbook in order for them to work. However,
+there aren’t currently any features like that, and the author will seek to
+avoid them as much as possible.</p>
+<p>One common use case that works better with <code>Worksheet::new()</code> and
+<code>Workbook::push_worksheet()</code> is creating worksheets to run in a
+parallelized/async mode. However, it is worth noting that there isn’t a
+guaranteed performance benefit from creating and working with worksheets in
+parallelized/async mode since the main overhead comes from <strong>writing</strong> the
+worksheets which will occur after the worksheets are joined back to the main
+workbook <code>save()</code> thread. In addition <code>rust_xlsxwriter</code> already parallelizes
+the writing of worksheets as much as possible.</p>
+<h2 id="chartsheets"><a class="doc-anchor" href="#chartsheets">§</a>Chartsheets</h2>
+<p>A Chartsheet in Excel is a specialized type of worksheet that doesn’t have
+cells but instead is used to display a single chart. It supports worksheet
+display options such as headers and footers, margins, tab selection and
+print properties but its primary function is to display a chart.</p>
+<img src="https://rustxlsxwriter.github.io/images/chartsheet.png">
+<p>A chartsheet can be created using the
+<a href="../workbook/struct.Workbook.html#method.add_chartsheet" title="method rust_xlsxwriter::workbook::Workbook::add_chartsheet"><code>Workbook::add_chartsheet()</code></a> of
+<a href="struct.Worksheet.html#method.new_chartsheet" title="associated function rust_xlsxwriter::worksheet::Worksheet::new_chartsheet"><code>Worksheet::new_chartsheet()</code></a> methods.</p>
+<p>The following is a simple chartsheet example that creates a workbook with a
+worksheet and a chartsheet as shown in the image above.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Add some data for the chart.
+    </span>worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">1</span>, <span class="number">0</span>, <span class="number">60</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="number">30</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">3</span>, <span class="number">0</span>, <span class="number">10</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">4</span>, <span class="number">0</span>, <span class="number">50</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a new chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Create a new chartsheet.
+    </span><span class="kw">let </span>chartsheet = workbook.add_chartsheet();
+
+    <span class="comment">// Add the chart to the chartsheet.
+    </span>chartsheet.insert_chart(<span class="number">0</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file.
+    </span>workbook.save(<span class="string">"chart.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h2 id="page-setup"><a class="doc-anchor" href="#page-setup">§</a>Page Setup</h2>
+<p>The sections below look at the elements of the Excel Page Setup dialog and
+the equivalent <code>rust_xlsxwriter</code> methods.</p>
+<p>For more, general, information about the page setup options in Excel see the
+Microsoft documentation on <a href="https://support.microsoft.com/en-us/office/page-setup-71c20d94-b13e-48fd-9800-cedd1fec6da3">Page Setup</a>.</p>
+<h3 id="page-setup---page"><a class="doc-anchor" href="#page-setup---page">§</a>Page Setup - Page</h3>
+<p>The page Setup “Page” dialog looks like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/page_setup01.png">
+<p>The equivalent <code>rust_xlsxwriter</code> methods are:</p>
+<ol>
+<li><a href="struct.Worksheet.html#method.set_portrait" title="method rust_xlsxwriter::worksheet::Worksheet::set_portrait"><code>Worksheet::set_portrait()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_landscape" title="method rust_xlsxwriter::worksheet::Worksheet::set_landscape"><code>Worksheet::set_landscape()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_scale" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_scale"><code>Worksheet::set_print_scale()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_fit_to_pages" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_fit_to_pages"><code>Worksheet::set_print_fit_to_pages()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_first_page_number" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_first_page_number"><code>Worksheet::set_print_first_page_number()</code></a></li>
+</ol>
+<p>Note, for <a href="struct.Worksheet.html#method.set_print_fit_to_pages" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_fit_to_pages"><code>Worksheet::set_print_fit_to_pages()</code></a> a common requirement is to
+fit the printed output to <code>n</code> pages wide but have the height be as long as
+necessary. To achieve this set the <code>height</code> to 0:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Set the printed output to fit 1 page wide and as long as necessary.
+    </span>worksheet.set_print_fit_to_pages(<span class="number">1</span>, <span class="number">0</span>);</code></pre></div>
+<h3 id="page-setup---margins"><a class="doc-anchor" href="#page-setup---margins">§</a>Page Setup - Margins</h3>
+<p>The page Setup “Margins” dialog looks like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/page_setup02.png">
+<p>The equivalent <code>rust_xlsxwriter</code> methods are:</p>
+<ol>
+<li><a href="struct.Worksheet.html#method.set_margins" title="method rust_xlsxwriter::worksheet::Worksheet::set_margins"><code>Worksheet::set_margins()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_center_horizontally" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_center_horizontally"><code>Worksheet::set_print_center_horizontally()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_center_vertically" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_center_vertically"><code>Worksheet::set_print_center_vertically()</code></a></li>
+</ol>
+<h3 id="page-setup---headerfooter"><a class="doc-anchor" href="#page-setup---headerfooter">§</a>Page Setup - Header/Footer</h3>
+<p>The page Setup “Header/Footer” dialog looks like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/page_setup03.png">
+<p>The equivalent <code>rust_xlsxwriter</code> methods are:</p>
+<ol>
+<li><a href="struct.Worksheet.html#method.set_header" title="method rust_xlsxwriter::worksheet::Worksheet::set_header"><code>Worksheet::set_header()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_footer" title="method rust_xlsxwriter::worksheet::Worksheet::set_footer"><code>Worksheet::set_footer()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_header_footer_scale_with_doc" title="method rust_xlsxwriter::worksheet::Worksheet::set_header_footer_scale_with_doc"><code>Worksheet::set_header_footer_scale_with_doc()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_header_footer_align_with_page" title="method rust_xlsxwriter::worksheet::Worksheet::set_header_footer_align_with_page"><code>Worksheet::set_header_footer_align_with_page()</code></a></li>
+</ol>
+<p>Headers and footers are explained in more detail in a subsequent section
+below on <a href="#adding-headers-and-footers">Adding Headers and Footers</a>.</p>
+<p>Note, the options for different first, odd and even pages are not supported
+in <code>rust_xlsxwriter</code>.</p>
+<h3 id="page-setup---sheet"><a class="doc-anchor" href="#page-setup---sheet">§</a>Page Setup - Sheet</h3>
+<p>The page Setup “Sheet” dialog looks like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/page_setup04.png">
+<p>The equivalent <code>rust_xlsxwriter</code> methods are:</p>
+<ol>
+<li><a href="struct.Worksheet.html#method.set_print_area" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_area"><code>Worksheet::set_print_area()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_repeat_rows" title="method rust_xlsxwriter::worksheet::Worksheet::set_repeat_rows"><code>Worksheet::set_repeat_rows()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_repeat_columns" title="method rust_xlsxwriter::worksheet::Worksheet::set_repeat_columns"><code>Worksheet::set_repeat_columns()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_gridlines" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_gridlines"><code>Worksheet::set_print_gridlines()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_black_and_white" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_black_and_white"><code>Worksheet::set_print_black_and_white()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_draft" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_draft"><code>Worksheet::set_print_draft()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_print_headings" title="method rust_xlsxwriter::worksheet::Worksheet::set_print_headings"><code>Worksheet::set_print_headings()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_page_order" title="method rust_xlsxwriter::worksheet::Worksheet::set_page_order"><code>Worksheet::set_page_order()</code></a></li>
+</ol>
+<h2 id="cell-formatting"><a class="doc-anchor" href="#cell-formatting">§</a>Cell formatting</h2>
+<p>In Excel the data in a worksheet cell is comprised of a type, a value and a
+format. When using <code>rust_xlsxwriter</code> the type is inferred and the value and
+format are generally written at the same time using methods like
+<a href="struct.Worksheet.html#method.write_with_format" title="method rust_xlsxwriter::worksheet::Worksheet::write_with_format"><code>Worksheet::write_with_format()</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Add a format.
+    </span><span class="kw">let </span>border = Format::new().set_border(FormatBorder::Thin);
+
+    <span class="comment">// Some data to write.
+    </span><span class="kw">let </span>data = [
+        [<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>],
+        [<span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>],
+        [<span class="number">30</span>, <span class="number">31</span>, <span class="number">32</span>, <span class="number">33</span>, <span class="number">34</span>],
+    ];
+
+    <span class="comment">// Write the data with formatting.
+    </span><span class="kw">for </span>(row_num, col) <span class="kw">in </span>data.iter().enumerate() {
+        <span class="kw">for </span>(col_num, cell) <span class="kw">in </span>col.iter().enumerate() {
+            <span class="kw">let </span>row_num = row_num <span class="kw">as </span>u32 + <span class="number">1</span>;
+            <span class="kw">let </span>col_num = col_num <span class="kw">as </span>u16 + <span class="number">1</span>;
+            worksheet.write_with_format(row_num, col_num, <span class="kw-2">*</span>cell, <span class="kw-2">&amp;</span>border)<span class="question-mark">?</span>;
+        }
+    }
+
+    workbook.save(<span class="string">"worksheet.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Which produces an output file like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format.png"></p>
+<p>However, it is sometimes easier to structure <code>rust_xlsxwriter</code> programs to
+write the data first and then add the formatting. To do that you can make
+use of the following worksheet methods:</p>
+<ul>
+<li><a href="struct.Worksheet.html#method.set_cell_format" title="method rust_xlsxwriter::worksheet::Worksheet::set_cell_format"><code>Worksheet::set_cell_format()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_range_format" title="method rust_xlsxwriter::worksheet::Worksheet::set_range_format"><code>Worksheet::set_range_format()</code></a></li>
+<li><a href="struct.Worksheet.html#method.set_range_format_with_border" title="method rust_xlsxwriter::worksheet::Worksheet::set_range_format_with_border"><code>Worksheet::set_range_format_with_border()</code></a></li>
+</ul>
+<p>Here is an example with the same output as  the previous example where the
+data and formatting are handled separately:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Add a format.
+    </span><span class="kw">let </span>border = Format::new().set_border(FormatBorder::Thin);
+
+    <span class="comment">// Write an array of data.
+    </span><span class="kw">let </span>data = [
+        [<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>],
+        [<span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>],
+        [<span class="number">30</span>, <span class="number">31</span>, <span class="number">32</span>, <span class="number">33</span>, <span class="number">34</span>],
+    ];
+    worksheet.write_row_matrix(<span class="number">1</span>, <span class="number">1</span>, data)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add formatting to the cells.
+    </span>worksheet.set_range_format(<span class="number">1</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>border)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"worksheet.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>The methodology of separating the data and the formatting is particularly
+useful when you need to add a border to a range, since that can require up
+to 9 separate formats and tracking of the cell positions. Here is an example
+with <a href="struct.Worksheet.html#method.set_range_format_with_border" title="method rust_xlsxwriter::worksheet::Worksheet::set_range_format_with_border"><code>Worksheet::set_range_format_with_border()</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Add some formats.
+    </span><span class="kw">let </span>inner_border = Format::new().set_border(FormatBorder::Thin);
+    <span class="kw">let </span>outer_border = Format::new().set_border(FormatBorder::Double);
+
+    <span class="comment">// Write an array of data.
+    </span><span class="kw">let </span>data = [
+        [<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>],
+        [<span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>],
+        [<span class="number">30</span>, <span class="number">31</span>, <span class="number">32</span>, <span class="number">33</span>, <span class="number">34</span>],
+    ];
+    worksheet.write_row_matrix(<span class="number">1</span>, <span class="number">1</span>, data)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add formatting to the cells.
+    </span>worksheet.set_range_format_with_border(<span class="number">1</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>inner_border, <span class="kw-2">&amp;</span>outer_border)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"worksheet.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Which produces an output file like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format_with_border.png"></p>
+<p>For use cases where the cell formatting changes based on cell values
+Conditional Formatting may be a better option (see <a href="../conditional_format/index.html">Working with Conditional
+Formats</a>). Additionally, formatting a
+ranges of cells as a Worksheet Table may be a better option than simple cell
+formatting (see the <a href="../struct.Table.html" title="struct rust_xlsxwriter::Table"><code>Table</code></a> section of the documentation).</p>
+<h2 id="adding-headers-and-footers"><a class="doc-anchor" href="#adding-headers-and-footers">§</a>Adding Headers and Footers</h2>
+<p>Headers and footers can be added to worksheets using the
+<a href="struct.Worksheet.html#method.set_header" title="method rust_xlsxwriter::worksheet::Worksheet::set_header"><code>Worksheet::set_header()</code></a> and <a href="struct.Worksheet.html#method.set_footer" title="method rust_xlsxwriter::worksheet::Worksheet::set_footer"><code>Worksheet::set_footer()</code></a> methods.</p>
+<p>Headers and footers are generated using a string which is a combination of
+plain text and optional control characters defined by Excel.</p>
+<p>The available control characters are:</p>
+<div><table><thead><tr><th>Control</th><th>Category</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&amp;L</code></td><td>Alignment</td><td>Left</td></tr>
+<tr><td><code>&amp;C</code></td><td></td><td>Center</td></tr>
+<tr><td><code>&amp;R</code></td><td></td><td>Right</td></tr>
+<tr><td><code>&amp;[Page]</code>  or <code>&amp;P</code></td><td>Information</td><td>Page number</td></tr>
+<tr><td><code>&amp;[Pages]</code> or <code>&amp;N</code></td><td></td><td>Total number of pages</td></tr>
+<tr><td><code>&amp;[Date]</code>  or <code>&amp;D</code></td><td></td><td>Date</td></tr>
+<tr><td><code>&amp;[Time]</code>  or <code>&amp;T</code></td><td></td><td>Time</td></tr>
+<tr><td><code>&amp;[File]</code>  or <code>&amp;F</code></td><td></td><td>File name</td></tr>
+<tr><td><code>&amp;[Tab]</code>   or <code>&amp;A</code></td><td></td><td>Worksheet name</td></tr>
+<tr><td><code>&amp;[Path]</code>  or <code>&amp;Z</code></td><td></td><td>Workbook path</td></tr>
+<tr><td><code>&amp;fontsize</code></td><td>Font</td><td>Font size</td></tr>
+<tr><td><code>&amp;"font,style"</code></td><td></td><td>Font name and style</td></tr>
+<tr><td><code>&amp;U</code></td><td></td><td>Single underline</td></tr>
+<tr><td><code>&amp;E</code></td><td></td><td>Double underline</td></tr>
+<tr><td><code>&amp;S</code></td><td></td><td>Strikethrough</td></tr>
+<tr><td><code>&amp;X</code></td><td></td><td>Superscript</td></tr>
+<tr><td><code>&amp;Y</code></td><td></td><td>Subscript</td></tr>
+<tr><td><code>&amp;[Picture]</code> or <code>&amp;G</code></td><td>Images</td><td>Picture/image</td></tr>
+<tr><td><code>&amp;&amp;</code></td><td>Miscellaneous</td><td>Literal ampersand &amp;</td></tr>
+</tbody></table>
+</div>
+<p>Some of the placeholder variables have a long version like <code>&amp;[Page]</code> and a
+short version like <code>&amp;P</code>. The longer version is displayed in the Excel
+interface but the shorter version is the way that it is stored in the file
+format. Either version is okay since <code>rust_xlsxwriter</code> will translate as
+required.</p>
+<p>Headers and footers have 3 edit areas to the left, center and right. Text
+can be aligned to these areas by prefixing the text with the control
+characters <code>&amp;L</code>, <code>&amp;C</code> and <code>&amp;R</code>.</p>
+<p>For example:</p>
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;LHello&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header01.png">
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;CHello&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header02.png">
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;RHello&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header03.png">
+<p>You can also have text in each of the alignment areas:</p>
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;LCiao&amp;CBello&amp;RCielo&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header04.png">
+<p>The information control characters act as variables/templates that Excel
+will update/expand as the workbook or worksheet changes.</p>
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;CPage &amp;[Page] of &amp;[Pages]&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header05.png">
+<p>Times and dates are in the user’s default format:</p>
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;CUpdated at &amp;[Time]&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header06.png">
+<p>To insert an image in use <code>&amp;[Picture]</code> or <code>&amp;G</code>. You will also need to use
+<a href="struct.Worksheet.html#method.set_header_image" title="method rust_xlsxwriter::worksheet::Worksheet::set_header_image"><code>Worksheet::set_header_image()</code></a> to set the corresponding image:</p>
+<div class="example-wrap"><pre class="language-text"><code>let image = Image::new(&quot;examples/watermark.png&quot;)?;
+
+worksheet.set_header(&quot;&amp;C&amp;[Picture]&quot;);
+worksheet.set_header_image(&amp;image, XlsxImagePosition::Center);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header10.png">
+<p>To include a single literal ampersand <code>&amp;</code> in a header or footer you should
+use a double ampersand <code>&amp;&amp;</code>:</p>
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;CCuriouser &amp;&amp; Curiouser - Attorneys at Law&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header07.png">
+<p>You can specify the font size of a section of the text by prefixing it with
+the control character <code>&amp;n</code> where <code>n</code> is the font size:</p>
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(&quot;&amp;C&amp;20Big Hello&quot;);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header08.png">
+<p>You can specify the font of a section of the text by prefixing it with the
+control sequence <code>&amp;"font,style"</code> where <code>fontname</code> is a font name such as
+Windows font descriptions: “Regular”, “Italic”, “Bold” or “Bold Italic”:
+“Courier New” or “Times New Roman” and <code>style</code> is one of the standard
+Windows font descriptions like “Regular”, “Italic”, “Bold” or “Bold Italic”:</p>
+<div class="example-wrap"><pre class="language-text"><code>worksheet.set_header(r#&quot;&amp;C&amp;&quot;Courier New,Bold Italic&quot;Hello&quot;#);</code></pre></div><img src="https://rustxlsxwriter.github.io/images/header09.png">
+<p>It is possible to combine all of these features together to create complex
+headers and footers. If you set up a complex header in Excel you can
+transfer it to <code>rust_xlsxwriter</code> by inspecting the string in the Excel file.
+For example the following shows how unzip and grep the Excel XML sub-files
+on a Linux system. The example uses libxml’s xmllint to format the XML for
+clarity:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ unzip myfile.xlsm -d myfile
+$ xmllint --format `find myfile -name &quot;*.xml&quot; | xargs` | \
+    egrep &quot;Header|Footer&quot; | sed &#39;s/&amp;amp;/\&amp;/g&#39;
+
+ &lt;headerFooter scaleWithDoc=&quot;0&quot;&gt;
+   &lt;oddHeader&gt;&amp;L&amp;P&lt;/oddHeader&gt;
+ &lt;/headerFooter&gt;</code></pre></div>
+<p><strong>Note</strong>: Excel requires that the header or footer string be less than 256
+characters, including the control characters. Strings longer than this will
+not be written, and a warning will be output.</p>
+<h2 id="autofitting-column-widths"><a class="doc-anchor" href="#autofitting-column-widths">§</a>Autofitting column widths</h2>
+<p>Column widths in a <code>rust_xlsxwriter</code> worksheet can be adjusted automatically
+using the <a href="struct.Worksheet.html#method.autofit" title="method rust_xlsxwriter::worksheet::Worksheet::autofit"><code>Worksheet::autofit()</code></a> method.</p>
+<p>There is no option in the xlsx file format that can be used to say “autofit
+columns on loading”. Auto-fitting of columns is something that Excel does at
+runtime when it has access to all of the worksheet information as well as
+the Windows functions for calculating display areas based on fonts and
+formatting.</p>
+<p>As such <a href="struct.Worksheet.html#method.autofit" title="method rust_xlsxwriter::worksheet::Worksheet::autofit"><code>Worksheet::autofit()</code></a> simulates this behavior by calculating
+string widths using metrics taken from Excel. This isn’t perfect but for
+most cases it should be sufficient and if not you can set your own widths,
+see below.</p>
+<p>The <code>Worksheet::autofit()</code> method ignores columns that already have an
+explicit column width set via <a href="struct.Worksheet.html#method.set_column_width" title="method rust_xlsxwriter::worksheet::Worksheet::set_column_width"><code>Worksheet::set_column_width()</code></a> or
+<a href="struct.Worksheet.html#method.set_column_width_pixels" title="method rust_xlsxwriter::worksheet::Worksheet::set_column_width_pixels"><code>Worksheet::set_column_width_pixels()</code></a> if it is greater than the
+calculated maximum width. Alternatively, calling these methods after
+<code>Worksheet::autofit()</code> will override the autofit value.</p>
+<p><strong>Note</strong>, <code>Worksheet::autofit()</code> iterates through all the cells in a
+worksheet that have been populated with data and performs a length
+calculation on each one, so it can have a performance overhead for larger
+worksheets.</p>
+<h2 id="working-with-worksheet-tabs"><a class="doc-anchor" href="#working-with-worksheet-tabs">§</a>Working with worksheet tabs</h2>
+<p>Worksheet tabs in Excel allow the user to differentiate between different
+worksheets.</p>
+<p>Worksheets in a workbook can be highlighted via the tab name, color,
+position or the fact that it is active when the user opens the workbook.</p>
+<img src="https://rustxlsxwriter.github.io/images/worksheet_tabs.png">
+<p>The <code>rust_xlsxwriter</code> library provides a number of methods, explained below,
+to emulate this functionality.</p>
+<h3 id="worksheet-names"><a class="doc-anchor" href="#worksheet-names">§</a>Worksheet names</h3>
+<p>The worksheet name can be set with <a href="struct.Worksheet.html#method.set_name" title="method rust_xlsxwriter::worksheet::Worksheet::set_name"><code>Worksheet::set_name()</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>_worksheet1 = workbook.add_worksheet(); <span class="comment">// Defaults to Sheet1
+    </span><span class="kw">let </span>_worksheet2 = workbook.add_worksheet().set_name(<span class="string">"Foglio2"</span>);
+    <span class="kw">let </span>_worksheet3 = workbook.add_worksheet().set_name(<span class="string">"Data"</span>);
+    <span class="kw">let </span>_worksheet4 = workbook.add_worksheet(); <span class="comment">// Defaults to Sheet4</span></code></pre></div>
+<p>Which gives the following output:</p>
+<img src="https://rustxlsxwriter.github.io/images/worksheet_set_name.png">
+<p>Excel applies various rules to worksheet names such as:</p>
+<ul>
+<li>The name must be less than 32 characters.</li>
+<li>The name cannot be blank.</li>
+<li>The name cannot contain any of the characters: <code>[ ] : * ? / \</code>.</li>
+<li>The name cannot start or end with an apostrophe.</li>
+<li>The name shouldn’t be “History” (case-insensitive) since that is reserved
+by Excel.</li>
+<li>The name must not be a duplicate (case-insensitive) of another worksheet
+name used in the workbook.</li>
+</ul>
+<p>The rules for worksheet names in Excel are explained in the <a href="https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9">Microsoft
+Office documentation</a>.</p>
+<h3 id="setting-the-active-worksheet"><a class="doc-anchor" href="#setting-the-active-worksheet">§</a>Setting the active worksheet</h3>
+<p>In Excel the visible worksheet in a group of worksheets is known as the
+active worksheet. Since only one worksheet is in the foreground at any one
+time there can only be one active worksheet.</p>
+<p>With <code>rust_xlsxwriter</code> the <a href="struct.Worksheet.html#method.set_active" title="method rust_xlsxwriter::worksheet::Worksheet::set_active"><code>Worksheet::set_active()</code></a> method is used to
+specify which worksheet is active. If no worksheet is set as the active
+worksheet then the default is to have the first one active, like in Excel.</p>
+<p>Here is an example of making the second worksheet active:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>worksheet1 = Worksheet::new();
+    <span class="kw">let </span>worksheet3 = Worksheet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = Worksheet::new();
+
+    worksheet2.set_active(<span class="bool-val">true</span>);
+
+    workbook.push_worksheet(worksheet1);
+    workbook.push_worksheet(worksheet2);
+    workbook.push_worksheet(worksheet3);</code></pre></div>
+<p>Which gives the following output:</p>
+<img src="https://rustxlsxwriter.github.io/images/worksheet_set_active.png">
+<p>If you have a lot of worksheets then they may not all fit on the screen at
+the same time. In cases like that the active worksheet will still be visible
+but its tab may not be. In those rare cases you can use the
+<a href="struct.Worksheet.html#method.set_first_tab" title="method rust_xlsxwriter::worksheet::Worksheet::set_first_tab"><code>Worksheet::set_first_tab()</code></a> method to set the first visible tab (not
+worksheet) in a group of worksheets.</p>
+<h3 id="setting-worksheet-tab-colors"><a class="doc-anchor" href="#setting-worksheet-tab-colors">§</a>Setting worksheet tab colors</h3>
+<p>Another way of highlighting one or more worksheets in Excel is to set the
+tab color. With <code>rust_xlsxwriter</code> this is achieved with
+<a href="struct.Worksheet.html#method.set_tab_color" title="method rust_xlsxwriter::worksheet::Worksheet::set_tab_color"><code>Worksheet::set_tab_color()</code></a> and a <a href="../enum.Color.html" title="enum rust_xlsxwriter::Color"><code>Color</code></a> color:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>worksheet1 = Worksheet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = Worksheet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>worksheet3 = Worksheet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>worksheet4 = Worksheet::new();
+
+    worksheet1.set_tab_color(Color::Red);
+    worksheet2.set_tab_color(Color::Green);
+    worksheet3.set_tab_color(Color::RGB(<span class="number">0xFF9900</span>));
+
+    <span class="comment">// worksheet4 will have the default color.
+    </span>worksheet4.set_active(<span class="bool-val">true</span>);
+
+    workbook.push_worksheet(worksheet1);
+    workbook.push_worksheet(worksheet2);
+    workbook.push_worksheet(worksheet3);
+    workbook.push_worksheet(worksheet4);</code></pre></div>
+<p>Which gives the following output:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/worksheet_set_tab_color.png"></p>
+<h3 id="hiding-worksheets"><a class="doc-anchor" href="#hiding-worksheets">§</a>Hiding worksheets</h3>
+<p>Sometimes it is desirable to hide worksheets if they contain a lot of
+intermediate data or calculations that end user doesn’t need to see. With
+<code>rust_xlsxwriter</code> this is achieved with the <a href="struct.Worksheet.html#method.set_hidden" title="method rust_xlsxwriter::worksheet::Worksheet::set_hidden"><code>Worksheet::set_hidden()</code></a>
+method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>worksheet1 = Worksheet::new();
+    <span class="kw">let </span>worksheet3 = Worksheet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = Worksheet::new();
+
+    worksheet2.set_hidden(<span class="bool-val">true</span>);
+
+    workbook.push_worksheet(worksheet1);
+    workbook.push_worksheet(worksheet2);
+    workbook.push_worksheet(worksheet3);</code></pre></div>
+<p>Which gives the following output:</p>
+<img src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden.png">
+<p>In Excel a hidden worksheet can not be activated or selected so
+<a href="struct.Worksheet.html#method.set_hidden" title="method rust_xlsxwriter::worksheet::Worksheet::set_hidden"><code>Worksheet::set_hidden()</code></a> is mutually exclusive with the
+<a href="struct.Worksheet.html#method.set_active" title="method rust_xlsxwriter::worksheet::Worksheet::set_active"><code>Worksheet::set_active()</code></a> and <a href="struct.Worksheet.html#method.set_selected" title="method rust_xlsxwriter::worksheet::Worksheet::set_selected"><code>Worksheet::set_selected()</code></a> methods. In
+addition, since the first worksheet will default to being the active
+worksheet, you cannot hide the first worksheet without activating another
+sheet.</p>
+<h3 id="selecting-worksheets"><a class="doc-anchor" href="#selecting-worksheets">§</a>Selecting worksheets</h3>
+<p>A selected worksheet has its tab highlighted. Selecting worksheets is a way
+of grouping them together so that, for example, several worksheets could be
+printed in one go.</p>
+<p>The <a href="struct.Worksheet.html#method.set_selected" title="method rust_xlsxwriter::worksheet::Worksheet::set_selected"><code>Worksheet::set_selected()</code></a> method is used to indicate that a
+worksheet is selected in a multi-sheet workbook.</p>
+<p>A worksheet that has been activated via the <a href="struct.Worksheet.html#method.set_active" title="method rust_xlsxwriter::worksheet::Worksheet::set_active"><code>Worksheet::set_active()</code></a>
+method will also appear as selected.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>worksheet1 = Worksheet::new();
+    <span class="kw">let </span>worksheet3 = Worksheet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = Worksheet::new();
+
+    worksheet2.set_selected(<span class="bool-val">true</span>);
+
+    workbook.push_worksheet(worksheet1);
+    workbook.push_worksheet(worksheet2);
+    workbook.push_worksheet(worksheet3);</code></pre></div>
+<p>Which gives the following output. Note that Sheet 1 and Sheet2 are selected
+but Sheet3 isn’t:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/worksheet_set_selected.png"></p>
+<h2 id="worksheet-protection"><a class="doc-anchor" href="#worksheet-protection">§</a>Worksheet protection</h2>
+<p>It is occasionally necessary to lock all or parts of a worksheet to prevent
+unintentional editing. For example you may have certain fields that you want
+a user to update but have other instruction or calculation cells that you
+don’t want modified.</p>
+<p>In Excel you do this by turning on the “<em>Review -&gt; Sheet Protect</em>” option
+and in <code>rust_xlsxwriter</code> you can use the <a href="struct.Worksheet.html#method.protect" title="method rust_xlsxwriter::worksheet::Worksheet::protect"><code>Worksheet::protect()</code></a> method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Format, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Create some format objects.
+    </span><span class="kw">let </span>unlocked = Format::new().set_unlocked();
+    <span class="kw">let </span>hidden = Format::new().set_hidden();
+
+    <span class="comment">// Protect the worksheet to turn on cell locking.
+    </span>worksheet.protect();
+
+    <span class="comment">// Examples of cell locking and hiding.
+    </span>worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Cell B1 is locked. It cannot be edited."</span>)<span class="question-mark">?</span>;
+    worksheet.write_formula(<span class="number">0</span>, <span class="number">1</span>, <span class="string">"=1+2"</span>)<span class="question-mark">?</span>; <span class="comment">// Locked by default.
+
+    </span>worksheet.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Cell B2 is unlocked. It can be edited."</span>)<span class="question-mark">?</span>;
+    worksheet.write_formula_with_format(<span class="number">1</span>, <span class="number">1</span>, <span class="string">"=1+2"</span>, <span class="kw-2">&amp;</span>unlocked)<span class="question-mark">?</span>;
+
+    worksheet.write_string(<span class="number">2</span>, <span class="number">0</span>, <span class="string">"Cell B3 is hidden. The formula isn't visible."</span>)<span class="question-mark">?</span>;
+    worksheet.write_formula_with_format(<span class="number">2</span>, <span class="number">1</span>, <span class="string">"=1+2"</span>, <span class="kw-2">&amp;</span>hidden)<span class="question-mark">?</span>;
+
+    worksheet.write_string(<span class="number">4</span>, <span class="number">0</span>, <span class="string">"Use Menu -&gt; Review -&gt; Unprotect Sheet"</span>)<span class="question-mark">?</span>;
+    worksheet.write_string(<span class="number">5</span>, <span class="number">0</span>, <span class="string">"to remove the worksheet protection."</span>)<span class="question-mark">?</span>;
+
+    worksheet.autofit();
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"worksheet_protection.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>The key parts of this example are:</p>
+<ul>
+<li>In Excel all cells have a default “locked” format so once a worksheet is
+protected the cells cannot be changed.</li>
+<li>To allow some cells to be edited you can set a “unlocked” format.</li>
+<li>You can also “hide” formulas in a protected worksheet.</li>
+</ul>
+<p>The output from the program will look like the following. Note that cell
+“B2”, which was unlocked in the example, has been edited.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/app_worksheet_protection.png"></p>
+<p>And this is the alert you get if you try to edit a locked cell.</p>
+<img src="https://rustxlsxwriter.github.io/images/protection_alert.png">
+<h3 id="setting-a-protection-password"><a class="doc-anchor" href="#setting-a-protection-password">§</a>Setting a protection password</h3>
+<p>You can deter a user from turning off worksheet protection by adding a
+worksheet level password using the <a href="struct.Worksheet.html#method.protect_with_password" title="method rust_xlsxwriter::worksheet::Worksheet::protect_with_password"><code>Worksheet::protect_with_password()</code></a>
+method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Protect the worksheet from modification.
+    </span>worksheet.protect_with_password(<span class="string">"abc123"</span>);</code></pre></div>
+<p>This gives the following dialog when the user tries to unprotect the
+worksheet.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_password.png"></p>
+<p><strong>Note</strong>: Worksheet level passwords in Excel offer <strong>very weak protection</strong>.
+They do not encrypt your data and are very easy to deactivate. Full workbook
+encryption is not supported by <code>rust_xlsxwriter</code>. See the section on
+<a href="#workbook-protection">Workbook Protection</a> below.</p>
+<h3 id="choosing-which-worksheet-elements-to-protect"><a class="doc-anchor" href="#choosing-which-worksheet-elements-to-protect">§</a>Choosing which worksheet elements to protect</h3>
+<p>Excel allows you to control which objects or actions on the worksheet that
+are protected. The default Excel options are:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options1.png"></p>
+<p>Almost all the options are protected by default apart from “Select locked
+cells” and “Select unlocked cells”.</p>
+<p>If you wish to turn on or off any of these options you can use the
+<a href="../struct.ProtectionOptions.html" title="struct rust_xlsxwriter::ProtectionOptions"><code>ProtectionOptions</code></a> struct and the <a href="struct.Worksheet.html#method.protect_with_options" title="method rust_xlsxwriter::worksheet::Worksheet::protect_with_options"><code>Worksheet::protect_with_options()</code></a>
+method. For example:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Set some of the options and use the defaults for everything else.
+    </span><span class="kw">let </span>options = ProtectionOptions {
+        insert_columns: <span class="bool-val">true</span>,
+        insert_rows: <span class="bool-val">true</span>,
+        ..ProtectionOptions::default()
+    };
+
+    <span class="comment">// Set the protection options.
+    </span>worksheet.protect_with_options(<span class="kw-2">&amp;</span>options);</code></pre></div>
+<p>This changes the allowed options to:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options2.png"></p>
+<h3 id="workbook-protection"><a class="doc-anchor" href="#workbook-protection">§</a>Workbook protection</h3>
+<p>As noted above <code>rust_xlsxwriter</code> doesn’t provide workbook level
+encryption/protection and it is unlikely that it will be added.</p>
+<p>However, it is possible to encrypt an <code>rust_xlsxwriter</code> file using a third
+party open source tool called <a href="https://github.com/herumi/msoffice">msoffice-crypt</a>. This works for macOS, Linux
+and Windows:</p>
+<div class="example-wrap"><pre class="language-bash"><code>msoffice-crypt.exe -e -p password clear.xlsx encrypted.xlsx</code></pre></div><h3 id="read-only-workbook"><a class="doc-anchor" href="#read-only-workbook">§</a>Read-only workbook</h3>
+<p>If you wish to have an Excel workbook open as read-only by default then you
+can use the <a href="../workbook/struct.Workbook.html#method.read_only_recommended" title="method rust_xlsxwriter::workbook::Workbook::read_only_recommended"><code>Workbook::read_only_recommended()</code></a> method:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    workbook.read_only_recommended();</code></pre></div>
+<p>This presents the user of the file with an option to open it in “read-only”
+mode. This means that any changes to the file can’t be saved back to the
+same file and must be saved to a new file.</p>
+<p>The alert looks like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/workbook_read_only_recommended.png"></p>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a></dt><dd>The <code>Worksheet</code> struct represents an Excel worksheet. It handles operations
+such as writing data to cells or formatting the worksheet layout.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.IntoExcelData.html" title="trait rust_xlsxwriter::worksheet::IntoExcelData">Into<wbr>Excel<wbr>Data</a></dt><dd>Trait to map user defined types to one of the supported Excel native types.</dd></dl><h2 id="types" class="section-header">Type Aliases<a href="#types" class="anchor">§</a></h2><dl class="item-table"><dt><a class="type" href="type.ColNum.html" title="type rust_xlsxwriter::worksheet::ColNum">ColNum</a></dt><dd>Integer type to represent a zero indexed column number. Excel’s limit for
+columns in a worksheet is 16,384.</dd><dt><a class="type" href="type.RowNum.html" title="type rust_xlsxwriter::worksheet::RowNum">RowNum</a></dt><dd>Integer type to represent a zero indexed row number. Excel’s limit for rows
+in a worksheet is 1,048,576.</dd></dl></section></div></main></body></html>

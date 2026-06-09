@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Worksheet"],"trait":["IntoExcelData"],"type":["ColNum","RowNum"]};

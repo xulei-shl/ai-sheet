@@ -1,0 +1,38 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A type to represent a Chart border. It can be used interchangeably with `ChartLine`."><title>ChartBorder in rust_xlsxwriter::chart - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc type"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Chart<wbr>Border</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#aliased-type">Aliased Type</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In rust_<wbr>xlsxwriter::<wbr>chart</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a>::<wbr><a href="index.html">chart</a></div><h1>Type Alias <span class="type">ChartBorder</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/chart.rs.html#14252">Source</a> </span></div><pre class="rust item-decl"><code>pub type ChartBorder = <a class="struct" href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine">ChartLine</a>;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A type to represent a Chart border. It can be used interchangeably with
+<a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a>.</p>
+<p>Excel uses the chart element names “Line” and “Border” depending on the
+context. For a Line chart the line is represented by a line property but for
+a Column chart the line becomes the border. Both of these share the same
+properties and are both represented in <code>rust_xlsxwriter</code> by the
+<a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> struct.</p>
+<p>The <code>ChartBorder</code> type is a type alias of <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> for use as a
+syntactic shortcut where you would expect to write <code>ChartBorder</code> instead of
+<code>ChartLine</code>.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>An example of formatting the border in a chart element.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series with formatting.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_format(
+            ChartFormat::new()
+                .set_border(
+                    ChartBorder::new()
+                        .set_color(<span class="string">"#FF9900"</span>)
+                        .set_width(<span class="number">5.25</span>)
+                        .set_dash_type(ChartLineDashType::SquareDot)
+                        .set_transparency(<span class="number">70</span>),
+                )
+                .set_no_fill(),
+        );
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png"></p>
+</div></details><h2 id="aliased-type" class="section-header">Aliased Type<a href="#aliased-type" class="anchor">§</a></h2><pre class="rust item-decl"><code>pub struct ChartBorder { <span class="comment">/* private fields */</span> }</code></pre><script src="../../type.impl/rust_xlsxwriter/chart/struct.ChartLine.js" data-self-path="rust_xlsxwriter::chart::ChartBorder" async></script></section></div></main></body></html>

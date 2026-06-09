@@ -1,0 +1,621 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Working with Conditional Formats"><title>rust_xlsxwriter::conditional_format - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module conditional_<wbr>format</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#working-with-conditional-formats" title="Working with Conditional Formats">Working with Conditional Formats</a></li><li><a href="#replicating-an-excel-conditional-format-with-rust_xlsxwriter" title="Replicating an Excel conditional format with `rust_xlsxwriter`">Replicating an Excel conditional format with <code>rust_xlsxwriter</code></a></li><li><a href="#excels-limitations-on-conditional-format-properties" title="Excel’s limitations on conditional format properties">Excel’s limitations on conditional format properties</a></li><li><a href="#selecting-a-non-contiguous-range" title="Selecting a non-contiguous range">Selecting a non-contiguous range</a></li><li><a href="#relative-and-absolute-references-in-conditional-formats" title="Relative and absolute references in conditional formats">Relative and absolute references in conditional formats</a></li><li><a href="#examples" title="Examples">Examples</a><ul><li><a href="#some-examples" title="Some examples:">Some examples:</a></li></ul></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a></div><h1>Module <span>conditional_format</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/conditional_format.rs.html#7-7534">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="working-with-conditional-formats"><a class="doc-anchor" href="#working-with-conditional-formats">§</a>Working with Conditional Formats</h2>
+<p>Conditional formatting is a feature of Excel which allows you to apply a
+format to a cell or a range of cells based on certain criteria. For example
+you might apply rules like the following to highlight cells in different
+ranges.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_dialog.png"></p>
+<p>With <code>rust_xlsxwriter</code> we could emulate this by creating <a href="../struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a>
+instances and applying them to conditional format rules, like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Write a conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(<span class="number">50</span>))
+        .set_format(format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write another conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::LessThan(<span class="number">50</span>))
+        .set_format(format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+</code></pre></div>
+<p>Which would produce an output like the following. Cells with values &gt;= 50
+are in light red. Values &lt; 50 are in light green.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_cell1.png"></p>
+<h2 id="replicating-an-excel-conditional-format-with-rust_xlsxwriter"><a class="doc-anchor" href="#replicating-an-excel-conditional-format-with-rust_xlsxwriter">§</a>Replicating an Excel conditional format with <code>rust_xlsxwriter</code></h2>
+<p>It is important not to try to reverse engineer Excel’s conditional
+formatting rules from <code>rust_xlsxwriter</code>. If you aren’t familiar with the
+syntax and functionality of conditional formats then a better place to start
+is in Excel. Create a conditional format in Excel to meet your needs and
+then port it over to <code>rust_xlsxwriter</code>.</p>
+<p>There are several common features of conditional formats (although some
+variants do not have all of these):</p>
+<ul>
+<li>A range: The range that the conditional format applies to. This is usually
+set via the
+<a href="../worksheet/struct.Worksheet.html#method.add_conditional_format" title="method rust_xlsxwriter::worksheet::Worksheet::add_conditional_format"><code>Worksheet::add_conditional_format()</code></a>
+method.</li>
+<li>A rule: This can be an equality like <code>&gt;=</code> or a rule like “Top 10”.</li>
+<li>A target: This is usually a cell or range that the rule applies to. This
+mainly applies to Cell style conditional formats. For other types of
+conditional format the “range” is the target.</li>
+<li>A format: The cell format with properties such as text or background color
+to high the cell if the rule matches. This only applies to “Classic”
+conditional formats, see below.</li>
+</ul>
+<p>Excel has four main categories of conditional format: Classic, Color Scale,
+Data Bar and Icon Sets. The Classic variants apply a format based on a rule.
+The newer versions apply a visualization such as a color scale, data bar or
+icons based on a rule.</p>
+<p>The following are the structs that represent the main conditional format
+variants in Excel. See each of these sections for more information:</p>
+<ul>
+<li>Classic:
+<ul>
+<li><a href="struct.ConditionalFormatCell.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCell"><code>ConditionalFormatCell</code></a>: The Cell style conditional format. This is
+the most common style of conditional formats which uses simple
+equalities such as “equal to” or “greater than” or “between”. See the
+example above.</li>
+<li><a href="struct.ConditionalFormatAverage.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatAverage"><code>ConditionalFormatAverage</code></a>: The Average/Standard Deviation style
+conditional format.</li>
+<li><a href="struct.ConditionalFormatBlank.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatBlank"><code>ConditionalFormatBlank</code></a>: The Blank/Non-blank style conditional
+format.</li>
+<li><a href="struct.ConditionalFormatDate.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDate"><code>ConditionalFormatDate</code></a>: The Dates Occurring style conditional format.</li>
+<li><a href="struct.ConditionalFormatDuplicate.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDuplicate"><code>ConditionalFormatDuplicate</code></a>: The Duplicate/Unique style conditional
+format.</li>
+<li><a href="struct.ConditionalFormatError.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatError"><code>ConditionalFormatError</code></a>: The Error/Non-error style conditional
+format.</li>
+<li><a href="struct.ConditionalFormatFormula.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatFormula"><code>ConditionalFormatFormula</code></a>: The Formula style conditional format.</li>
+<li><a href="struct.ConditionalFormatText.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatText"><code>ConditionalFormatText</code></a>: The Text conditional format for rules like
+“contains” or “begins with”.</li>
+<li><a href="struct.ConditionalFormatTop.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatTop"><code>ConditionalFormatTop</code></a>: The Top/Bottom style conditional format.</li>
+</ul>
+</li>
+<li>Color Scale:
+<ul>
+<li><a href="struct.ConditionalFormat2ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat2ColorScale"><code>ConditionalFormat2ColorScale</code></a>: The 2 color scale style conditional
+format.</li>
+<li><a href="struct.ConditionalFormat3ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat3ColorScale"><code>ConditionalFormat3ColorScale</code></a>: The 3 color scale style conditional
+format.</li>
+</ul>
+</li>
+<li>Data Bar:
+<ul>
+<li><a href="struct.ConditionalFormatDataBar.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDataBar"><code>ConditionalFormatDataBar</code></a>: The Data Bar style conditional format.</li>
+</ul>
+</li>
+<li>Icon Set:
+<ul>
+<li><a href="struct.ConditionalFormatIconSet.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatIconSet"><code>ConditionalFormatIconSet</code></a>: The Icon style conditional format.</li>
+</ul>
+</li>
+</ul>
+<h2 id="excels-limitations-on-conditional-format-properties"><a class="doc-anchor" href="#excels-limitations-on-conditional-format-properties">§</a>Excel’s limitations on conditional format properties</h2>
+<p>When using the “Classic” style of conditional format, see above, it is
+important to note that not all of Excel’s cell format properties can be
+modified or set.</p>
+<p>For example the view below of the Excel conditional format dialog shows the
+limited number of font properties that can be set. The available properties
+are highlighted with green.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_limitations.png"></p>
+<p>Properties that <strong>cannot</strong> be modified in a conditional format are font
+name, font size, superscript and subscript, diagonal borders, all alignment
+properties and all protection properties.</p>
+<h2 id="selecting-a-non-contiguous-range"><a class="doc-anchor" href="#selecting-a-non-contiguous-range">§</a>Selecting a non-contiguous range</h2>
+<p>In Excel it is possible to select several non-contiguous cells or ranges
+like <code>"B3:D6 I3:K6 B9:D12 I9:K12"</code> and apply a conditional format to them.</p>
+<p>It is possible to achieve a similar effect with <code>rust_xlsxwriter</code> by using
+repeated calls to
+<a href="../worksheet/struct.Worksheet.html#method.add_conditional_format" title="method rust_xlsxwriter::worksheet::Worksheet::add_conditional_format"><code>Worksheet::add_conditional_format()</code></a>.
+However this approach results in multiple identical conditional formats
+applied to different cell ranges rather than one conditional format applied
+to a multiple range selection.</p>
+<p>If this distinction is important to you then you can get the Excel multiple
+selection effect using the <code>set_multi_range()</code> which is provided for all the
+<code>ConditionalFormat</code> types. See the example below and note that the cells
+outside the selected ranges do not have any conditional formatting.</p>
+<p>Note, you can use an Excel range like
+<code>"$B$3:$D$6,$I$3:$K$6,$B$9:$D$12,$I$9:$K$12"</code> or omit the <code>$</code> anchors and
+replace the commas with spaces to have a clearer range like <code>"B3:D6 I3:K6 B9:D12 I9:K12"</code>. The documentation and examples use the latter format for
+clarity but it you are copying and pasting from Excel you can use the first
+format.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Write a conditional format over a non-contiguous range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(<span class="number">50</span>))
+        .set_multi_range(<span class="string">"B3:D6 I3:K6 B9:D12 I9:K12"</span>)
+        .set_format(format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write another conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::LessThan(<span class="number">50</span>))
+        .set_multi_range(<span class="string">"B3:D6 I3:K6 B9:D12 I9:K12"</span>)
+        .set_format(format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+</code></pre></div>
+<p>This creates conditional format rules like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_multi_range_rules.png"></p>
+<p>And the following output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_multi_range.png"></p>
+<h2 id="relative-and-absolute-references-in-conditional-formats"><a class="doc-anchor" href="#relative-and-absolute-references-in-conditional-formats">§</a>Relative and absolute references in conditional formats</h2>
+<p>When dealing with Excel conditional formats it is important to distinguish
+between relative and absolute cell references in Excel.</p>
+<p>Relative cell references change when they are copied while absolute
+references maintain fixed row and column references. In Excel absolute
+references are prefixed by the dollar symbol like <code>$A$1</code>. See the Microsoft
+Office documentation for more information on <a href="https://support.microsoft.com/en-us/office/switch-between-relative-absolute-and-mixed-references-dfec08cd-ae65-4f56-839e-5f0d8d0baca9">relative and absolute
+references</a>.</p>
+<p>In conditional formats each of these four variants has a different effect on
+how the conditional format is applied:</p>
+<ul>
+<li><code>A1</code>: Column and row are relative. The conditional format rule is applied
+to each cell in the conditional format range.</li>
+<li><code>$A1</code>: Column is absolute and row is relative. The conditional format rule
+is applied to each row based on the first cell in the row.</li>
+<li><code>A$1</code>: Column is relative and row is absolute. The conditional format rule
+is applied to each column based on the first cell in the column.</li>
+<li><code>$A$1</code>: Column and row are absolute. The conditional format rule is
+applied to the entire range based on the first cell in the range.</li>
+</ul>
+<p>The effect is shown in the following example that highlights cells with even
+numbered values:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// The rule is applied to each cell in the range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatFormula::new()
+        .set_rule(<span class="string">"=ISEVEN(B3)"</span>)
+        .set_format(<span class="kw-2">&amp;</span>format);
+
+    <span class="comment">// The rule is applied to each row based on the first row in the column.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatFormula::new()
+        .set_rule(<span class="string">"=ISEVEN($B3)"</span>)
+        .set_format(<span class="kw-2">&amp;</span>format);
+
+    <span class="comment">// The rule is applied to each column based on the first cell in the column.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatFormula::new()
+        .set_rule(<span class="string">"=ISEVEN(B$3)"</span>)
+        .set_format(<span class="kw-2">&amp;</span>format);
+
+    <span class="comment">// The rule is applied to the entire range based on the first cell in the range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatFormula::new()
+        .set_rule(<span class="string">"=ISEVEN($B$3)"</span>)
+        .set_format(format);
+</code></pre></div>
+<p>Output for the formula <code>=ISEVEN(B3)</code>:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_anchor1.png"></p>
+<p>Output for the formula <code>=ISEVEN($B3)</code>:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_anchor2.png"></p>
+<p>Output for the formula <code>=ISEVEN(B$3)</code>:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_anchor3.png"></p>
+<p>Output for the formula <code>=ISEVEN($B$3)</code>:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/conditional_format_anchor4.png"></p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Conditional formatting is a feature of Excel which allows you to apply a format
+to a cell or a range of cells based on user defined rules. For example you might
+apply rules like the following to highlight cells in different ranges.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_format_dialog.png">
+<p>The examples below show how to use the various types of conditional formatting
+with <code>rust_xlsxwriter</code>.</p>
+<h3 id="some-examples"><a class="doc-anchor" href="#some-examples">§</a>Some examples:</h3>
+<p><strong>Example 1.</strong> Cell conditional formatting. Cells with values &gt;= 50 are in
+light red. Values &lt; 50 are in light green.</p>
+<p>See <a href="struct.ConditionalFormatCell.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCell"><code>ConditionalFormatCell</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats1.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(<span class="number">50</span>))
+        .set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write another conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::LessThan(<span class="number">50</span>))
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 2.</strong> Cell conditional formatting with between ranges. Values between
+30 and 70 are in light red. Values outside that range are in light green.</p>
+<p>See <a href="struct.ConditionalFormatCell.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCell"><code>ConditionalFormatCell</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats2.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::Between(<span class="number">30</span>, <span class="number">70</span>))
+        .set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write another conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::NotBetween(<span class="number">30</span>, <span class="number">70</span>))
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 3.</strong> Duplicate and Unique conditional formats. Duplicate values are
+in light red. Unique values are in light green.</p>
+<p>See <a href="struct.ConditionalFormatDuplicate.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDuplicate"><code>ConditionalFormatDuplicate</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats3.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatDuplicate::new().set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Invert the duplicate conditional format to show unique values in the
+    // same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatDuplicate::new()
+        .invert()
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 4.</strong> Above and Below Average conditional formats. Above average
+values are in light red. Below average values are in light green.</p>
+<p>See <a href="struct.ConditionalFormatAverage.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatAverage"><code>ConditionalFormatAverage</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats4.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range. The default criteria is Above Average.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatAverage::new().set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write another conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatAverage::new()
+        .set_rule(ConditionalFormatAverageRule::BelowAverage)
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 5.</strong> Top and Bottom range conditional formats. Top 10 values are in
+light red. Bottom 10 values are in light green.</p>
+<p>See <a href="struct.ConditionalFormatTop.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatTop"><code>ConditionalFormatTop</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats5.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatTop::new()
+        .set_rule(rust_xlsxwriter::ConditionalFormatTopRule::Top(<span class="number">10</span>))
+        .set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Also show the bottom values in the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatTop::new()
+        .set_rule(rust_xlsxwriter::ConditionalFormatTopRule::Bottom(<span class="number">10</span>))
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 6.</strong> Cell conditional formatting in non-contiguous range. Cells with
+values &gt;= 50 are in light red. Values &lt; 50 are in light green. Non-contiguous
+ranges.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats6.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a non-contiguous range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(<span class="number">50</span>))
+        .set_multi_range(<span class="string">"B3:D6 I3:K6 B9:D12 I9:K12"</span>)
+        .set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write another conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatCell::new()
+        .set_rule(ConditionalFormatCellRule::LessThan(<span class="number">50</span>))
+        .set_multi_range(<span class="string">"B3:D6 I3:K6 B9:D12 I9:K12"</span>)
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 7.</strong> Formula conditional formatting. Even numbered cells are in
+light green. Odd numbered cells are in light red.</p>
+<p>See <a href="struct.ConditionalFormatFormula.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatFormula"><code>ConditionalFormatFormula</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats7.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatFormula::new()
+        .set_rule(<span class="string">"=ISODD(B3)"</span>)
+        .set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write another conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatFormula::new()
+        .set_rule(<span class="string">"=ISEVEN(B3)"</span>)
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">10</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 8.</strong> Text style conditional formats. Column A shows words that
+contain the sub-word ‘rust’. Column C shows words that start/end with ‘t’</p>
+<p>See <a href="struct.ConditionalFormatText.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatText"><code>ConditionalFormatText</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats8.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a text "containing" conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatText::new()
+        .set_rule(ConditionalFormatTextRule::Contains(<span class="string">"rust"</span>.to_string()))
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">1</span>, <span class="number">0</span>, <span class="number">13</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a text "not containing" conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatText::new()
+        .set_rule(ConditionalFormatTextRule::DoesNotContain(
+            <span class="string">"rust"</span>.to_string(),
+        ))
+        .set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">1</span>, <span class="number">0</span>, <span class="number">13</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a text "begins with" conditional format over a range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatText::new()
+        .set_rule(ConditionalFormatTextRule::BeginsWith(<span class="string">"t"</span>.to_string()))
+        .set_format(<span class="kw-2">&amp;</span>format2);
+
+    worksheet.add_conditional_format(<span class="number">1</span>, <span class="number">2</span>, <span class="number">13</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a text "ends with" conditional format over the same range.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatText::new()
+        .set_rule(ConditionalFormatTextRule::EndsWith(<span class="string">"t"</span>.to_string()))
+        .set_format(<span class="kw-2">&amp;</span>format1);
+
+    worksheet.add_conditional_format(<span class="number">1</span>, <span class="number">2</span>, <span class="number">13</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 9.</strong> Examples of 2 color scale conditional formats.</p>
+<p>See <a href="struct.ConditionalFormat2ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat2ColorScale"><code>ConditionalFormat2ColorScale</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats9.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write 2 color scale formats with standard Excel colors.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color(<span class="string">"F8696B"</span>)
+        .set_maximum_color(<span class="string">"FCFCFF"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">1</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color(<span class="string">"FCFCFF"</span>)
+        .set_maximum_color(<span class="string">"F8696B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color(<span class="string">"FCFCFF"</span>)
+        .set_maximum_color(<span class="string">"63BE7B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">5</span>, <span class="number">11</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color(<span class="string">"63BE7B"</span>)
+        .set_maximum_color(<span class="string">"FCFCFF"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">7</span>, <span class="number">11</span>, <span class="number">7</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color(<span class="string">"FFEF9C"</span>)
+        .set_maximum_color(<span class="string">"63BE7B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">9</span>, <span class="number">11</span>, <span class="number">9</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color(<span class="string">"63BE7B"</span>)
+        .set_maximum_color(<span class="string">"FFEF9C"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">11</span>, <span class="number">11</span>, <span class="number">11</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 10.</strong> Examples of 3 color scale conditional formats.</p>
+<p>See <a href="struct.ConditionalFormat3ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat3ColorScale"><code>ConditionalFormat3ColorScale</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats10.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write 3 color scale formats with standard Excel colors.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color(<span class="string">"F8696B"</span>)
+        .set_midpoint_color(<span class="string">"FFEB84"</span>)
+        .set_maximum_color(<span class="string">"63BE7B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">1</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color(<span class="string">"63BE7B"</span>)
+        .set_midpoint_color(<span class="string">"FFEB84"</span>)
+        .set_maximum_color(<span class="string">"F8696B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color(<span class="string">"F8696B"</span>)
+        .set_midpoint_color(<span class="string">"FCFCFF"</span>)
+        .set_maximum_color(<span class="string">"63BE7B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">5</span>, <span class="number">11</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color(<span class="string">"63BE7B"</span>)
+        .set_midpoint_color(<span class="string">"FCFCFF"</span>)
+        .set_maximum_color(<span class="string">"F8696B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">7</span>, <span class="number">11</span>, <span class="number">7</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color(<span class="string">"F8696B"</span>)
+        .set_midpoint_color(<span class="string">"FCFCFF"</span>)
+        .set_maximum_color(<span class="string">"5A8AC6"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">9</span>, <span class="number">11</span>, <span class="number">9</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color(<span class="string">"5A8AC6"</span>)
+        .set_midpoint_color(<span class="string">"FCFCFF"</span>)
+        .set_maximum_color(<span class="string">"F8696B"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">11</span>, <span class="number">11</span>, <span class="number">11</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 11.</strong> Examples of data bars.</p>
+<p>See <a href="struct.ConditionalFormatDataBar.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDataBar"><code>ConditionalFormatDataBar</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats11.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a standard Excel data bar.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatDataBar::new();
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">1</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a standard Excel data bar with negative data
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatDataBar::new();
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a data bar with a user defined fill color.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatDataBar::new().set_fill_color(<span class="string">"009933"</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">5</span>, <span class="number">11</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a data bar with the direction changed.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatDataBar::new()
+        .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">7</span>, <span class="number">11</span>, <span class="number">7</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+<p><strong>Example 12.</strong> Examples of icon style conditional formats.</p>
+<p>See <a href="struct.ConditionalFormatIconSet.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatIconSet"><code>ConditionalFormatIconSet</code></a> for more details.</p>
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats12.png">
+<p>Code to generate the above example:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code>    <span class="comment">// Code snippet from examples/app_conditional_formatting.rs
+
+    // Three Traffic lights - Green is highest.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights);
+
+    worksheet.add_conditional_format(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Reversed - Red is highest.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+        .reverse_icons(<span class="bool-val">true</span>);
+
+    worksheet.add_conditional_format(<span class="number">2</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Icons only - The number data is hidden.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+        .show_icons_only(<span class="bool-val">true</span>);
+
+    worksheet.add_conditional_format(<span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Three arrows.
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeArrows);
+
+    worksheet.add_conditional_format(<span class="number">5</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Three symbols.
+    </span><span class="kw">let </span>conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeSymbolsCircled);
+
+    worksheet.add_conditional_format(<span class="number">6</span>, <span class="number">1</span>, <span class="number">6</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Three stars.
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeStars);
+
+    worksheet.add_conditional_format(<span class="number">7</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Four Arrows.
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourArrows);
+
+    worksheet.add_conditional_format(<span class="number">8</span>, <span class="number">1</span>, <span class="number">8</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Four circles - Red (highest) to Black (lowest).
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourRedToBlack);
+
+    worksheet.add_conditional_format(<span class="number">9</span>, <span class="number">1</span>, <span class="number">9</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Four rating histograms.
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourHistograms);
+
+    worksheet.add_conditional_format(<span class="number">10</span>, <span class="number">1</span>, <span class="number">10</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Four Arrows.
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveArrows);
+
+    worksheet.add_conditional_format(<span class="number">11</span>, <span class="number">1</span>, <span class="number">11</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Four rating histograms.
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveHistograms);
+
+    worksheet.add_conditional_format(<span class="number">12</span>, <span class="number">1</span>, <span class="number">12</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Four rating quadrants.
+    </span><span class="kw">let </span>conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveQuadrants);
+
+    worksheet.add_conditional_format(<span class="number">13</span>, <span class="number">1</span>, <span class="number">13</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>conditional_format)<span class="question-mark">?</span>;</code></pre></div>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.ConditionalFormat2ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat2ColorScale">Conditional<wbr>Format2<wbr>Color<wbr>Scale</a></dt><dd>The <code>ConditionalFormat2ColorScale</code> struct represents a 2 Color Scale
+conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormat3ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat3ColorScale">Conditional<wbr>Format3<wbr>Color<wbr>Scale</a></dt><dd>The <code>ConditionalFormat3ColorScale</code> struct represents a 3 Color Scale
+conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatAverage.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatAverage">Conditional<wbr>Format<wbr>Average</a></dt><dd>The <code>ConditionalFormatAverage</code> struct represents an Average/Standard
+Deviation style conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatBlank.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatBlank">Conditional<wbr>Format<wbr>Blank</a></dt><dd>The <code>ConditionalFormatBlank</code> struct represents a Blank/Non-blank conditional
+format.</dd><dt><a class="struct" href="struct.ConditionalFormatCell.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCell">Conditional<wbr>Format<wbr>Cell</a></dt><dd>The <code>ConditionalFormatCell</code> struct represents a Cell conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatCustomIcon.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCustomIcon">Conditional<wbr>Format<wbr>Custom<wbr>Icon</a></dt><dd>The <code>ConditionalFormatCustomIcon</code> struct represents an icon in an Icon Set
+style conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatDataBar.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDataBar">Conditional<wbr>Format<wbr>Data<wbr>Bar</a></dt><dd>The <code>ConditionalFormatDataBar</code> struct represents a Data Bar conditional
+format.</dd><dt><a class="struct" href="struct.ConditionalFormatDate.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDate">Conditional<wbr>Format<wbr>Date</a></dt><dd>The <code>ConditionalFormatDate</code> struct represents a Dates Occurring style
+conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatDuplicate.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDuplicate">Conditional<wbr>Format<wbr>Duplicate</a></dt><dd>The <code>ConditionalFormatDuplicate</code> struct represents a Duplicate/Unique
+conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatError.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatError">Conditional<wbr>Format<wbr>Error</a></dt><dd>The <code>ConditionalFormatError</code> struct represents an Error/Non-error conditional
+format.</dd><dt><a class="struct" href="struct.ConditionalFormatFormula.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatFormula">Conditional<wbr>Format<wbr>Formula</a></dt><dd>The <code>ConditionalFormatFormula</code> struct represents a Formula style conditional
+format.</dd><dt><a class="struct" href="struct.ConditionalFormatIconSet.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatIconSet">Conditional<wbr>Format<wbr>Icon<wbr>Set</a></dt><dd>The <code>ConditionalFormatIconSet</code> struct represents an Icon Set style
+conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatText.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatText">Conditional<wbr>Format<wbr>Text</a></dt><dd>The <code>ConditionalFormatText</code> struct represents a Text conditional format.</dd><dt><a class="struct" href="struct.ConditionalFormatTop.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatTop">Conditional<wbr>Format<wbr>Top</a></dt><dd>The <code>ConditionalFormatTop</code> struct represents a Top/Bottom style conditional
+format.</dd><dt><a class="struct" href="struct.ConditionalFormatValue.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatValue">Conditional<wbr>Format<wbr>Value</a></dt><dd>The <code>ConditionalFormatValue</code> struct represents conditional format value
+types.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.ConditionalFormatAverageRule.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatAverageRule">Conditional<wbr>Format<wbr>Average<wbr>Rule</a></dt><dd>The <code>ConditionalFormatAverageRule</code> enum defines the conditional format
+criteria for <a href="struct.ConditionalFormatCell.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCell"><code>ConditionalFormatCell</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatCellRule.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatCellRule">Conditional<wbr>Format<wbr>Cell<wbr>Rule</a></dt><dd>The <code>ConditionalFormatCellRule</code> enum defines the conditional format rule for
+<a href="struct.ConditionalFormatCell.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCell"><code>ConditionalFormatCell</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatDataBarAxisPosition.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatDataBarAxisPosition">Conditional<wbr>Format<wbr>Data<wbr>BarAxis<wbr>Position</a></dt><dd>The <code>ConditionalFormatDataBarAxisPosition</code> enum defines the conditional
+format axis positions for <a href="struct.ConditionalFormatDataBar.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDataBar"><code>ConditionalFormatDataBar</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatDataBarDirection.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatDataBarDirection">Conditional<wbr>Format<wbr>Data<wbr>BarDirection</a></dt><dd>The <code>ConditionalFormatDataBarDirection</code> enum defines the conditional format
+directions for <a href="struct.ConditionalFormatDataBar.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDataBar"><code>ConditionalFormatDataBar</code></a>. This is used to set the data
+bar conditional format direction to “Right to left”, “Left to right” or
+“Context” (the default) in conjunction with
+<a href="struct.ConditionalFormatDataBar.html#method.set_direction" title="method rust_xlsxwriter::conditional_format::ConditionalFormatDataBar::set_direction"><code>ConditionalFormatDataBar::set_direction()</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatDateRule.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatDateRule">Conditional<wbr>Format<wbr>Date<wbr>Rule</a></dt><dd>The <code>ConditionalFormatDateRule</code> enum defines the conditional format
+criteria for <a href="struct.ConditionalFormatDate.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDate"><code>ConditionalFormatDate</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatIconType.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatIconType">Conditional<wbr>Format<wbr>Icon<wbr>Type</a></dt><dd>The <code>ConditionalFormatIconTypes</code> enum defines the conditional
+format icon types for <a href="struct.ConditionalFormatIconSet.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatIconSet"><code>ConditionalFormatIconSet</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatTextRule.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatTextRule">Conditional<wbr>Format<wbr>Text<wbr>Rule</a></dt><dd>The <code>ConditionalFormatTextRule</code> enum defines the conditional format
+criteria for <a href="struct.ConditionalFormatText.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatText"><code>ConditionalFormatText</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatTopRule.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatTopRule">Conditional<wbr>Format<wbr>TopRule</a></dt><dd>The <code>ConditionalFormatTopRule</code> enum defines the conditional format rule for
+<a href="struct.ConditionalFormatCell.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatCell"><code>ConditionalFormatCell</code></a>.</dd><dt><a class="enum" href="enum.ConditionalFormatType.html" title="enum rust_xlsxwriter::conditional_format::ConditionalFormatType">Conditional<wbr>Format<wbr>Type</a></dt><dd>The <code>ConditionalFormatType</code> enum defines the conditional format type
+for <a href="struct.ConditionalFormat2ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat2ColorScale"><code>ConditionalFormat2ColorScale</code></a>, <a href="struct.ConditionalFormat3ColorScale.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormat3ColorScale"><code>ConditionalFormat3ColorScale</code></a> and
+<a href="struct.ConditionalFormatDataBar.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatDataBar"><code>ConditionalFormatDataBar</code></a>.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.ConditionalFormat.html" title="trait rust_xlsxwriter::conditional_format::ConditionalFormat">Conditional<wbr>Format</a></dt><dd>Trait for generic conditional format types.</dd><dt><a class="trait" href="trait.IntoConditionalFormatValue.html" title="trait rust_xlsxwriter::conditional_format::IntoConditionalFormatValue">Into<wbr>Conditional<wbr>Format<wbr>Value</a></dt><dd>Trait to map rust types into an <a href="struct.ConditionalFormatValue.html" title="struct rust_xlsxwriter::conditional_format::ConditionalFormatValue"><code>ConditionalFormatValue</code></a> value.</dd></dl></section></div></main></body></html>

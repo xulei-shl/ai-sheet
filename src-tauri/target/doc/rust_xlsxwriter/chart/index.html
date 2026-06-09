@@ -1,0 +1,494 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Working with Charts"><title>rust_xlsxwriter::chart - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module chart</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#working-with-charts" title="Working with Charts">Working with Charts</a><ul><li><a href="#creating-a-chart-with-rust_xlsxwriter" title="Creating a chart with `rust_xlsxwriter`">Creating a chart with <code>rust_xlsxwriter</code></a></li><li><a href="#supported-chart-types" title="Supported chart types">Supported chart types</a></li><li><a href="#chart-formatting" title="Chart formatting">Chart formatting</a></li><li><a href="#chart-value-and-category-axes" title="Chart Value and Category Axes">Chart Value and Category Axes</a></li><li><a href="#secondary-axes" title="Secondary Axes">Secondary Axes</a></li><li><a href="#combined-charts" title="Combined Charts">Combined Charts</a></li><li><a href="#future-work" title="Future work">Future work</a></li></ul></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li><li><a href="#types" title="Type Aliases">Type Aliases</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a></div><h1>Module <span>chart</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/chart.rs.html#7-18010">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="working-with-charts"><a class="doc-anchor" href="#working-with-charts">§</a>Working with Charts</h2>
+<p>The sections below explain some of the options and features when working
+with the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> struct.</p>
+<h3 id="creating-a-chart-with-rust_xlsxwriter"><a class="doc-anchor" href="#creating-a-chart-with-rust_xlsxwriter">§</a>Creating a chart with <code>rust_xlsxwriter</code></h3>
+<p>The basis steps for creating a chart in <code>rust_xlsxwriter</code> are:</p>
+<ul>
+<li>Create a new <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> object of the chart type you want.</li>
+<li>Add one or more series to the chart via <a href="struct.Chart.html#method.add_series" title="method rust_xlsxwriter::chart::Chart::add_series"><code>Chart::add_series()</code></a> to define
+the data you wish to plot.</li>
+<li>Add any formatting or additional feature you need.</li>
+<li>Add the chart to the worksheet via
+<a href="../worksheet/struct.Worksheet.html#method.insert_chart" title="method rust_xlsxwriter::worksheet::Worksheet::insert_chart"><code>Worksheet::insert_chart()</code></a>.</li>
+</ul>
+<p>These steps are shown in the example below which creates a minimal chart
+that plots data in a worksheet. The program creates a new column <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a>,
+adds a series via <a href="struct.Chart.html#method.add_series" title="method rust_xlsxwriter::chart::Chart::add_series"><code>Chart::add_series()</code></a> and add the value range the series
+refers to via <a href="struct.ChartSeries.html#method.set_values" title="method rust_xlsxwriter::chart::ChartSeries::set_values"><code>ChartSeries::set_values()</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+    <span class="kw">let </span>bold = Format::new().set_bold();
+
+    <span class="comment">// Add the worksheet data that the charts will refer to.
+    </span><span class="kw">let </span>categories = [<span class="string">"Mon"</span>, <span class="string">"Tue"</span>, <span class="string">"Wed"</span>, <span class="string">"Thu"</span>, <span class="string">"Fri"</span>];
+    <span class="kw">let </span>values = [<span class="number">20</span>, <span class="number">40</span>, <span class="number">50</span>, <span class="number">30</span>, <span class="number">20</span>];
+
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Day"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_column(<span class="number">1</span>, <span class="number">0</span>, categories)<span class="question-mark">?</span>;
+
+    worksheet.write_with_format(<span class="number">0</span>, <span class="number">1</span>, <span class="string">"Sample"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_column(<span class="number">1</span>, <span class="number">1</span>, values)<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a new column chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure the data series for the chart.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$B$2:$B$6"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"chart_tutorial1.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>This produces a file like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_tutorial1.png">
+<p>To improve this a little we will add the category data that the value data
+refers to. In this case it is the “Day” data in Column A. We extend the
+program by adding the category values via <a href="struct.ChartSeries.html#method.set_categories" title="method rust_xlsxwriter::chart::ChartSeries::set_categories"><code>ChartSeries::set_categories()</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure the data series for the chart.
+    </span>chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$2:$A$6"</span>)
+        .set_values(<span class="string">"Sheet1!$B$2:$B$6"</span>);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>(Note, the section of the program where we write the worksheet data is the
+same as the previous example and is omitted in this example. You can view it
+in the source or the examples folder.)</p>
+<p>The updated file like this (the chart data range is highlighted):</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_tutorial2.png">
+<p>The previous example works fine but it it contained some hard-coded cell
+ranges like  <code>set_values("Sheet1!$B$2:$B$6")</code>. This is okay for simple
+programs but if our example changed to have a different number of data items
+then we would have to manually change the code to adjust for the new ranges.</p>
+<p>Fortunately, these hard-coded values are only used for the sake of the
+example and <code>rust_xlsxwriter</code> provides APIs to handle these more
+programmatically.</p>
+<p>In general <code>rust_xlsxwriter</code> always provides numeric APIs for any ranges in
+Excel but when it makes ergonomic sense it also provides <strong>secondary</strong>
+string based APIs. The previous example uses one of these secondary string
+based APIs for demonstration purposes but for real applications you would
+set the chart ranges using 5-tuple values like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Set some variables to define the chart range.
+    </span><span class="kw">let </span>row_min = <span class="number">1</span>;
+    <span class="kw">let </span>row_max = values.len() <span class="kw">as </span>u32;
+    <span class="kw">let </span>col_cat = <span class="number">0</span>;
+    <span class="kw">let </span>col_val = <span class="number">1</span>;
+
+    <span class="comment">// Create a new column chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure the data series for the chart.
+    </span>chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, row_min, col_cat, row_max, col_cat))
+        .set_values((<span class="string">"Sheet1"</span>, row_min, col_val, row_max, col_val));
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>We could use hard coded row and column indexes for the chart ranges but the
+variables make it more flexible and future proof. The output from this
+example is exactly the same as the previous image above.</p>
+<p>Finally we can improve the output a bit more by inserting chart and axes
+titles, by hiding the legend since it doesn’t provide much information in
+this case, and by shifting the chart a few pixels away from the data for
+clarity via
+<a href="../worksheet/struct.Worksheet.html#method.insert_chart_with_offset" title="method rust_xlsxwriter::worksheet::Worksheet::insert_chart_with_offset"><code>Worksheet::insert_chart_with_offset()</code></a>.</p>
+<p>Here is the chart section with these changes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Create a new column chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure the data series for the chart.
+    </span>chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, row_min, col_cat, row_max, col_cat))
+        .set_values((<span class="string">"Sheet1"</span>, row_min, col_val, row_max, col_val));
+
+    <span class="comment">// Add a chart title and some axis labels.
+    </span>chart.title().set_name(<span class="string">"Results of sample tests"</span>);
+    chart.x_axis().set_name(<span class="string">"Test day"</span>);
+    chart.y_axis().set_name(<span class="string">"Sample length (mm)"</span>);
+
+    <span class="comment">// Turn off the chart legend.
+    </span>chart.legend().set_hidden();
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart_with_offset(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart, <span class="number">5</span>, <span class="number">5</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>This produces a file like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_tutorial4.png">
+<p>For more examples see chart examples in the<a href="../cookbook/index.html" title="mod rust_xlsxwriter::cookbook"><code>Cookbook</code></a>.</p>
+<h3 id="supported-chart-types"><a class="doc-anchor" href="#supported-chart-types">§</a>Supported chart types</h3>
+<p>The <code>rust_xlsxwriter</code> library supports the main original Excel chart types
+such as:</p>
+<ul>
+<li>Area</li>
+<li>Bar</li>
+<li>Column</li>
+<li>Doughnut</li>
+<li>Line</li>
+<li>Pie</li>
+<li>Radar</li>
+<li>Stock</li>
+<li>Scatter</li>
+</ul>
+<p>See <a href="enum.ChartType.html" title="enum rust_xlsxwriter::chart::ChartType"><code>ChartType</code></a> for the full list and examples.</p>
+<p>Support for newer Excel chart types such as Treemap, Sunburst, Box and
+Whisker, Statistical Histogram, Waterfall, Funnel, and Maps is not currently
+planned since the underlying structure is substantially different from the
+original chart types above.</p>
+<h3 id="chart-formatting"><a class="doc-anchor" href="#chart-formatting">§</a>Chart formatting</h3>
+<p>Excel uses a standard dialog for any chart elements that support formatting
+such as data series, the plot area, the chart area, the legend or individual
+points. It looks like this:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_format_dialog.png">
+<p>In <code>rust_xlsxwriter</code> the <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a> struct represents many of these
+format options and just like Excel it offers a standard formatting interface
+for a number of the chart elements.</p>
+<p>The <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a> struct is generally passed to the <code>set_format()</code> method
+of a chart element. <code>ChartFormat</code> supports several child formatting structs
+such as:</p>
+<ul>
+<li><a href="struct.ChartSolidFill.html" title="struct rust_xlsxwriter::chart::ChartSolidFill"><code>ChartSolidFill</code></a> properties for solid fills.</li>
+<li><a href="struct.ChartPatternFill.html" title="struct rust_xlsxwriter::chart::ChartPatternFill"><code>ChartPatternFill</code></a> for pattern fills.</li>
+<li><a href="struct.ChartGradientFill.html" title="struct rust_xlsxwriter::chart::ChartGradientFill"><code>ChartGradientFill</code></a> for gradient fills.</li>
+<li><a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> for line/border properties.</li>
+</ul>
+<p>As a syntactic shortcut you can pass any of the child format structs to
+<code>set_format()</code>. This allows you to create and use a <a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a> struct,
+for example, without having to construct a parent <a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a>. However,
+if you mix more than one type of format you will need a parent
+<a href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat"><code>ChartFormat</code></a> struct to group them.</p>
+<h3 id="chart-value-and-category-axes"><a class="doc-anchor" href="#chart-value-and-category-axes">§</a>Chart Value and Category Axes</h3>
+<p>When working with charts it is important to understand how Excel
+differentiates between a chart axis that is used for data series
+“Categories” and a chart axis that is used for data series “Values”.</p>
+<p>The majority of Excel charts types have a “Category” X-axis axis where each
+of the values is evenly spaced and sequential. The category values can be
+strings, like in the example below, or they can be numbers. When the
+categories are numbers Excel treats them as if they were strings which is
+why you can’t set a minimum or maximum limit in Category axes.</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axes01.png">
+<p style="text-align: center;"><b>Column chart with Category X-axis and Value Y-axis</b></p>
+<p>The Y axis of Excel charts are generally a “Value” axis where points are
+displayed according to their value. This type of axis does support minimum
+and maximum limits.</p>
+<p>Scatter charts are an exception to the general rule since they have two
+value axes in order to plot <code>(x, y)</code> data that doesn’t necessarily lie on
+fixed X-axis divisions, as shown in the chart below:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axes02.png">
+<p style="text-align: center;"><b>Scatter chart with Value X-axis and Value Y-axis</b></p>
+<p>One other variation is a category style chart with date or time values for
+the X-axis. This type of “Date” axis shares properties of Category and Value
+axes. Date axes are used in Stock charts, or if you provide date/time data
+and use the <a href="struct.ChartAxis.html#method.set_date_axis" title="method rust_xlsxwriter::chart::ChartAxis::set_date_axis"><code>ChartAxis::set_date_axis()</code></a> method.</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axes03.png">
+<p style="text-align: center;"><b>Column chart with Date X-axis and Value Y-axis</b></p>
+<p>Finally, one other variant is a Bar chart where the Category and Value axes
+positions are reversed:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axes04.png">
+<p style="text-align: center;"><b>Bar chart with Category Y-axis and Value X-axis</b></p>
+<p>In Excel category and values axes expose different properties as can be seen
+in the dialogs for a each type of axis, shown below. Note that for Category
+axes there is no minimum and maximum “Bounds” option:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_axes05.png">
+<img src="https://rustxlsxwriter.github.io/images/chart_axes06.png">
+<p>Due to Excel’s distinction between axes type some <code>rust_xlsxwriter</code>
+<a href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis"><code>ChartAxis</code></a> properties can be set for a value axis, some can be set for a
+category axis and some properties can be set for both. For example <code>reverse</code>
+can be set for either category or value axes while the <code>min</code> and <code>max</code>
+properties can only be set for value axes (and date axes). The documentation
+calls out the type of axis to which properties apply.</p>
+<h3 id="secondary-axes"><a class="doc-anchor" href="#secondary-axes">§</a>Secondary Axes</h3>
+<p>It is possible to add a secondary axis of the same type to a chart by
+setting the <a href="struct.ChartSeries.html#method.set_secondary_axis" title="method rust_xlsxwriter::chart::ChartSeries::set_secondary_axis"><code>ChartSeries::set_secondary_axis()</code></a> property of the series:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Create a new line chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Configure a series that defaults to the primary axis.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$6"</span>);
+
+    <span class="comment">// Configure another series with a secondary axis.
+    </span>chart
+        .add_series()
+        .set_values(<span class="string">"Sheet1!$B$1:$B$6"</span>)
+        .set_secondary_axis(<span class="bool-val">true</span>);
+
+    <span class="comment">// Add some axis labels.
+    </span>chart.y_axis().set_name(<span class="string">"Y axis"</span>);
+    chart.y2_axis().set_name(<span class="string">"Y2 axis"</span>);
+
+    <span class="comment">// Move the legend to the bottom for clarity.
+    </span>chart.legend().set_position(ChartLegendPosition::Bottom);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart_with_offset(<span class="number">0</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>chart, <span class="number">5</span>, <span class="number">5</span>)<span class="question-mark">?</span>;
+</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis.png"></p>
+<p>In general secondary axes are used for displaying different Y values for the
+same category range. However it is also possible to display a secondary X
+axis for series that use a different category range. See the example below.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Create a new line chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Configure a series that defaults to the primary axis.
+    </span>chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>))
+        .set_values((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">1</span>));
+
+    <span class="comment">// Configure another series with a secondary axis. Note that the category
+    // range is different to the primary axes series.
+    </span>chart
+        .add_series()
+        .set_categories((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">6</span>, <span class="number">2</span>))
+        .set_values((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">3</span>))
+        .set_secondary_axis(<span class="bool-val">true</span>);
+
+    <span class="comment">// Make the secondary X axis visible (it is hidden by default) and also
+    // position the labels so they are next to the axis and therefore visible.
+    </span>chart
+        .x2_axis()
+        .set_hidden(<span class="bool-val">false</span>)
+        .set_label_position(ChartAxisLabelPosition::NextTo);
+
+    <span class="comment">// Set the X2 axis to cross the Y2 axis at the max value so it appears at
+    // the top of the chart.
+    </span>chart.y2_axis().set_crossing(ChartAxisCrossing::Max);
+
+    <span class="comment">// Add some axis labels.
+    </span>chart.x_axis().set_name(<span class="string">"X axis"</span>);
+    chart.y_axis().set_name(<span class="string">"Y axis"</span>);
+    chart.x2_axis().set_name(<span class="string">"X2 axis"</span>);
+    chart.y2_axis().set_name(<span class="string">"Y2 axis"</span>);
+
+    <span class="comment">// Move the legend to the bottom for clarity.
+    </span>chart.legend().set_position(ChartLegendPosition::Bottom);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart_with_offset(<span class="number">0</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>chart, <span class="number">5</span>, <span class="number">5</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis2.png"></p>
+<p>It is also possible to have a secondary, combined, chart either with a
+shared or secondary axis, see below.</p>
+<h3 id="combined-charts"><a class="doc-anchor" href="#combined-charts">§</a>Combined Charts</h3>
+<p>In Excel is also possible to combine two different chart types, for example
+a column and line chart to create a Pareto chart. In <code>rust_xlsxwriter</code> you
+can replicate this by creating a new chart instance as the primary chart and
+then create a secondary chart of a different type and combine it with the
+primary chart using the <a href="struct.Chart.html#method.combine" title="method rust_xlsxwriter::chart::Chart::combine"><code>Chart::combine()</code></a> method.</p>
+<p>The combined secondary chart can share the same Y axis as the primary chart
+or it can use a secondary Y2 axis. An example of each is shown below.</p>
+<p>Combined Column and Line chart with the same Y axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Create a new Column chart. This will be the primary chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>column_chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure the data series for the primary chart.
+    </span>column_chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_values(<span class="string">"Sheet1!$B$1:$B$6"</span>);
+
+    <span class="comment">// Create a new line chart. This will use this as the secondary chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>line_chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Configure the data series for the secondary chart.
+    </span>line_chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_values(<span class="string">"Sheet1!$C$1:$C$6"</span>);
+
+    <span class="comment">// Combine the charts.
+    </span>column_chart.combine(<span class="kw-2">&amp;</span>line_chart);
+
+    <span class="comment">// Add some axis labels. Note, this is done via the primary chart.
+    </span>column_chart.x_axis().set_name(<span class="string">"X axis"</span>);
+    column_chart.y_axis().set_name(<span class="string">"Y axis"</span>);
+
+    <span class="comment">// Add the primary chart to the worksheet.
+    </span>worksheet.insert_chart_with_offset(<span class="number">0</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>column_chart, <span class="number">5</span>, <span class="number">5</span>)<span class="question-mark">?</span>;
+</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_combine1.png">
+<p>Combined Column and Line chart with the Column values are on the primary Y
+axis and the Line chart values on the secondary Y2 axis.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>column_chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure the data series for the primary chart.
+    </span>column_chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_values(<span class="string">"Sheet1!$B$1:$B$6"</span>);
+
+    <span class="comment">// Create a new line chart. This will use this as the secondary chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>line_chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Configure the data series for the secondary chart. This series is also
+    // assigned to the secondary Y2 axis.
+    </span>line_chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$1:$A$6"</span>)
+        .set_values(<span class="string">"Sheet1!$C$1:$C$6"</span>)
+        .set_secondary_axis(<span class="bool-val">true</span>);
+
+    <span class="comment">// Combine the charts.
+    </span>column_chart.combine(<span class="kw-2">&amp;</span>line_chart);
+
+    <span class="comment">// Add some axis labels. Note, this is done via the primary chart.
+    </span>column_chart.x_axis().set_name(<span class="string">"X axis"</span>);
+    column_chart.y_axis().set_name(<span class="string">"Y axis"</span>);
+
+    <span class="comment">// The y2 axis properties are set also via the primary chart.
+    </span>column_chart.y2_axis().set_name(<span class="string">"Y2 axis"</span>);
+
+    <span class="comment">// Add the primary chart to the worksheet.
+    </span>worksheet.insert_chart_with_offset(<span class="number">0</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>column_chart, <span class="number">5</span>, <span class="number">5</span>)<span class="question-mark">?</span>;
+</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chart_combine2.png">
+<p>The following is a slightly more realistic example of combining chart types
+to create a <a href="https://en.wikipedia.org/wiki/Pareto_chart">Pareto Chart</a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Formats used in the workbook.
+    </span><span class="kw">let </span>bold = Format::new().set_bold();
+    <span class="kw">let </span>percent_format = Format::new().set_num_format(<span class="string">"0%"</span>);
+
+    <span class="comment">// Add the worksheet data that the charts will refer to.
+    </span><span class="kw">let </span>headings = [<span class="string">"Reason"</span>, <span class="string">"Number"</span>, <span class="string">"Percentage"</span>];
+
+    <span class="kw">let </span>reasons = [
+        <span class="string">"Traffic"</span>,
+        <span class="string">"Child care"</span>,
+        <span class="string">"Public Transport"</span>,
+        <span class="string">"Weather"</span>,
+        <span class="string">"Overslept"</span>,
+        <span class="string">"Emergency"</span>,
+    ];
+
+    <span class="kw">let </span>numbers = [<span class="number">60</span>, <span class="number">40</span>, <span class="number">20</span>, <span class="number">15</span>, <span class="number">10</span>, <span class="number">5</span>];
+    <span class="kw">let </span>percents = [<span class="number">0.440</span>, <span class="number">0.667</span>, <span class="number">0.800</span>, <span class="number">0.900</span>, <span class="number">0.967</span>, <span class="number">1.00</span>];
+
+    worksheet.write_row_with_format(<span class="number">0</span>, <span class="number">0</span>, headings, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet.write_column(<span class="number">1</span>, <span class="number">0</span>, reasons)<span class="question-mark">?</span>;
+    worksheet.write_column(<span class="number">1</span>, <span class="number">1</span>, numbers)<span class="question-mark">?</span>;
+    worksheet.write_column_with_format(<span class="number">1</span>, <span class="number">2</span>, percents, <span class="kw-2">&amp;</span>percent_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Widen the columns for visibility.
+    </span>worksheet.set_column_width(<span class="number">0</span>, <span class="number">15</span>)<span class="question-mark">?</span>;
+    worksheet.set_column_width(<span class="number">1</span>, <span class="number">10</span>)<span class="question-mark">?</span>;
+    worksheet.set_column_width(<span class="number">2</span>, <span class="number">10</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">//
+    // Create a new Column chart. This will be the primary chart.
+    //
+    </span><span class="kw">let </span><span class="kw-2">mut </span>column_chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Configure a series on the primary axis.
+    </span>column_chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$2:$A$7"</span>)
+        .set_values(<span class="string">"Sheet1!$B$2:$B$7"</span>);
+
+    <span class="comment">// Add a chart title.
+    </span>column_chart.title().set_name(<span class="string">"Reasons for lateness"</span>);
+
+    <span class="comment">// Turn off the chart legend.
+    </span>column_chart.legend().set_hidden();
+
+    <span class="comment">// Set the  name and scale of the Y axes. Note, the secondary axis is set
+    // from the primary chart.
+    </span>column_chart
+        .y_axis()
+        .set_name(<span class="string">"Respondents (number)"</span>)
+        .set_min(<span class="number">0</span>)
+        .set_max(<span class="number">120</span>);
+
+    column_chart.y2_axis().set_max(<span class="number">1</span>);
+
+    <span class="comment">//
+    // Create a new Line chart. This will be the secondary chart.
+    //
+    </span><span class="kw">let </span><span class="kw-2">mut </span>line_chart = Chart::new(ChartType::Line);
+
+    <span class="comment">// Add a series on the secondary axis.
+    </span>line_chart
+        .add_series()
+        .set_categories(<span class="string">"Sheet1!$A$2:$A$7"</span>)
+        .set_values(<span class="string">"Sheet1!$C$2:$C$7"</span>)
+        .set_secondary_axis(<span class="bool-val">true</span>);
+
+    <span class="comment">// Combine the charts.
+    </span>column_chart.combine(<span class="kw-2">&amp;</span>line_chart);
+
+    <span class="comment">// Add the chart to the worksheet.
+    </span>worksheet.insert_chart(<span class="number">1</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>column_chart)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"chart_pareto.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Chart from the output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/app_chart_pareto.png">
+<p>The examples above use the concept of a <em>primary</em> and <em>secondary</em> chart. The
+primary chart is the chart that defines the primary X and Y axis. It is also
+used for setting all chart properties apart from the secondary data series.
+For instance the chart title and axes properties should be set via the
+primary chart.</p>
+<p>There are some limitations in the <code>rust_xlsxwriter</code> implementation of
+combined charts:</p>
+<ul>
+<li>Only two charts can be combined.</li>
+<li>Scatter charts cannot currently be used as a primary chart but they can be
+used as a secondary chart.</li>
+<li>Bar charts can only combine secondary charts on a secondary axis. This is
+an Excel limitation.</li>
+</ul>
+<h3 id="future-work"><a class="doc-anchor" href="#future-work">§</a>Future work</h3>
+<p>Future additions to chart support in <code>rust_xlsxwriter</code> include:</p>
+<ul>
+<li>Chartsheets - Worksheets that only display a chart.</li>
+<li>Some chart element layout options.</li>
+</ul>
+<p>See the <a href="https://github.com/jmcnamara/rust_xlsxwriter/issues/19">Chart Roadmap</a> on the <code>rust_xlsxwriter</code> GitHub for more
+information.</p>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart">Chart</a></dt><dd>The <code>Chart</code> struct is used to create an object to represent an chart that
+can be inserted into a worksheet.</dd><dt><a class="struct" href="struct.ChartArea.html" title="struct rust_xlsxwriter::chart::ChartArea">Chart<wbr>Area</a></dt><dd>The <code>ChartArea</code> struct is a representation of the background area object of
+an Excel chart.</dd><dt><a class="struct" href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis">Chart<wbr>Axis</a></dt><dd>The <code>ChartAxis</code> struct represents a chart axis.</dd><dt><a class="struct" href="struct.ChartDataLabel.html" title="struct rust_xlsxwriter::chart::ChartDataLabel">Chart<wbr>Data<wbr>Label</a></dt><dd>The <code>ChartDataLabel</code> struct represents a chart data label.</dd><dt><a class="struct" href="struct.ChartDataTable.html" title="struct rust_xlsxwriter::chart::ChartDataTable">Chart<wbr>Data<wbr>Table</a></dt><dd>The <code>ChartDataTable</code> struct represents an optional data table displayed
+below the chart.</dd><dt><a class="struct" href="struct.ChartErrorBars.html" title="struct rust_xlsxwriter::chart::ChartErrorBars">Chart<wbr>Error<wbr>Bars</a></dt><dd>The <code>ChartErrorBars</code> struct represents the error bars for a chart series.</dd><dt><a class="struct" href="struct.ChartFont.html" title="struct rust_xlsxwriter::chart::ChartFont">Chart<wbr>Font</a></dt><dd>The <code>ChartFont</code> struct represents the font format for various chart objects.</dd><dt><a class="struct" href="struct.ChartFormat.html" title="struct rust_xlsxwriter::chart::ChartFormat">Chart<wbr>Format</a></dt><dd>The <code>ChartFormat</code> struct represents formatting for various chart objects.</dd><dt><a class="struct" href="struct.ChartGradientFill.html" title="struct rust_xlsxwriter::chart::ChartGradientFill">Chart<wbr>Gradient<wbr>Fill</a></dt><dd>The <code>ChartGradientFill</code> struct represents a gradient fill for a chart
+element.</dd><dt><a class="struct" href="struct.ChartGradientStop.html" title="struct rust_xlsxwriter::chart::ChartGradientStop">Chart<wbr>Gradient<wbr>Stop</a></dt><dd>The <code>ChartGradientStop</code> struct represents a gradient fill data point.</dd><dt><a class="struct" href="struct.ChartLayout.html" title="struct rust_xlsxwriter::chart::ChartLayout">Chart<wbr>Layout</a></dt><dd>The <code>ChartLayout</code> struct represents the dimensions required to position some
+chart objects.</dd><dt><a class="struct" href="struct.ChartLegend.html" title="struct rust_xlsxwriter::chart::ChartLegend">Chart<wbr>Legend</a></dt><dd>The <code>ChartLegend</code> struct represents a chart legend.</dd><dt><a class="struct" href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine">Chart<wbr>Line</a></dt><dd>The <code>ChartLine</code> struct represents a chart line/border.</dd><dt><a class="struct" href="struct.ChartMarker.html" title="struct rust_xlsxwriter::chart::ChartMarker">Chart<wbr>Marker</a></dt><dd>The <code>ChartMarker</code> struct represents a chart marker.</dd><dt><a class="struct" href="struct.ChartPatternFill.html" title="struct rust_xlsxwriter::chart::ChartPatternFill">Chart<wbr>Pattern<wbr>Fill</a></dt><dd>The <code>ChartPatternFill</code> struct represents a the pattern fill for a chart
+element.</dd><dt><a class="struct" href="struct.ChartPlotArea.html" title="struct rust_xlsxwriter::chart::ChartPlotArea">Chart<wbr>Plot<wbr>Area</a></dt><dd>The <code>ChartPlotArea</code> struct is a representation of the plotting area an Excel
+chart.</dd><dt><a class="struct" href="struct.ChartPoint.html" title="struct rust_xlsxwriter::chart::ChartPoint">Chart<wbr>Point</a></dt><dd>The <code>ChartPoint</code> struct represents a chart point.</dd><dt><a class="struct" href="struct.ChartRange.html" title="struct rust_xlsxwriter::chart::ChartRange">Chart<wbr>Range</a></dt><dd>The <code>ChartRange</code> struct represents a chart range.</dd><dt><a class="struct" href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries">Chart<wbr>Series</a></dt><dd>The <code>ChartSeries</code> struct represents a chart series.</dd><dt><a class="struct" href="struct.ChartSolidFill.html" title="struct rust_xlsxwriter::chart::ChartSolidFill">Chart<wbr>Solid<wbr>Fill</a></dt><dd>The <code>ChartSolidFill</code> struct represents a the solid fill for a chart element.</dd><dt><a class="struct" href="struct.ChartTitle.html" title="struct rust_xlsxwriter::chart::ChartTitle">Chart<wbr>Title</a></dt><dd>The <code>ChartTitle</code> struct represents a chart title.</dd><dt><a class="struct" href="struct.ChartTrendline.html" title="struct rust_xlsxwriter::chart::ChartTrendline">Chart<wbr>Trendline</a></dt><dd>The <code>ChartTrendline</code> struct represents a trendline for a chart series.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.ChartAxisCrossing.html" title="enum rust_xlsxwriter::chart::ChartAxisCrossing">Chart<wbr>Axis<wbr>Crossing</a></dt><dd>The <code>ChartAxisCrossing</code> enum defines the <a href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis"><code>ChartAxis</code></a> crossing point for
+the opposite axis.</dd><dt><a class="enum" href="enum.ChartAxisDateUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDateUnitType">Chart<wbr>Axis<wbr>Date<wbr>Unit<wbr>Type</a></dt><dd>The <code>ChartAxisDateUnitType</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> axis date unit types.</dd><dt><a class="enum" href="enum.ChartAxisDisplayUnitType.html" title="enum rust_xlsxwriter::chart::ChartAxisDisplayUnitType">Chart<wbr>Axis<wbr>Display<wbr>Unit<wbr>Type</a></dt><dd>The <code>ChartAxisDisplayUnitType</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> axis date display
+unit types.</dd><dt><a class="enum" href="enum.ChartAxisLabelAlignment.html" title="enum rust_xlsxwriter::chart::ChartAxisLabelAlignment">Chart<wbr>Axis<wbr>Label<wbr>Alignment</a></dt><dd>The <code>ChartAxisLabelAlignment</code> enum defines the <a href="struct.ChartAxis.html" title="struct rust_xlsxwriter::chart::ChartAxis"><code>ChartAxis</code></a> crossing point for
+the opposite axis.</dd><dt><a class="enum" href="enum.ChartAxisLabelPosition.html" title="enum rust_xlsxwriter::chart::ChartAxisLabelPosition">Chart<wbr>Axis<wbr>Label<wbr>Position</a></dt><dd>The <code>ChartAxisLabelPosition</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> axis label
+positions.</dd><dt><a class="enum" href="enum.ChartAxisTickType.html" title="enum rust_xlsxwriter::chart::ChartAxisTickType">Chart<wbr>Axis<wbr>Tick<wbr>Type</a></dt><dd>The <code>ChartAxisTickType</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> axis tick types.</dd><dt><a class="enum" href="enum.ChartDataLabelPosition.html" title="enum rust_xlsxwriter::chart::ChartDataLabelPosition">Chart<wbr>Data<wbr>Label<wbr>Position</a></dt><dd>The <code>ChartDataLabelPosition</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> data label positions.</dd><dt><a class="enum" href="enum.ChartEmptyCells.html" title="enum rust_xlsxwriter::chart::ChartEmptyCells">Chart<wbr>Empty<wbr>Cells</a></dt><dd>The <code>ChartEmptyCells</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> empty cell options.</dd><dt><a class="enum" href="enum.ChartErrorBarsDirection.html" title="enum rust_xlsxwriter::chart::ChartErrorBarsDirection">Chart<wbr>Error<wbr>Bars<wbr>Direction</a></dt><dd>The <code>ChartErrorBarsDirection</code> enum defines the error bar direction for a
+chart series <a href="struct.ChartErrorBars.html" title="struct rust_xlsxwriter::chart::ChartErrorBars"><code>ChartErrorBars</code></a>.</dd><dt><a class="enum" href="enum.ChartErrorBarsType.html" title="enum rust_xlsxwriter::chart::ChartErrorBarsType">Chart<wbr>Error<wbr>Bars<wbr>Type</a></dt><dd>The <code>ChartErrorBarsType</code> enum defines the type of a chart series
+<a href="struct.ChartErrorBars.html" title="struct rust_xlsxwriter::chart::ChartErrorBars"><code>ChartErrorBars</code></a>.</dd><dt><a class="enum" href="enum.ChartGradientFillType.html" title="enum rust_xlsxwriter::chart::ChartGradientFillType">Chart<wbr>Gradient<wbr>Fill<wbr>Type</a></dt><dd>The <code>ChartGradientFillType</code> enum defines the gradient types of a
+<a href="struct.ChartGradientFill.html" title="struct rust_xlsxwriter::chart::ChartGradientFill"><code>ChartGradientFill</code></a>.</dd><dt><a class="enum" href="enum.ChartLegendPosition.html" title="enum rust_xlsxwriter::chart::ChartLegendPosition">Chart<wbr>Legend<wbr>Position</a></dt><dd>The <code>ChartLegendPosition</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> legend positions.</dd><dt><a class="enum" href="enum.ChartLineDashType.html" title="enum rust_xlsxwriter::chart::ChartLineDashType">Chart<wbr>Line<wbr>Dash<wbr>Type</a></dt><dd>The <code>ChartLineDashType</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> line dash types.</dd><dt><a class="enum" href="enum.ChartMarkerType.html" title="enum rust_xlsxwriter::chart::ChartMarkerType">Chart<wbr>Marker<wbr>Type</a></dt><dd>The <code>ChartMarkerType</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> marker types.</dd><dt><a class="enum" href="enum.ChartPatternFillType.html" title="enum rust_xlsxwriter::chart::ChartPatternFillType">Chart<wbr>Pattern<wbr>Fill<wbr>Type</a></dt><dd>The <code>ChartPatternFillType</code> enum defines the <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> pattern fill types.</dd><dt><a class="enum" href="enum.ChartTrendlineType.html" title="enum rust_xlsxwriter::chart::ChartTrendlineType">Chart<wbr>Trendline<wbr>Type</a></dt><dd>The <code>ChartTrendlineType</code> enum defines the trendline types of a
+<a href="struct.ChartSeries.html" title="struct rust_xlsxwriter::chart::ChartSeries"><code>ChartSeries</code></a>.</dd><dt><a class="enum" href="enum.ChartType.html" title="enum rust_xlsxwriter::chart::ChartType">Chart<wbr>Type</a></dt><dd>The <code>ChartType</code> enum define the type of a <a href="struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> object.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.IntoChartFormat.html" title="trait rust_xlsxwriter::chart::IntoChartFormat">Into<wbr>Chart<wbr>Format</a></dt><dd>Trait to map types into a <code>ChartFormat</code>.</dd><dt><a class="trait" href="trait.IntoChartRange.html" title="trait rust_xlsxwriter::chart::IntoChartRange">Into<wbr>Chart<wbr>Range</a></dt><dd>Trait to map types into an <code>ChartRange</code>.</dd></dl><h2 id="types" class="section-header">Type Aliases<a href="#types" class="anchor">§</a></h2><dl class="item-table"><dt><a class="type" href="type.ChartBorder.html" title="type rust_xlsxwriter::chart::ChartBorder">Chart<wbr>Border</a></dt><dd>A type to represent a Chart border. It can be used interchangeably with
+<a href="struct.ChartLine.html" title="struct rust_xlsxwriter::chart::ChartLine"><code>ChartLine</code></a>.</dd></dl></section></div></main></body></html>

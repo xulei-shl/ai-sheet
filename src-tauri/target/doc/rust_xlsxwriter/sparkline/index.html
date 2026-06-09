@@ -1,0 +1,402 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Working with Sparklines"><title>rust_xlsxwriter::sparkline - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module sparkline</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#working-with-sparklines" title="Working with Sparklines">Working with Sparklines</a></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a></div><h1>Module <span>sparkline</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/sparkline.rs.html#7-1451">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="working-with-sparklines"><a class="doc-anchor" href="#working-with-sparklines">§</a>Working with Sparklines</h2>
+<p>Sparklines are a feature of Excel 2010+ which allows you to add small charts
+to worksheet cells. These are useful for showing data trends in a compact
+visual format.</p>
+<img src="https://rustxlsxwriter.github.io/images/sparklines1.png">
+<p>The following code was used to generate the above file.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Sparkline, SparklineType, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Some sample data to plot.
+    </span><span class="kw">let </span>data = [[-<span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>], [<span class="number">30</span>, <span class="number">20</span>, <span class="number">33</span>, <span class="number">20</span>, <span class="number">15</span>], [<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>]];
+
+    worksheet.write_row_matrix(<span class="number">0</span>, <span class="number">0</span>, data)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a line sparkline (the default) with markers.
+    </span><span class="kw">let </span>sparkline1 = Sparkline::new()
+        .set_range((<span class="string">"Sheet1"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>))
+        .show_markers(<span class="bool-val">true</span>);
+
+    worksheet.add_sparkline(<span class="number">0</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>sparkline1)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a column sparkline with non-default style.
+    </span><span class="kw">let </span>sparkline2 = Sparkline::new()
+        .set_range((<span class="string">"Sheet1"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">12</span>);
+
+    worksheet.add_sparkline(<span class="number">1</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>sparkline2)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a win/loss sparkline with negative values highlighted.
+    </span><span class="kw">let </span>sparkline3 = Sparkline::new()
+        .set_range((<span class="string">"Sheet1"</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">4</span>))
+        .set_type(SparklineType::WinLose)
+        .show_negative_points(<span class="bool-val">true</span>);
+
+    worksheet.add_sparkline(<span class="number">2</span>, <span class="number">5</span>, <span class="kw-2">&amp;</span>sparkline3)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"sparklines1.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>In Excel sparklines can be added as a single entity in a cell that refers to
+a 1D data range or as a “group” sparkline that is applied across a 1D range
+and refers to data in a 2D range. A grouped sparkline uses one sparkline for
+the specified range and any changes to it are applied to the entire
+sparkline group.</p>
+<p>The <a href="../worksheet/struct.Worksheet.html#method.add_sparkline" title="method rust_xlsxwriter::worksheet::Worksheet::add_sparkline"><code>Worksheet::add_sparkline()</code></a> method
+shown allows you to add a sparkline to a single cell that displays data from
+a 1D range of cells whereas the
+<a href="../worksheet/struct.Worksheet.html#method.add_sparkline_group" title="method rust_xlsxwriter::worksheet::Worksheet::add_sparkline_group"><code>Worksheet::add_sparkline_group()</code></a>
+method applies the group sparkline to a range.</p>
+<p>Both of these methods are shown in the example below along with a
+demonstration of various properties that can be set for Excel sparklines:</p>
+<img src="https://rustxlsxwriter.github.io/images/sparklines2.png">
+<p>The following code was used to generate the above file.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Format, Sparkline, SparklineType, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet1 = workbook.add_worksheet();
+    <span class="kw">let </span><span class="kw-2">mut </span>row = <span class="number">1</span>;
+
+    <span class="comment">// Set the columns widths to make the output clearer.
+    </span>worksheet1.set_column_width(<span class="number">0</span>, <span class="number">14</span>)<span class="question-mark">?</span>;
+    worksheet1.set_column_width(<span class="number">1</span>, <span class="number">50</span>)<span class="question-mark">?</span>;
+    worksheet1.set_zoom(<span class="number">150</span>);
+
+    <span class="comment">// Add some headings.
+    </span><span class="kw">let </span>bold = Format::new().set_bold();
+    worksheet1.write_with_format(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Sparkline"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+    worksheet1.write_with_format(<span class="number">0</span>, <span class="number">1</span>, <span class="string">"Description"</span>, <span class="kw-2">&amp;</span>bold)<span class="question-mark">?</span>;
+
+    <span class="comment">//
+    // Add a default line sparkline.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A default line sparkline."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new().set_range((<span class="string">"Sheet2"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>));
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a default column sparkline.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A default column sparkline."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a default win/loss sparkline.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A default win/loss sparkline."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">9</span>))
+        .set_type(SparklineType::WinLose);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">2</span>;
+
+    <span class="comment">//
+    // Add a line sparkline with markers.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Line with markers."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>))
+        .show_markers(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a line sparkline with high and low points.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Line with high and low points."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>))
+        .show_high_point(<span class="bool-val">true</span>)
+        .show_low_point(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a line sparkline with first and last points.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Line with first and last point markers."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>))
+        .show_first_point(<span class="bool-val">true</span>)
+        .show_last_point(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a line sparkline with negative point markers.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Line with negative point markers."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>))
+        .show_negative_points(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a line sparkline with axis.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Line with axis."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>))
+        .show_axis(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">2</span>;
+
+    <span class="comment">//
+    // Add a column sparkline with style 1. The default style.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Column with style 1. The default."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">1</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a column sparkline with style 2.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Column with style 2."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">2</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a column sparkline with style 3.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Column with style 3."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">3</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a column sparkline with style 4.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Column with style 4."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">4</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a column sparkline with style 5.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Column with style 5."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">5</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a column sparkline with style 6.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Column with style 6."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">6</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a column sparkline with a user defined color.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Column with a user defined color."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_sparkline_color(<span class="string">"#E965E0"</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">2</span>;
+
+    <span class="comment">//
+    // Add a win/loss sparkline.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A win/loss sparkline."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">9</span>))
+        .set_type(SparklineType::WinLose);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a win/loss sparkline with negative points highlighted.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A win/loss sparkline with negative points highlighted."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">9</span>))
+        .set_type(SparklineType::WinLose)
+        .show_negative_points(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">2</span>;
+
+    <span class="comment">//
+    // Add a left to right (the default) sparkline.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A left to right column (the default)."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">20</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Add a right to left sparkline.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A right to left column."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">20</span>)
+        .set_right_to_left(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    row += <span class="number">1</span>;
+
+    <span class="comment">//
+    // Sparkline and text in one cell. This just requires writing text to the
+    // same cell as the sparkline.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"Sparkline and text in one cell."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">9</span>))
+        .set_type(SparklineType::Column)
+        .set_style(<span class="number">20</span>);
+
+    worksheet1.add_sparkline(row, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+    worksheet1.write(row, <span class="number">0</span>, <span class="string">"Growth"</span>)<span class="question-mark">?</span>;
+    row += <span class="number">2</span>;
+
+    <span class="comment">//
+    // "A grouped sparkline. User changes are applied to all three. Not that the
+    // sparkline range is a 2D range and the sparkline is positioned in a 1D
+    // range of cells.
+    //
+    </span><span class="kw">let </span>text = <span class="string">"A grouped sparkline. Changes are applied to all three."</span>;
+    worksheet1.write(row, <span class="number">1</span>, text)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>sparkline = Sparkline::new()
+        .set_range((<span class="string">"Sheet2"</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">9</span>))
+        .show_markers(<span class="bool-val">true</span>);
+
+    worksheet1.add_sparkline_group(row, <span class="number">0</span>, row + <span class="number">2</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>sparkline)<span class="question-mark">?</span>;
+
+    <span class="comment">//
+    // Add a worksheet with the data to plot on a separate worksheet.
+    //
+    </span><span class="kw">let </span>worksheet2 = workbook.add_worksheet();
+
+    <span class="comment">// Some sample data to plot.
+    </span><span class="kw">let </span>data = [
+        <span class="comment">// Simple line data.
+        </span>[-<span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>],
+        <span class="comment">// Simple column data.
+        </span>[<span class="number">30</span>, <span class="number">20</span>, <span class="number">33</span>, <span class="number">20</span>, <span class="number">15</span>, <span class="number">5</span>, <span class="number">5</span>, <span class="number">15</span>, <span class="number">10</span>, <span class="number">15</span>],
+        <span class="comment">// Simple win/loss data.
+        </span>[<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>],
+        <span class="comment">// Unbalanced histogram.
+        </span>[<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">20</span>, <span class="number">30</span>, <span class="number">50</span>, <span class="number">70</span>, <span class="number">100</span>],
+        <span class="comment">// Data for the grouped sparkline example.
+        </span>[-<span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>],
+        [<span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>],
+        [<span class="number">0</span>, -<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>],
+    ];
+
+    worksheet2.write_row_matrix(<span class="number">0</span>, <span class="number">0</span>, data)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"sparklines2.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Sparkline.html" title="struct rust_xlsxwriter::sparkline::Sparkline">Sparkline</a></dt><dd>The <code>Sparkline</code> struct is used to create an object to represent a sparkline
+that can be inserted into a worksheet.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.SparklineType.html" title="enum rust_xlsxwriter::sparkline::SparklineType">Sparkline<wbr>Type</a></dt><dd>The <code>SparklineType</code> enum defines <a href="struct.Sparkline.html" title="struct rust_xlsxwriter::sparkline::Sparkline"><code>Sparkline</code></a> types.</dd></dl></section></div></main></body></html>

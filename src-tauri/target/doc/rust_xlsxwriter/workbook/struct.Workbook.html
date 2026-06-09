@@ -1,0 +1,759 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The `Workbook` struct represents an Excel file in its entirety. It is the starting point for creating a new Excel xlsx file."><title>Workbook in rust_xlsxwriter::workbook - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Workbook</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.add_chartsheet" title="add_chartsheet">add_chartsheet</a></li><li><a href="#method.add_vba_project" title="add_vba_project">add_vba_project</a></li><li><a href="#method.add_vba_project_with_signature" title="add_vba_project_with_signature">add_vba_project_with_signature</a></li><li><a href="#method.add_worksheet" title="add_worksheet">add_worksheet</a></li><li><a href="#method.define_name" title="define_name">define_name</a></li><li><a href="#method.new" title="new">new</a></li><li><a href="#method.push_worksheet" title="push_worksheet">push_worksheet</a></li><li><a href="#method.read_only_recommended" title="read_only_recommended">read_only_recommended</a></li><li><a href="#method.save" title="save">save</a></li><li><a href="#method.save_to_buffer" title="save_to_buffer">save_to_buffer</a></li><li><a href="#method.save_to_writer" title="save_to_writer">save_to_writer</a></li><li><a href="#method.set_properties" title="set_properties">set_properties</a></li><li><a href="#method.set_vba_name" title="set_vba_name">set_vba_name</a></li><li><a href="#method.worksheet_from_index" title="worksheet_from_index">worksheet_from_index</a></li><li><a href="#method.worksheet_from_name" title="worksheet_from_name">worksheet_from_name</a></li><li><a href="#method.worksheets" title="worksheets">worksheets</a></li><li><a href="#method.worksheets_mut" title="worksheets_mut">worksheets_mut</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Default-for-Workbook" title="Default">Default</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-RefUnwindSafe-for-Workbook" title="!RefUnwindSafe">!RefUnwindSafe</a></li><li><a href="#impl-Sync-for-Workbook" title="!Sync">!Sync</a></li><li><a href="#impl-UnwindSafe-for-Workbook" title="!UnwindSafe">!UnwindSafe</a></li><li><a href="#impl-Freeze-for-Workbook" title="Freeze">Freeze</a></li><li><a href="#impl-Send-for-Workbook" title="Send">Send</a></li><li><a href="#impl-Unpin-for-Workbook" title="Unpin">Unpin</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In rust_<wbr>xlsxwriter::<wbr>workbook</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rust_xlsxwriter</a>::<wbr><a href="index.html">workbook</a></div><h1>Struct <span class="struct">Workbook</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rust_xlsxwriter/workbook.rs.html#307-334">Source</a> </span></div><pre class="rust item-decl"><code>pub struct Workbook { <span class="comment">/* private fields */</span> }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The <code>Workbook</code> struct represents an Excel file in its entirety. It is the
+starting point for creating a new Excel xlsx file.</p>
+<img src="https://rustxlsxwriter.github.io/images/demo.png">
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Sample code to generate the Excel file shown above.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::<span class="kw-2">*</span>;
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Create some formats to use in the worksheet.
+    </span><span class="kw">let </span>bold_format = Format::new().set_bold();
+    <span class="kw">let </span>decimal_format = Format::new().set_num_format(<span class="string">"0.000"</span>);
+    <span class="kw">let </span>date_format = Format::new().set_num_format(<span class="string">"yyyy-mm-dd"</span>);
+    <span class="kw">let </span>merge_format = Format::new()
+        .set_border(FormatBorder::Thin)
+        .set_align(FormatAlign::Center);
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Set the column width for clarity.
+    </span>worksheet.set_column_width(<span class="number">0</span>, <span class="number">22</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a string without formatting.
+    </span>worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a string with the bold format defined above.
+    </span>worksheet.write_with_format(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"World"</span>, <span class="kw-2">&amp;</span>bold_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some numbers.
+    </span>worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">3</span>, <span class="number">0</span>, <span class="number">2.34</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a number with formatting.
+    </span>worksheet.write_with_format(<span class="number">4</span>, <span class="number">0</span>, <span class="number">3.00</span>, <span class="kw-2">&amp;</span>decimal_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a formula.
+    </span>worksheet.write(<span class="number">5</span>, <span class="number">0</span>, Formula::new(<span class="string">"=SIN(PI()/4)"</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a date.
+    </span><span class="kw">let </span>date = ExcelDateTime::from_ymd(<span class="number">2023</span>, <span class="number">1</span>, <span class="number">25</span>)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">6</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>date, <span class="kw-2">&amp;</span>date_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some links.
+    </span>worksheet.write(<span class="number">7</span>, <span class="number">0</span>, Url::new(<span class="string">"https://www.rust-lang.org"</span>))<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">8</span>, <span class="number">0</span>, Url::new(<span class="string">"https://www.rust-lang.org"</span>).set_text(<span class="string">"Rust"</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some merged cells.
+    </span>worksheet.merge_range(<span class="number">9</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="string">"Merged cells"</span>, <span class="kw-2">&amp;</span>merge_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Insert an image.
+    </span><span class="kw">let </span>image = Image::new(<span class="string">"examples/rust_logo.png"</span>)<span class="question-mark">?</span>;
+    worksheet.insert_image(<span class="number">1</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>image)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"demo.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Workbook" class="impl"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#342-2592">Source</a><a href="#impl-Workbook" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.new" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#382-417">Source</a><h4 class="code-header">pub fn <a href="#method.new" class="fn">new</a>() -&gt; <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h4></section></summary><div class="docblock"><p>Create a new Workbook object to represent an Excel spreadsheet file.</p>
+<p>The <code>Workbook::new()</code> constructor is used to create a new Excel workbook
+object. This is used to create worksheets and add data prior to saving
+everything to an xlsx file with <a href="struct.Workbook.html#method.save" title="method rust_xlsxwriter::workbook::Workbook::save"><code>Workbook::save()</code></a>, or
+<a href="struct.Workbook.html#method.save_to_buffer" title="method rust_xlsxwriter::workbook::Workbook::save_to_buffer"><code>Workbook::save_to_buffer()</code></a>.</p>
+<p><strong>Note</strong>: <code>rust_xlsxwriter</code> can only create new files. It cannot read or
+modify existing files.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<p>The following example demonstrates creating a simple workbook, with one
+unused worksheet.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>_worksheet = workbook.add_worksheet();
+
+    workbook.save(<span class="string">"workbook.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.add_worksheet" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#473-484">Source</a><h4 class="code-header">pub fn <a href="#method.add_worksheet" class="fn">add_worksheet</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a></h4></section></summary><div class="docblock"><p>Add a new worksheet to a workbook.</p>
+<p>The <code>add_worksheet()</code> method adds a new <a href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet"><code>Worksheet</code></a> to a workbook.</p>
+<p>The worksheets will be given standard Excel name like <code>Sheet1</code>,
+<code>Sheet2</code>, etc. Alternatively, the name can be set using
+<code>worksheet.set_name()</code>, see the example below and the docs for
+<a href="../worksheet/struct.Worksheet.html#method.set_name" title="method rust_xlsxwriter::worksheet::Worksheet::set_name"><code>Worksheet::set_name()</code></a>.</p>
+<p>The <code>add_worksheet()</code> method returns a borrowed mutable reference to a
+Worksheet instance owned by the Workbook so only one worksheet can be in
+existence at a time, see the example below. This limitation can be
+avoided, if necessary, by creating standalone Worksheet objects via
+<a href="../worksheet/struct.Worksheet.html#method.new" title="associated function rust_xlsxwriter::worksheet::Worksheet::new"><code>Worksheet::new()</code></a> and then later adding them to the workbook with
+<a href="struct.Workbook.html#method.push_worksheet" title="method rust_xlsxwriter::workbook::Workbook::push_worksheet"><code>Workbook::push_worksheet</code></a>.</p>
+<p>See also the documentation on <a href="../worksheet/index.html#creating-worksheets">Creating worksheets</a> and working with the
+borrow checker.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<p>The following example demonstrates creating adding worksheets to a
+workbook.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet(); <span class="comment">// Sheet1
+    </span>worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet().set_name(<span class="string">"Foglio2"</span>)<span class="question-mark">?</span>;
+    worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet(); <span class="comment">// Sheet3
+    </span>worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"workbook.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.add_chartsheet" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#555-566">Source</a><h4 class="code-header">pub fn <a href="#method.add_chartsheet" class="fn">add_chartsheet</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a></h4></section></summary><div class="docblock"><p>Add a new chartsheet to a workbook.</p>
+<p>The <code>add_chartsheet()</code> method adds a new “chartsheet” <a href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet"><code>Worksheet</code></a> to a
+workbook.</p>
+<p>A Chartsheet in Excel is a specialized type of worksheet that doesn’t
+have cells but instead is used to display a single chart. It supports
+worksheet display options such as headers and footers, margins, tab
+selection and print properties.</p>
+<p>The chartsheets will be given standard Excel name like <code>Chart1</code>,
+<code>Chart2</code>, etc. Alternatively, the name can be set using
+<a href="../worksheet/struct.Worksheet.html#method.set_name" title="method rust_xlsxwriter::worksheet::Worksheet::set_name"><code>Worksheet::set_name()</code></a>.</p>
+<p>The <code>add_worksheet()</code> method returns a borrowed mutable reference to a
+Worksheet instance owned by the Workbook so only one worksheet can be in
+existence at a time. This limitation can be avoided, if necessary, by
+creating standalone Worksheet objects via <a href="../worksheet/struct.Worksheet.html#method.new" title="associated function rust_xlsxwriter::worksheet::Worksheet::new"><code>Worksheet::new()</code></a> and then
+later adding them to the workbook with <a href="struct.Workbook.html#method.push_worksheet" title="method rust_xlsxwriter::workbook::Workbook::push_worksheet"><code>Workbook::push_worksheet</code></a>.</p>
+<p>See also the documentation on <a href="../worksheet/index.html#creating-worksheets">Creating worksheets</a> and working with the
+borrow checker.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<p>A simple chartsheet example. A chart is placed on it own dedicated
+worksheet.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Create a new chart.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>chart = Chart::new(ChartType::Column);
+
+    <span class="comment">// Add a data series using Excel formula syntax to describe the range.
+    </span>chart.add_series().set_values(<span class="string">"Sheet1!$A$1:$A$5"</span>);
+
+    <span class="comment">// Create a new chartsheet.
+    </span><span class="kw">let </span>chartsheet = workbook.add_chartsheet();
+
+    <span class="comment">// Add the chart to the chartsheet.
+    </span>chartsheet.insert_chart(<span class="number">0</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>chart)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/chartsheet.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.worksheet_from_index" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#639-645">Source</a><h4 class="code-header">pub fn <a href="#method.worksheet_from_index" class="fn">worksheet_from_index</a>(
+    &amp;mut self,
+    index: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.usize.html">usize</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut <a class="struct" href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Get a worksheet reference by index.</p>
+<p>Get a reference to a worksheet created via <a href="struct.Workbook.html#method.add_worksheet" title="method rust_xlsxwriter::workbook::Workbook::add_worksheet"><code>Workbook::add_worksheet()</code></a>
+using an index based on the creation order.</p>
+<p>Due to borrow checking rules you can only have one active reference to a
+worksheet object created by <code>add_worksheet()</code> since that method always
+returns a mutable reference. For a workbook with multiple worksheets
+this restriction is generally workable if you can create and use the
+worksheets sequentially since you will only need to have one reference
+at any one time. However, if you can’t structure your code to work
+sequentially then you get a reference to a previously created worksheet
+using <code>worksheet_from_index()</code>. The standard borrow checking rules still
+apply so you will have to give up ownership of any other worksheet
+reference prior to calling this method. See the example below.</p>
+<p>See also <a href="struct.Workbook.html#method.worksheet_from_name" title="method rust_xlsxwriter::workbook::Workbook::worksheet_from_name"><code>Workbook::worksheet_from_name()</code></a> and the documentation on
+<a href="../worksheet/index.html#creating-worksheets">Creating worksheets</a> and working with the borrow checker.</p>
+<h5 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h5>
+<ul>
+<li><code>index</code>: The index of the worksheet to get a reference to.</li>
+</ul>
+<h5 id="errors"><a class="doc-anchor" href="#errors">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.UnknownWorksheetNameOrIndex" title="variant rust_xlsxwriter::XlsxError::UnknownWorksheetNameOrIndex"><code>XlsxError::UnknownWorksheetNameOrIndex</code></a> - Error when trying to
+retrieve a worksheet reference by index. This is usually an index out
+of bounds error.</li>
+</ul>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<p>The following example demonstrates getting worksheet reference by index.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Start with a reference to worksheet1.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet1 = workbook.add_worksheet();
+    worksheet1.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// If we don't try to use the workbook1 reference again we can switch to
+    // using a reference to worksheet2.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = workbook.add_worksheet();
+    worksheet2.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet2 and move back to worksheet1.
+    </span>worksheet1 = workbook.worksheet_from_index(<span class="number">0</span>)<span class="question-mark">?</span>;
+    worksheet1.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet1"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet1 and move back to worksheet2.
+    </span>worksheet2 = workbook.worksheet_from_index(<span class="number">1</span>)<span class="question-mark">?</span>;
+    worksheet2.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet2"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/workbook_worksheet_from_index.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.worksheet_from_name" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#722-733">Source</a><h4 class="code-header">pub fn <a href="#method.worksheet_from_name" class="fn">worksheet_from_name</a>(
+    &amp;mut self,
+    sheetname: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.str.html">str</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut <a class="struct" href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Get a worksheet reference by name.</p>
+<p>Get a reference to a worksheet created via <a href="struct.Workbook.html#method.add_worksheet" title="method rust_xlsxwriter::workbook::Workbook::add_worksheet"><code>Workbook::add_worksheet()</code></a>
+using the sheet name.</p>
+<p>Due to borrow checking rules you can only have one active reference to a
+worksheet object created by <code>add_worksheet()</code> since that method always
+returns a mutable reference. For a workbook with multiple worksheets
+this restriction is generally workable if you can create and use the
+worksheets sequentially since you will only need to have one reference
+at any one time. However, if you can’t structure your code to work
+sequentially then you get a reference to a previously created worksheet
+using <code>worksheet_from_name()</code>. The standard borrow checking rules still
+apply so you will have to give up ownership of any other worksheet
+reference prior to calling this method. See the example below.</p>
+<p>Worksheet names are usually “Sheet1”, “Sheet2”, etc., or else a user
+define name that was set using <a href="../worksheet/struct.Worksheet.html#method.set_name" title="method rust_xlsxwriter::worksheet::Worksheet::set_name"><code>Worksheet::set_name()</code></a>. You can also
+use the <a href="../worksheet/struct.Worksheet.html#method.name" title="method rust_xlsxwriter::worksheet::Worksheet::name"><code>Worksheet::name()</code></a> method to get the name.</p>
+<p>See also <a href="struct.Workbook.html#method.worksheet_from_index" title="method rust_xlsxwriter::workbook::Workbook::worksheet_from_index"><code>Workbook::worksheet_from_index()</code></a> and the documentation on
+<a href="../worksheet/index.html#creating-worksheets">Creating worksheets</a> and working with the borrow checker.</p>
+<h5 id="parameters-1"><a class="doc-anchor" href="#parameters-1">§</a>Parameters</h5>
+<ul>
+<li><code>name</code>: The name of the worksheet to get a reference to.</li>
+</ul>
+<h5 id="errors-1"><a class="doc-anchor" href="#errors-1">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.UnknownWorksheetNameOrIndex" title="variant rust_xlsxwriter::XlsxError::UnknownWorksheetNameOrIndex"><code>XlsxError::UnknownWorksheetNameOrIndex</code></a> - Error when trying to
+retrieve a worksheet reference by index. This is usually an index out
+of bounds error.</li>
+</ul>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<p>The following example demonstrates getting worksheet reference by index.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Start with a reference to worksheet1.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet1 = workbook.add_worksheet();
+    worksheet1.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// If we don't try to use the workbook1 reference again we can switch to
+    // using a reference to worksheet2.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>worksheet2 = workbook.add_worksheet();
+    worksheet2.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet2 and move back to worksheet1.
+    </span>worksheet1 = workbook.worksheet_from_index(<span class="number">0</span>)<span class="question-mark">?</span>;
+    worksheet1.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet1"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Stop using worksheet1 and move back to worksheet2.
+    </span>worksheet2 = workbook.worksheet_from_index(<span class="number">1</span>)<span class="question-mark">?</span>;
+    worksheet2.write_string(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Sheet2"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/workbook_worksheet_from_name.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.worksheets_mut" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#788-790">Source</a><h4 class="code-header">pub fn <a href="#method.worksheets_mut" class="fn">worksheets_mut</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a>&gt;</h4></section></summary><div class="docblock"><p>Get a mutable reference to the vector of worksheets.</p>
+<p>Get a mutable reference to the vector of Worksheets used by the Workbook
+instance. This can be useful for iterating over, and performing the same
+operation, on all the worksheets in the workbook. See the example below.</p>
+<p>If you are careful you can also use some of the standard <a href="https://doc.rust-lang.org/1.89.0/std/primitive.slice.html" title="primitive slice">slice</a>
+operations on the vector reference, see below.</p>
+<p>See also the documentation on <a href="../worksheet/index.html#creating-worksheets">Creating worksheets</a> and working with the
+borrow checker.</p>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<p>The following example demonstrates operating on the vector of all the
+worksheets in a workbook.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Add three worksheets to the workbook.
+    </span><span class="kw">let _ </span>= workbook.add_worksheet();
+    <span class="kw">let _ </span>= workbook.add_worksheet();
+    <span class="kw">let _ </span>= workbook.add_worksheet();
+
+    <span class="comment">// Write the same data to all three worksheets.
+    </span><span class="kw">for </span>worksheet <span class="kw">in </span>workbook.worksheets_mut() {
+        worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+        worksheet.write_number(<span class="number">1</span>, <span class="number">0</span>, <span class="number">12345</span>)<span class="question-mark">?</span>;
+    }
+
+    <span class="comment">// If you are careful you can use standard slice operations.
+    </span>workbook.worksheets_mut().swap(<span class="number">0</span>, <span class="number">1</span>);</code></pre></div>
+<p>Output file, note the same data is in all three worksheets and Sheet2
+and Sheet1 have swapped position:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/workbook_worksheets_mut.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.worksheets" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#828-830">Source</a><h4 class="code-header">pub fn <a href="#method.worksheets" class="fn">worksheets</a>(&amp;mut self) -&gt; &amp;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a>&gt;</h4></section></summary><div class="docblock"><p>Get a reference to the vector of worksheets.</p>
+<p>Get a reference to the vector of Worksheets used by the Workbook
+instance. This is less useful than <a href="struct.Workbook.html#method.worksheets_mut" title="method rust_xlsxwriter::workbook::Workbook::worksheets_mut"><code>Workbook::worksheets_mut</code></a> version
+since a mutable reference is required for most worksheet operations.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<p>The following example demonstrates operating on the vector of all the
+worksheets in a workbook. The non mutable version of this method is less
+useful than <code>workbook.worksheets_mut()</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Add three worksheets to the workbook.
+    </span><span class="kw">let </span>_worksheet1 = workbook.add_worksheet();
+    <span class="kw">let </span>_worksheet2 = workbook.add_worksheet();
+    <span class="kw">let </span>_worksheet3 = workbook.add_worksheet();
+
+    <span class="comment">// Get some information from all three worksheets.
+    </span><span class="kw">for </span>worksheet <span class="kw">in </span>workbook.worksheets() {
+        <span class="macro">println!</span>(<span class="string">"{}"</span>, worksheet.name());
+    }
+</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_worksheet" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#888-895">Source</a><h4 class="code-header">pub fn <a href="#method.push_worksheet" class="fn">push_worksheet</a>(&amp;mut self, worksheet: <a class="struct" href="../worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet">Worksheet</a>)</h4></section></summary><div class="docblock"><p>Add a worksheet object to a workbook.</p>
+<p>Add a worksheet created directly using <code>Workbook::new()</code> to a workbook.</p>
+<p>There are two way of creating a worksheet object with <code>rust_xlsxwriter</code>:
+via the <a href="struct.Workbook.html#method.add_worksheet" title="method rust_xlsxwriter::workbook::Workbook::add_worksheet"><code>Workbook::add_worksheet()</code></a> method and via the
+<a href="../worksheet/struct.Worksheet.html#method.new" title="associated function rust_xlsxwriter::worksheet::Worksheet::new"><code>Worksheet::new()</code></a> constructor. The first method ties the worksheet to
+the workbook object that will write it automatically when the file is
+saved, whereas the second method creates a worksheet that is independent
+of a workbook. This has certain advantages in keeping the worksheet free
+of the workbook borrow checking until you wish to add it.</p>
+<p>When working with the independent worksheet object you can add it to a
+workbook using <code>push_worksheet()</code>, see the example below.</p>
+<p>See also the documentation on <a href="../worksheet/index.html#creating-worksheets">Creating worksheets</a> and working with the
+borrow checker.</p>
+<h5 id="parameters-2"><a class="doc-anchor" href="#parameters-2">§</a>Parameters</h5>
+<ul>
+<li><code>worksheet</code>: The worksheet to add to the workbook.</li>
+</ul>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<p>The following example demonstrates creating a standalone worksheet
+object and then adding to a workbook.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>worksheet = Worksheet::new();
+
+    <span class="comment">// Use the worksheet object.
+    </span>worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add it to the workbook.
+    </span>workbook.push_worksheet(worksheet);
+
+    <span class="comment">// Save the workbook.</span></code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/workbook_push_worksheet.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.save" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#967-978">Source</a><h4 class="code-header">pub fn <a href="#method.save" class="fn">save</a>&lt;P: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/std/path/struct.Path.html" title="struct std::path::Path">Path</a>&gt;&gt;(&amp;mut self, path: P) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.unit.html">()</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Save the Workbook as an xlsx file.</p>
+<p>The workbook <code>save()</code> method writes all the Workbook data to a new xlsx
+file. It will overwrite any existing file.</p>
+<p>The <code>save()</code> method can be called multiple times so it is possible to
+get incremental files at different stages of a process, or to save the
+same Workbook object to different paths. However, <code>save()</code> is an
+expensive operation which assembles multiple files into an xlsx/zip
+container so for performance reasons you shouldn’t call it
+unnecessarily.</p>
+<h5 id="parameters-3"><a class="doc-anchor" href="#parameters-3">§</a>Parameters</h5>
+<ul>
+<li><code>path</code>: The path of the new Excel file to create as a <code>&amp;str</code> or as a
+<a href="https://doc.rust-lang.org/1.89.0/std/path/index.html" title="mod std::path"><code>std::path</code></a> <code>Path</code> or <code>PathBuf</code> instance.</li>
+</ul>
+<h5 id="errors-2"><a class="doc-anchor" href="#errors-2">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.SheetnameReused" title="variant rust_xlsxwriter::XlsxError::SheetnameReused"><code>XlsxError::SheetnameReused</code></a> - Worksheet name is already in use in
+the workbook.</li>
+<li><a href="../enum.XlsxError.html#variant.TableNameReused" title="variant rust_xlsxwriter::XlsxError::TableNameReused"><code>XlsxError::TableNameReused</code></a> - Worksheet Table name is already in
+use in the workbook.</li>
+<li><a href="../enum.XlsxError.html#variant.ChartError" title="variant rust_xlsxwriter::XlsxError::ChartError"><code>XlsxError::ChartError</code></a> - A Chartsheet doesn’t contain a chart.</li>
+<li><a href="../enum.XlsxError.html#variant.IoError" title="variant rust_xlsxwriter::XlsxError::IoError"><code>XlsxError::IoError</code></a> - A wrapper for various IO errors when creating
+the xlsx file, or its sub-files.</li>
+<li><a href="../enum.XlsxError.html#variant.ZipError" title="variant rust_xlsxwriter::XlsxError::ZipError"><code>XlsxError::ZipError</code></a> - A wrapper for various zip errors when
+creating the xlsx file, or its sub-files.</li>
+</ul>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<p>The following example demonstrates creating a simple workbook using a
+string path.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>_worksheet = workbook.add_worksheet();
+
+    workbook.save(<span class="string">"workbook.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>The following example demonstrates creating a simple workbook using a
+Rust <a href="https://doc.rust-lang.org/1.89.0/std/path/index.html" title="mod std::path"><code>std::path</code></a> Path.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>_worksheet = workbook.add_worksheet();
+
+    <span class="kw">let </span>path = std::path::Path::new(<span class="string">"workbook.xlsx"</span>);
+    workbook.save(path)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.save_to_buffer" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1019-1024">Source</a><h4 class="code-header">pub fn <a href="#method.save_to_buffer" class="fn">save_to_buffer</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u8.html">u8</a>&gt;, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Save the Workbook as an xlsx file and return it as a byte vector.</p>
+<p>The workbook <code>save_to_buffer()</code> method is similar to the
+<a href="struct.Workbook.html#method.save" title="method rust_xlsxwriter::workbook::Workbook::save"><code>Workbook::save()</code></a> method except that it returns the xlsx file as a
+<code>Vec&lt;u8&gt;</code> buffer suitable for streaming in a web application.</p>
+<h5 id="errors-3"><a class="doc-anchor" href="#errors-3">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.SheetnameReused" title="variant rust_xlsxwriter::XlsxError::SheetnameReused"><code>XlsxError::SheetnameReused</code></a> - Worksheet name is already in use in
+the workbook.</li>
+<li><a href="../enum.XlsxError.html#variant.IoError" title="variant rust_xlsxwriter::XlsxError::IoError"><code>XlsxError::IoError</code></a> - A wrapper for various IO errors when creating
+the xlsx file, or its sub-files.</li>
+<li><a href="../enum.XlsxError.html#variant.ZipError" title="variant rust_xlsxwriter::XlsxError::ZipError"><code>XlsxError::ZipError</code></a> - A wrapper for various zip errors when
+creating the xlsx file, or its sub-files.</li>
+</ul>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<p>The following example demonstrates creating a simple workbook to a
+<code>Vec&lt;u8&gt;</code> buffer.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+    worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>buf = workbook.save_to_buffer()<span class="question-mark">?</span>;
+
+    <span class="macro">println!</span>(<span class="string">"File size: {}"</span>, buf.len());
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.save_to_writer" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1082-1088">Source</a><h4 class="code-header">pub fn <a href="#method.save_to_writer" class="fn">save_to_writer</a>&lt;W&gt;(&amp;mut self, writer: W) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.unit.html">()</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;<div class="where">where
+    W: <a class="trait" href="https://doc.rust-lang.org/1.89.0/std/io/trait.Write.html" title="trait std::io::Write">Write</a> + <a class="trait" href="https://doc.rust-lang.org/1.89.0/std/io/trait.Seek.html" title="trait std::io::Seek">Seek</a> + <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>,</div></h4></section></summary><div class="docblock"><p>Save the Workbook as an xlsx file to a user supplied file/buffer.</p>
+<p>The workbook <code>save_to_writer()</code> method is similar to the
+<a href="struct.Workbook.html#method.save" title="method rust_xlsxwriter::workbook::Workbook::save"><code>Workbook::save()</code></a> method except that it writes the xlsx file to types
+that implement the <a href="https://doc.rust-lang.org/1.89.0/std/io/trait.Write.html" title="trait std::io::Write"><code>Write</code></a> trait such as the <a href="https://doc.rust-lang.org/1.89.0/std/fs/struct.File.html" title="struct std::fs::File"><code>std::fs::File</code></a> type or
+buffers.</p>
+<h5 id="parameters-4"><a class="doc-anchor" href="#parameters-4">§</a>Parameters</h5>
+<ul>
+<li><code>writer</code>: An object that implements the <a href="https://doc.rust-lang.org/1.89.0/std/io/trait.Write.html" title="trait std::io::Write"><code>Write</code></a> trait.</li>
+</ul>
+<h5 id="errors-4"><a class="doc-anchor" href="#errors-4">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.SheetnameReused" title="variant rust_xlsxwriter::XlsxError::SheetnameReused"><code>XlsxError::SheetnameReused</code></a> - Worksheet name is already in use in
+the workbook.</li>
+<li><a href="../enum.XlsxError.html#variant.IoError" title="variant rust_xlsxwriter::XlsxError::IoError"><code>XlsxError::IoError</code></a> - A wrapper for various IO errors when creating
+the xlsx file, or its sub-files.</li>
+<li><a href="../enum.XlsxError.html#variant.ZipError" title="variant rust_xlsxwriter::XlsxError::ZipError"><code>XlsxError::ZipError</code></a> - A wrapper for various zip errors when
+creating the xlsx file, or its sub-files.</li>
+</ul>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<p>The following example demonstrates creating a simple workbook to some
+types that implement the <code>Write</code> trait like a file and a buffer.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+    worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to a File object.
+    </span><span class="kw">let </span>file = File::create(<span class="string">"workbook1.xlsx"</span>)<span class="question-mark">?</span>;
+    workbook.save_to_writer(file)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to a buffer. It is wrapped in a Cursor because it need to
+    // implement the `Seek` trait.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>cursor = Cursor::new(Vec::new());
+    workbook.save_to_writer(<span class="kw-2">&amp;mut </span>cursor)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write the buffer to a file for the sake of the example.
+    </span><span class="kw">let </span>buf = cursor.into_inner();
+    <span class="kw">let </span><span class="kw-2">mut </span>file = File::create(<span class="string">"workbook2.xlsx"</span>)<span class="question-mark">?</span>;
+    Write::write_all(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>buf)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.define_name" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1204-1256">Source</a><h4 class="code-header">pub fn <a href="#method.define_name" class="fn">define_name</a>(
+    &amp;mut self,
+    name: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,
+    formula: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.str.html">str</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Create a defined name in the workbook to use as a variable.</p>
+<p>The <code>define_name()</code> method is used to defined a variable name that can
+be used to represent a value, a single cell or a range of cells in a
+workbook. These are sometimes referred to as a “Named Ranges”.</p>
+<p>Defined names are generally used to simplify or clarify formulas by
+using descriptive variable names. For example:</p>
+<div class="example-wrap"><pre class="language-text"><code>    // Global workbook name.
+    workbook.define_name(&quot;Exchange_rate&quot;, &quot;=0.96&quot;)?;
+    worksheet.write_formula(0, 0, &quot;=Exchange_rate&quot;)?;</code></pre></div>
+<p>A name defined like this is “global” to the workbook and can be used in
+any worksheet in the workbook.  It is also possible to define a
+local/worksheet name by prefixing it with the sheet name using the
+syntax <code>"sheetname!defined_name"</code>:</p>
+<div class="example-wrap"><pre class="language-text"><code>    // Local worksheet name.
+    workbook.define_name(&#39;Sheet2!Sales&#39;, &#39;=Sheet2!$G$1:$G$10&#39;)?;</code></pre></div>
+<p>See the full example below.</p>
+<p>Note, Excel has limitations on names used in defined names. For example
+it must start with a letter or underscore and cannot contain a space or
+any of the characters: <code>,/*[]:\"'</code>. It also cannot look like an Excel
+range such as <code>A1</code>, <code>XFD12345</code> or <code>R1C1</code>. If in doubt it best to test
+the name in Excel first.</p>
+<p>For local defined names sheet name must exist (at the time of saving)
+and if the sheet name contains spaces or special characters you must
+follow the Excel convention and enclose it in single quotes:</p>
+<div class="example-wrap"><pre class="language-text"><code>    workbook.define_name(&quot;&#39;New Data&#39;!Sales&quot;, &quot;&quot;=Sheet2!$G$1:$G$10&quot;)?;</code></pre></div>
+<p>The rules for names in Excel are explained in the Microsoft Office
+documentation on how to <a href="https://support.microsoft.com/en-us/office/define-and-use-names-in-formulas-4d0f13ac-53b7-422e-afd2-abd7ff379c64">Define and use names in
+formulas</a>
+and subsections.</p>
+<h5 id="parameters-5"><a class="doc-anchor" href="#parameters-5">§</a>Parameters</h5>
+<ul>
+<li><code>name</code>: The variable name to define.</li>
+<li><code>formula</code>: The formula, value or range that the name defines..</li>
+</ul>
+<h5 id="errors-5"><a class="doc-anchor" href="#errors-5">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.ParameterError" title="variant rust_xlsxwriter::XlsxError::ParameterError"><code>XlsxError::ParameterError</code></a> - The following Excel error cases will
+raise a <code>ParameterError</code> error:
+<ul>
+<li>If the name doesn’t start with a letter or underscore.</li>
+<li>If the name contains <code>,/*[]:\"'</code> or <code>space</code>.</li>
+</ul>
+</li>
+</ul>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<p>Example of how to create defined names using the <code>rust_xlsxwriter</code>
+library.</p>
+<p>This functionality is used to define user friendly variable names to
+represent a value, a single cell,  or a range of cells in a workbook.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Define some global/workbook names.
+    </span>workbook.define_name(<span class="string">"Exchange_rate"</span>, <span class="string">"=0.96"</span>)<span class="question-mark">?</span>;
+    workbook.define_name(<span class="string">"Sales"</span>, <span class="string">"=Sheet1!$G$1:$H$10"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Define a local/worksheet name. Over-rides the "Sales" name above.
+    </span>workbook.define_name(<span class="string">"Sheet2!Sales"</span>, <span class="string">"=Sheet2!$G$1:$G$10"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/app_defined_name1.png"></p>
+<p>Here is the output in the Excel Name Manager. Note that there is a
+Global/Workbook “Sales” variable name and a Local/Worksheet version.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/app_defined_name2.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_properties" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1342-1345">Source</a><h4 class="code-header">pub fn <a href="#method.set_properties" class="fn">set_properties</a>(&amp;mut self, properties: &amp;<a class="struct" href="../struct.DocProperties.html" title="struct rust_xlsxwriter::DocProperties">DocProperties</a>) -&gt; &amp;mut <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h4></section></summary><div class="docblock"><p>Set the Excel document metadata properties.</p>
+<p>Set various Excel document metadata properties such as Author or
+Creation Date. It is used in conjunction with the <a href="../struct.DocProperties.html" title="struct rust_xlsxwriter::DocProperties"><code>DocProperties</code></a>
+struct.</p>
+<h5 id="parameters-6"><a class="doc-anchor" href="#parameters-6">§</a>Parameters</h5>
+<ul>
+<li><code>properties</code>: A reference to a <a href="../struct.DocProperties.html" title="struct rust_xlsxwriter::DocProperties"><code>DocProperties</code></a> object.</li>
+</ul>
+<h5 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h5>
+<p>An example of setting workbook document properties for a file created
+using the <code>rust_xlsxwriter</code> library.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>properties = DocProperties::new()
+        .set_title(<span class="string">"This is an example spreadsheet"</span>)
+        .set_subject(<span class="string">"That demonstrates document properties"</span>)
+        .set_author(<span class="string">"A. Rust User"</span>)
+        .set_manager(<span class="string">"J. Alfred Prufrock"</span>)
+        .set_company(<span class="string">"Rust Solutions Inc"</span>)
+        .set_category(<span class="string">"Sample spreadsheets"</span>)
+        .set_keywords(<span class="string">"Sample, Example, Properties"</span>)
+        .set_comment(<span class="string">"Created with Rust and rust_xlsxwriter"</span>);
+
+    workbook.set_properties(<span class="kw-2">&amp;</span>properties);</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/app_doc_properties.png"></p>
+<p>The document properties can also be used to set a constant creation date
+so that a file generated by a <code>rust_xlsxwriter</code> program will have the
+same checksum no matter when it is created.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{DocProperties, ExcelDateTime, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Create a file creation date for the file.
+    </span><span class="kw">let </span>date = ExcelDateTime::from_ymd(<span class="number">2023</span>, <span class="number">1</span>, <span class="number">1</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add it to the document metadata.
+    </span><span class="kw">let </span>properties = DocProperties::new().set_creation_datetime(<span class="kw-2">&amp;</span>date);
+    workbook.set_properties(<span class="kw-2">&amp;</span>properties);
+
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+    worksheet.write_string(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    workbook.save(<span class="string">"properties.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>See also <a href="../workbook/index.html#checksum-of-a-saved-file">Checksum of a saved
+file</a>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.add_vba_project" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1449-1466">Source</a><h4 class="code-header">pub fn <a href="#method.add_vba_project" class="fn">add_vba_project</a>&lt;P: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/std/path/struct.Path.html" title="struct std::path::Path">Path</a>&gt;&gt;(
+    &amp;mut self,
+    path: P,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Add a vba macro file to the workbook.</p>
+<p>The <code>add_vba_project()</code> method can be used to add macros or functions to
+a workbook using a binary VBA project file that has been extracted from
+an existing Excel <code>xlsm</code> file.</p>
+<p>An Excel <code>xlsm</code> file is structurally the same as an <code>xlsx</code> file except
+that it contains an additional <code>vbaProject.bin</code> binary file containing
+VBA functions and/or macros.</p>
+<p>The <code>vbaProject.bin</code> in a <code>xlsm</code> file is a binary OLE COM container.
+This was the format used in older <code>xls</code> versions of Excel prior to Excel
+2007. Unlike other components of an xlsx/xlsm file the data isn’t stored
+in XML format. Instead the functions and macros as stored as a
+pre-parsed binary format. As such it wouldn’t be feasible to
+programmatically define macros and create a <code>vbaProject.bin</code> file from
+scratch.</p>
+<p>Instead, as a workaround, the Rust
+<a href="https://crates.io/crates/vba_extract"><code>vba_extract</code></a> utility is used to
+extract <code>vbaProject.bin</code> files from existing xlsm files which you can
+then add to <code>rust_xlsxwriter</code> files.</p>
+<p>The utility can be installed via <code>cargo</code>:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo install vba_extract</code></pre></div>
+<p>Once <code>vba_extract</code> is installed it can be used as follows:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ vba_extract macro_file.xlsm
+
+Extracted: vbaProject.bin</code></pre></div>
+<p>If the VBA project is signed, <code>vba_extract</code> also extracts the
+<code>vbaProjectSignature.bin</code> file from the xlsm file (see below).</p>
+<p>The process is explained in detail in <a href="../macros/index.html" title="mod rust_xlsxwriter::macros">Working with VBA
+macros</a>.</p>
+<p>Only one <code>vbaProject.bin</code> file can be added per workbook. The name
+doesn’t have to be <code>vbaProject.bin</code>. Any suitable path/name for an
+existing VBA bin file will do.</p>
+<h5 id="parameters-7"><a class="doc-anchor" href="#parameters-7">§</a>Parameters</h5>
+<ul>
+<li><code>project</code>: A path to a <code>vbaProject.bin</code> file.</li>
+</ul>
+<h5 id="errors-6"><a class="doc-anchor" href="#errors-6">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.IoError" title="variant rust_xlsxwriter::XlsxError::IoError"><code>XlsxError::IoError</code></a> - I/O errors if the path doesn’t exist or is
+restricted.</li>
+</ul>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<p>An example of adding macros to an <code>rust_xlsxwriter</code> file using a VBA
+macros file extracted from an existing Excel xlsm file.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{Button, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Add the VBA macro file.
+    </span>workbook.add_vba_project(<span class="string">"examples/vbaProject.bin"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a worksheet and some text.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Widen the first column for clarity.
+    </span>worksheet.set_column_width(<span class="number">0</span>, <span class="number">30</span>)<span class="question-mark">?</span>;
+
+    worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="string">"Press the button to say hello:"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a button tied to a macro in the VBA project.
+    </span><span class="kw">let </span>button = Button::new()
+        .set_caption(<span class="string">"Press Me"</span>)
+        .set_macro(<span class="string">"say_hello"</span>)
+        .set_width(<span class="number">80</span>)
+        .set_height(<span class="number">30</span>);
+
+    worksheet.insert_button(<span class="number">2</span>, <span class="number">1</span>, <span class="kw-2">&amp;</span>button)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk. Note the `.xlsm` extension. This is required by
+    // Excel or it raise a warning.
+    </span>workbook.save(<span class="string">"macros.xlsm"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/app_macros.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.add_vba_project_with_signature" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1525-1545">Source</a><h4 class="code-header">pub fn <a href="#method.add_vba_project_with_signature" class="fn">add_vba_project_with_signature</a>&lt;P: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/std/path/struct.Path.html" title="struct std::path::Path">Path</a>&gt;&gt;(
+    &amp;mut self,
+    project: P,
+    signature: P,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Add a signed vba macro file to the workbook.</p>
+<p>The <code>add_vba_project_with_signature()</code> method can be used to add signed
+macros or functions to a workbook using a binary VBA project file that
+has been extracted from an existing Excel <code>xlsm</code> file.</p>
+<p>VBA macros can be signed in Excel to allow for further control over
+execution. The signature part is added to the <code>xlsm</code> file in a binary
+called <code>vbaProjectSignature.bin</code> which must be used in conjunction with
+<code>vbaProject.bin</code>, see above.</p>
+<p>The Rust <a href="https://crates.io/crates/vba_extract"><code>vba_extract</code></a> utility
+will extract the <code>vbaProject.bin</code> and <code>vbaProjectSignature.bin</code> files
+from an <code>xlsm</code> file with signed macros.</p>
+<p>See <a href="struct.Workbook.html#method.add_vba_project" title="method rust_xlsxwriter::workbook::Workbook::add_vba_project"><code>Workbook::add_vba_project()</code></a> above and <a href="../macros/index.html" title="mod rust_xlsxwriter::macros">Working with VBA
+macros</a> for more details.</p>
+<h5 id="parameters-8"><a class="doc-anchor" href="#parameters-8">§</a>Parameters</h5>
+<ul>
+<li><code>project</code>: A path to a <code>vbaProject.bin</code> file.</li>
+<li><code>signature</code>: A path to a <code>vbaProjectSignature.bin</code> file.</li>
+</ul>
+<h5 id="errors-7"><a class="doc-anchor" href="#errors-7">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.IoError" title="variant rust_xlsxwriter::XlsxError::IoError"><code>XlsxError::IoError</code></a> - I/O errors if the path doesn’t exist or is
+restricted.</li>
+</ul>
+<h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
+<p>The following example demonstrates a simple example of adding a vba
+project to an xlsm file.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    workbook.add_vba_project_with_signature(
+        <span class="string">"examples/vbaProject.bin"</span>,
+        <span class="string">"examples/vbaProjectSignature.bin"</span>,
+    )<span class="question-mark">?</span>;</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_vba_name" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1576-1582">Source</a><h4 class="code-header">pub fn <a href="#method.set_vba_name" class="fn">set_vba_name</a>(
+    &amp;mut self,
+    name: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a>, <a class="enum" href="../enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Set the workbook name used in VBA macros.</p>
+<p>This method can be used to set the VBA name for the workbook. This is
+sometimes required when a VBA macro included via
+<a href="struct.Workbook.html#method.add_vba_project" title="method rust_xlsxwriter::workbook::Workbook::add_vba_project"><code>Workbook::add_vba_project()</code></a> makes reference to the workbook with a
+name other than the default Excel VBA name of <code>ThisWorkbook</code>.</p>
+<p>See also the
+<a href="../worksheet/struct.Worksheet.html#method.set_vba_name" title="method rust_xlsxwriter::worksheet::Worksheet::set_vba_name"><code>Worksheet::set_vba_name()</code></a> method
+for setting a worksheet VBA name.</p>
+<p>The name must be a valid Excel VBA object name as defined by the
+following rules:</p>
+<ul>
+<li>The name must be less than 32 characters.</li>
+<li>The name can only contain word characters: letters, numbers and
+underscores.</li>
+<li>The name must start with a letter.</li>
+<li>The name cannot be blank.</li>
+</ul>
+<h5 id="parameters-9"><a class="doc-anchor" href="#parameters-9">§</a>Parameters</h5>
+<ul>
+<li><code>name</code>: The vba name. It must follow the Excel rules, shown above.</li>
+</ul>
+<h5 id="errors-8"><a class="doc-anchor" href="#errors-8">§</a>Errors</h5>
+<ul>
+<li><a href="../enum.XlsxError.html#variant.VbaNameError" title="variant rust_xlsxwriter::XlsxError::VbaNameError"><code>XlsxError::VbaNameError</code></a> - The name doesn’t meet one of Excel’s
+criteria, shown above.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.read_only_recommended" class="method"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#1619-1622">Source</a><h4 class="code-header">pub fn <a href="#method.read_only_recommended" class="fn">read_only_recommended</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h4></section></summary><div class="docblock"><p>Add a recommendation to open the file in “read-only” mode.</p>
+<p>This method can be used to set the Excel “Read-only Recommended” option
+that is available when saving a file. This presents the user of the file
+with an option to open it in “read-only” mode. This means that any
+changes to the file can’t be saved back to the same file and must be
+saved to a new file.</p>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<p>The following example demonstrates creating a simple workbook which opens
+with a recommendation that the file should be opened in read only mode.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="kw">let </span>_worksheet = workbook.add_worksheet();
+
+    workbook.read_only_recommended();
+
+    workbook.save(<span class="string">"workbook.xlsx"</span>)<span class="question-mark">?</span>;</code></pre></div>
+<p>Alert when you open the output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/workbook_read_only_recommended.png">
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Default-for-Workbook" class="impl"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#336-340">Source</a><a href="#impl-Default-for-Workbook" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.default" class="method trait-impl"><a class="src rightside" href="../../src/rust_xlsxwriter/workbook.rs.html#337-339">Source</a><a href="#method.default" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/default/trait.Default.html#tymethod.default" class="fn">default</a>() -&gt; Self</h4></section></summary><div class='docblock'>Returns the “default value” for a type. <a href="https://doc.rust-lang.org/1.89.0/core/default/trait.Default.html#tymethod.default">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-Workbook" class="impl"><a href="#impl-Freeze-for-Workbook" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section><section id="impl-RefUnwindSafe-for-Workbook" class="impl"><a href="#impl-RefUnwindSafe-for-Workbook" class="anchor">§</a><h3 class="code-header">impl !<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section><section id="impl-Send-for-Workbook" class="impl"><a href="#impl-Send-for-Workbook" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section><section id="impl-Sync-for-Workbook" class="impl"><a href="#impl-Sync-for-Workbook" class="anchor">§</a><h3 class="code-header">impl !<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section><section id="impl-Unpin-for-Workbook" class="impl"><a href="#impl-Unpin-for-Workbook" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section><section id="impl-UnwindSafe-for-Workbook" class="impl"><a href="#impl-UnwindSafe-for-Workbook" class="anchor">§</a><h3 class="code-header">impl !<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook">Workbook</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.89.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#209">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#211">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#217">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#218">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#774">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#757-759">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#767">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#813-815">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#817">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#820">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#798-800">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#802">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#805">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main></body></html>

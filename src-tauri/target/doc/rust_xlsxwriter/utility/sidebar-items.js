@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["cell_range","cell_range_absolute","check_sheet_name","column_name_to_number","column_number_to_name","row_col_to_cell","row_col_to_cell_absolute"]};

@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="`rust_xlsxwriter` is a Rust library for writing Excel files in the xlsx format."><title>rust_xlsxwriter - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../static.files/storage-4e99c027.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#table-of-contents" title="Table of contents">Table of contents</a></li><li><a href="#example" title="Example">Example</a><ul><li><a href="#crate-features" title="Crate Features">Crate Features</a></li></ul></li></ul><h3><a href="#modules">Crate Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>rust_xlsxwriter</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/rust_xlsxwriter/lib.rs.html#7-293">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p><code>rust_xlsxwriter</code> is a Rust library for writing Excel files in the xlsx
+format.</p>
+<img src="https://rustxlsxwriter.github.io/images/demo.png">
+<p>The <code>rust_xlsxwriter</code> crate can be used to write text, numbers, dates and
+formulas to multiple worksheets in a new Excel 2007+ xlsx file. It has a
+focus on performance and on fidelity with the file format created by Excel.
+It cannot be used to modify an existing file.</p>
+<p><code>rust_xlsxwriter</code> is a rewrite of the Python <a href="https://xlsxwriter.readthedocs.io/index.html"><code>XlsxWriter</code></a> library in Rust
+by the same author and with some additional Rust-like features and APIs. The
+currently supported features are:</p>
+<ul>
+<li>Support for writing all basic Excel data types.</li>
+<li>Full cell formatting support.</li>
+<li>Formula support, including new Excel 365 dynamic functions.</li>
+<li>Charts.</li>
+<li>Hyperlink support.</li>
+<li>Page/Printing Setup support.</li>
+<li>Merged ranges.</li>
+<li>Conditional formatting.</li>
+<li>Data validation.</li>
+<li>Cell Notes.</li>
+<li>Textboxes.</li>
+<li>Sparklines.</li>
+<li>Worksheet PNG/JPEG/GIF/BMP images.</li>
+<li>Rich multi-format strings.</li>
+<li>Defined names.</li>
+<li>Autofilters.</li>
+<li>Worksheet Tables.</li>
+<li>Support for macros.</li>
+</ul>
+<h2 id="table-of-contents"><a class="doc-anchor" href="#table-of-contents">§</a>Table of contents</h2>
+<ul>
+<li><a href="tutorial/index.html" title="mod rust_xlsxwriter::tutorial"><code>Tutorial</code></a>: A getting started and tutorial guide.</li>
+<li><a href="cookbook/index.html" title="mod rust_xlsxwriter::cookbook"><code>Cookbook</code></a>: Examples of using <code>rust_xlsxwriter</code>.</li>
+</ul>
+<p>
+<ul>
+<li><a href="workbook/struct.Workbook.html" title="struct rust_xlsxwriter::workbook::Workbook"><code>Workbook</code></a>: The entry point for creating an Excel workbook of
+worksheets.</li>
+<li><a href="workbook/index.html" title="mod rust_xlsxwriter::workbook"><code>Working with Workbooks</code></a>: A higher level introduction
+to creating and working with workbooks.</li>
+</ul>
+</p>
+<p>
+<ul>
+<li><a href="worksheet/struct.Worksheet.html" title="struct rust_xlsxwriter::worksheet::Worksheet"><code>Worksheet</code></a>: The main spreadsheet canvas for writing data and objects to
+a worksheet.</li>
+<li><a href="worksheet/index.html" title="mod rust_xlsxwriter::worksheet"><code>Working with Worksheets</code></a>: A higher level introduction
+to creating and working with worksheets.</li>
+</ul>
+</p>
+<p>
+<ul>
+<li><a href="chart/struct.Chart.html" title="struct rust_xlsxwriter::chart::Chart"><code>Chart</code></a> struct: The interface for creating worksheet charts.</li>
+<li><a href="chart/index.html" title="mod rust_xlsxwriter::chart"><code>Working with charts</code></a>: A higher level introduction to
+creating and using charts.</li>
+</ul>
+</p>
+<p>
+<ul>
+<li><a href="struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a>: The interface for adding formatting to worksheets and other
+objects.</li>
+<li><a href="struct.Table.html" title="struct rust_xlsxwriter::Table"><code>Table</code></a>: The interface for worksheet tables.</li>
+<li><a href="struct.Image.html" title="struct rust_xlsxwriter::Image"><code>Image</code></a>: The interface for images used in worksheets.</li>
+<li><a href="conditional_format/index.html" title="mod rust_xlsxwriter::conditional_format"><code>Conditional Formats</code></a>: Working with
+conditional formatting in worksheets.</li>
+<li><a href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation"><code>DataValidation</code></a>: Working with data validation in worksheets.</li>
+<li><a href="struct.Note.html" title="struct rust_xlsxwriter::Note"><code>Note</code></a>: Adding Notes to worksheet cells.</li>
+<li><a href="struct.Shape.html" title="struct rust_xlsxwriter::Shape"><code>Shape</code></a>: Adding Textbox shapes to worksheets.</li>
+<li><a href="macros/index.html" title="mod rust_xlsxwriter::macros"><code>Macros</code></a>: Working with Macros.</li>
+<li><a href="sparkline/index.html" title="mod rust_xlsxwriter::sparkline"><code>Sparklines</code></a>: Working with Sparklines.</li>
+<li><a href="struct.ExcelDateTime.html" title="struct rust_xlsxwriter::ExcelDateTime"><code>ExcelDateTime</code></a>: A type to represent dates and times in Excel format.</li>
+<li><a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>: A type for Excel formulas.</li>
+<li><a href="struct.Url.html" title="struct rust_xlsxwriter::Url"><code>Url</code></a>: A type for URLs/Hyperlinks used in worksheets.</li>
+<li><a href="struct.DocProperties.html" title="struct rust_xlsxwriter::DocProperties"><code>DocProperties</code></a>: The interface used to create an object to represent
+document metadata properties.</li>
+</ul>
+</p>
+<ul>
+<li><a href="changelog/index.html" title="mod rust_xlsxwriter::changelog"><code>Changelog</code></a>: Release notes and changelog.</li>
+</ul>
+<p>Other external documentation:</p>
+<ul>
+<li><a href="https://rustxlsxwriter.github.io/index.html">User Guide</a>: Working with the <code>rust_xlsxwriter</code> library.</li>
+<li><a href="https://github.com/jmcnamara/rust_xlsxwriter/issues/1">Roadmap of planned features</a>.</li>
+</ul>
+<h2 id="example"><a class="doc-anchor" href="#example">§</a>Example</h2><img src="https://rustxlsxwriter.github.io/images/demo.png">
+<p>Sample code to generate the Excel file shown above.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::<span class="kw-2">*</span>;
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+
+    <span class="comment">// Create some formats to use in the worksheet.
+    </span><span class="kw">let </span>bold_format = Format::new().set_bold();
+    <span class="kw">let </span>decimal_format = Format::new().set_num_format(<span class="string">"0.000"</span>);
+    <span class="kw">let </span>date_format = Format::new().set_num_format(<span class="string">"yyyy-mm-dd"</span>);
+    <span class="kw">let </span>merge_format = Format::new()
+        .set_border(FormatBorder::Thin)
+        .set_align(FormatAlign::Center);
+
+    <span class="comment">// Add a worksheet to the workbook.
+    </span><span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    <span class="comment">// Set the column width for clarity.
+    </span>worksheet.set_column_width(<span class="number">0</span>, <span class="number">22</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a string without formatting.
+    </span>worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="string">"Hello"</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a string with the bold format defined above.
+    </span>worksheet.write_with_format(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"World"</span>, <span class="kw-2">&amp;</span>bold_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some numbers.
+    </span>worksheet.write(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>)<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">3</span>, <span class="number">0</span>, <span class="number">2.34</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a number with formatting.
+    </span>worksheet.write_with_format(<span class="number">4</span>, <span class="number">0</span>, <span class="number">3.00</span>, <span class="kw-2">&amp;</span>decimal_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a formula.
+    </span>worksheet.write(<span class="number">5</span>, <span class="number">0</span>, Formula::new(<span class="string">"=SIN(PI()/4)"</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Write a date.
+    </span><span class="kw">let </span>date = ExcelDateTime::from_ymd(<span class="number">2023</span>, <span class="number">1</span>, <span class="number">25</span>)<span class="question-mark">?</span>;
+    worksheet.write_with_format(<span class="number">6</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span>date, <span class="kw-2">&amp;</span>date_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some links.
+    </span>worksheet.write(<span class="number">7</span>, <span class="number">0</span>, Url::new(<span class="string">"https://www.rust-lang.org"</span>))<span class="question-mark">?</span>;
+    worksheet.write(<span class="number">8</span>, <span class="number">0</span>, Url::new(<span class="string">"https://www.rust-lang.org"</span>).set_text(<span class="string">"Rust"</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Write some merged cells.
+    </span>worksheet.merge_range(<span class="number">9</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="string">"Merged cells"</span>, <span class="kw-2">&amp;</span>merge_format)<span class="question-mark">?</span>;
+
+    <span class="comment">// Insert an image.
+    </span><span class="kw">let </span>image = Image::new(<span class="string">"examples/rust_logo.png"</span>)<span class="question-mark">?</span>;
+    worksheet.insert_image(<span class="number">1</span>, <span class="number">2</span>, <span class="kw-2">&amp;</span>image)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file to disk.
+    </span>workbook.save(<span class="string">"demo.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h3 id="crate-features"><a class="doc-anchor" href="#crate-features">§</a>Crate Features</h3>
+<p>The following is a list of the features supports by the <code>rust_xlsxwriter</code>
+crate:</p>
+<ul>
+<li><code>default</code>: Includes all the standard functionality. This has a dependency
+on the <code>zip</code> crate only.</li>
+<li><code>serde</code>: Adds supports for Serde serialization. This is off by default.</li>
+<li><code>chrono</code>: Adds supports for Chrono date/time types to the API. This is off
+by default.</li>
+<li><code>zlib</code>: Adds a dependency on zlib and a C compiler. This includes the same
+features as <code>default</code> but is 1.5x faster for large files.</li>
+<li><code>polars</code>: Add support for mapping between <code>PolarsError</code> and
+<code>rust_xlsxwriter::XlsxError</code> to make code that handles both types of error
+easier to write.</li>
+<li><code>wasm</code>: Adds a dependency on <code>js-sys</code> and <code>wasm-bindgen</code> to allow
+compilation for wasm/JavaScript targets.</li>
+<li><code>ryu</code>: Adds a dependency on <code>ryu</code>. This speeds up writing numeric
+worksheet cells for large data files. It gives a performance boost above
+300,000 numeric cells and can be up to 30% faster than the default number
+formatting for 5,000,000 numeric cells.</li>
+</ul>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="changelog/index.html" title="mod rust_xlsxwriter::changelog">changelog</a></dt><dd>Changelog</dd><dt><a class="mod" href="chart/index.html" title="mod rust_xlsxwriter::chart">chart</a></dt><dd>Working with Charts</dd><dt><a class="mod" href="conditional_format/index.html" title="mod rust_xlsxwriter::conditional_format">conditional_<wbr>format</a></dt><dd>Working with Conditional Formats</dd><dt><a class="mod" href="cookbook/index.html" title="mod rust_xlsxwriter::cookbook">cookbook</a></dt><dd>A cookbook of example programs using <code>rust_xlsxwriter</code>.</dd><dt><a class="mod" href="macros/index.html" title="mod rust_xlsxwriter::macros">macros</a></dt><dd>Working with VBA Macros</dd><dt><a class="mod" href="sparkline/index.html" title="mod rust_xlsxwriter::sparkline">sparkline</a></dt><dd>Working with Sparklines</dd><dt><a class="mod" href="tutorial/index.html" title="mod rust_xlsxwriter::tutorial">tutorial</a></dt><dd>A getting started tutorial for <code>rust_xlsxwriter</code>.</dd><dt><a class="mod" href="utility/index.html" title="mod rust_xlsxwriter::utility">utility</a></dt><dd>Utility functions for <code>rust_xlsxwriter</code>.</dd><dt><a class="mod" href="workbook/index.html" title="mod rust_xlsxwriter::workbook">workbook</a></dt><dd>Working with Workbooks</dd><dt><a class="mod" href="worksheet/index.html" title="mod rust_xlsxwriter::worksheet">worksheet</a></dt><dd>Working with Worksheets</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Button.html" title="struct rust_xlsxwriter::Button">Button</a></dt><dd>The <code>Button</code> struct represents an worksheet button object.</dd><dt><a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">Data<wbr>Validation</a></dt><dd>The <code>DataValidation</code> struct represents a data validation in Excel.</dd><dt><a class="struct" href="struct.DocProperties.html" title="struct rust_xlsxwriter::DocProperties">DocProperties</a></dt><dd>The <code>DocProperties</code> struct is used to create an object to represent document
+metadata properties.</dd><dt><a class="struct" href="struct.ExcelDateTime.html" title="struct rust_xlsxwriter::ExcelDateTime">Excel<wbr>Date<wbr>Time</a></dt><dd>The <code>ExcelDateTime</code> struct is used to represent an Excel date and/or time.</dd><dt><a class="struct" href="struct.FilterCondition.html" title="struct rust_xlsxwriter::FilterCondition">Filter<wbr>Condition</a></dt><dd>The <code>FilterCondition</code> struct is used to define autofilter rules.</dd><dt><a class="struct" href="struct.Format.html" title="struct rust_xlsxwriter::Format">Format</a></dt><dd>The <code>Format</code> struct is used to define cell formatting for data in a
+worksheet.</dd><dt><a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a></dt><dd>The <code>Formula</code> struct is used to define a worksheet formula.</dd><dt><a class="struct" href="struct.Image.html" title="struct rust_xlsxwriter::Image">Image</a></dt><dd>The <code>Image</code> struct is used to create an object to represent an image that
+can be inserted into a worksheet.</dd><dt><a class="struct" href="struct.Note.html" title="struct rust_xlsxwriter::Note">Note</a></dt><dd>The <code>Note</code> struct represents an worksheet note object.</dd><dt><a class="struct" href="struct.ProtectionOptions.html" title="struct rust_xlsxwriter::ProtectionOptions">Protection<wbr>Options</a></dt><dd>The <code>ProtectionOptions</code> struct is use to set protected elements in a worksheet.</dd><dt><a class="struct" href="struct.Shape.html" title="struct rust_xlsxwriter::Shape">Shape</a></dt><dd>The <code>Shape</code> struct represents an worksheet shape object.</dd><dt><a class="struct" href="struct.ShapeFont.html" title="struct rust_xlsxwriter::ShapeFont">Shape<wbr>Font</a></dt><dd>The <code>ShapeFont</code> struct represents the font format for shape objects.</dd><dt><a class="struct" href="struct.ShapeFormat.html" title="struct rust_xlsxwriter::ShapeFormat">Shape<wbr>Format</a></dt><dd>The <code>ShapeFormat</code> struct represents formatting for various shape objects.</dd><dt><a class="struct" href="struct.ShapeGradientFill.html" title="struct rust_xlsxwriter::ShapeGradientFill">Shape<wbr>Gradient<wbr>Fill</a></dt><dd>The <code>ShapeGradientFill</code> struct represents a gradient fill for a shape
+element.</dd><dt><a class="struct" href="struct.ShapeGradientStop.html" title="struct rust_xlsxwriter::ShapeGradientStop">Shape<wbr>Gradient<wbr>Stop</a></dt><dd>The <code>ShapeGradientStop</code> struct represents a gradient fill data point.</dd><dt><a class="struct" href="struct.ShapeLine.html" title="struct rust_xlsxwriter::ShapeLine">Shape<wbr>Line</a></dt><dd>The <code>ShapeLine</code> struct represents a shape line/border.</dd><dt><a class="struct" href="struct.ShapePatternFill.html" title="struct rust_xlsxwriter::ShapePatternFill">Shape<wbr>Pattern<wbr>Fill</a></dt><dd>The <code>ShapePatternFill</code> struct represents a the pattern fill for a shape
+element.</dd><dt><a class="struct" href="struct.ShapeSolidFill.html" title="struct rust_xlsxwriter::ShapeSolidFill">Shape<wbr>Solid<wbr>Fill</a></dt><dd>The <code>ShapeSolidFill</code> struct represents a the solid fill for a shape element.</dd><dt><a class="struct" href="struct.ShapeText.html" title="struct rust_xlsxwriter::ShapeText">Shape<wbr>Text</a></dt><dd>The <code>ShapeText</code> struct represents the text options for a shape element.</dd><dt><a class="struct" href="struct.Table.html" title="struct rust_xlsxwriter::Table">Table</a></dt><dd>The <code>Table</code> struct represents a worksheet Table.</dd><dt><a class="struct" href="struct.TableColumn.html" title="struct rust_xlsxwriter::TableColumn">Table<wbr>Column</a></dt><dd>The <code>TableColumn</code> struct represents a table column.</dd><dt><a class="struct" href="struct.Url.html" title="struct rust_xlsxwriter::Url">Url</a></dt><dd>The <code>Url</code> struct is used to define a worksheet url.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.Color.html" title="enum rust_xlsxwriter::Color">Color</a></dt><dd>The <code>Color</code> enum defines Excel colors that can be used throughout the
+<code>rust_xlsxwriter</code> APIs.</dd><dt><a class="enum" href="enum.DataValidationErrorStyle.html" title="enum rust_xlsxwriter::DataValidationErrorStyle">Data<wbr>Validation<wbr>Error<wbr>Style</a></dt><dd>The <code>DataValidationErrorStyle</code> enum defines the type of error dialog that is
+shown when there is and error in a data validation.</dd><dt><a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">Data<wbr>Validation<wbr>Rule</a></dt><dd>The <code>DataValidationRule</code> enum defines the data validation rule for
+<a href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation"><code>DataValidation</code></a>.</dd><dt><a class="enum" href="enum.FilterCriteria.html" title="enum rust_xlsxwriter::FilterCriteria">Filter<wbr>Criteria</a></dt><dd>The <code>FilterCriteria</code> enum defines logical filter criteria used in an
+autofilter.</dd><dt><a class="enum" href="enum.FormatAlign.html" title="enum rust_xlsxwriter::FormatAlign">Format<wbr>Align</a></dt><dd>The <code>FormatAlign</code> enum defines the vertical and horizontal alignment properties
+of a <a href="struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a>.</dd><dt><a class="enum" href="enum.FormatBorder.html" title="enum rust_xlsxwriter::FormatBorder">Format<wbr>Border</a></dt><dd>The <code>FormatBorder</code> enum defines the Excel border types that can be added to
+a <a href="struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a> pattern.</dd><dt><a class="enum" href="enum.FormatDiagonalBorder.html" title="enum rust_xlsxwriter::FormatDiagonalBorder">Format<wbr>Diagonal<wbr>Border</a></dt><dd>The <code>FormatDiagonalBorder</code> enum defines <a href="struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a> diagonal border types.</dd><dt><a class="enum" href="enum.FormatPattern.html" title="enum rust_xlsxwriter::FormatPattern">Format<wbr>Pattern</a></dt><dd>The <code>FormatPattern</code> enum defines the Excel pattern types that can be added to
+a <a href="struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a>.</dd><dt><a class="enum" href="enum.FormatScript.html" title="enum rust_xlsxwriter::FormatScript">Format<wbr>Script</a></dt><dd>The <code>FormatScript</code> enum defines the <a href="struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a> font superscript and subscript
+properties.</dd><dt><a class="enum" href="enum.FormatUnderline.html" title="enum rust_xlsxwriter::FormatUnderline">Format<wbr>Underline</a></dt><dd>The <code>FormatUnderline</code> enum defines the font underline type in a <a href="struct.Format.html" title="struct rust_xlsxwriter::Format"><code>Format</code></a>.</dd><dt><a class="enum" href="enum.HeaderImagePosition.html" title="enum rust_xlsxwriter::HeaderImagePosition">Header<wbr>Image<wbr>Position</a></dt><dd>The <code>HeaderImagePosition</code> enum defines the image position in a header or footer.</dd><dt><a class="enum" href="enum.ObjectMovement.html" title="enum rust_xlsxwriter::ObjectMovement">Object<wbr>Movement</a></dt><dd>The <code>ObjectMovement</code> enum defines the movement of worksheet objects such as
+images and charts.</dd><dt><a class="enum" href="enum.ShapeGradientFillType.html" title="enum rust_xlsxwriter::ShapeGradientFillType">Shape<wbr>Gradient<wbr>Fill<wbr>Type</a></dt><dd>The <code>ShapeGradientFillType</code> enum defines the gradient types of a
+<a href="struct.ShapeGradientFill.html" title="struct rust_xlsxwriter::ShapeGradientFill"><code>ShapeGradientFill</code></a>.</dd><dt><a class="enum" href="enum.ShapeLineDashType.html" title="enum rust_xlsxwriter::ShapeLineDashType">Shape<wbr>Line<wbr>Dash<wbr>Type</a></dt><dd>The <code>ShapeLineDashType</code> enum defines the <a href="struct.Shape.html" title="struct rust_xlsxwriter::Shape"><code>Shape</code></a> line dash types.</dd><dt><a class="enum" href="enum.ShapePatternFillType.html" title="enum rust_xlsxwriter::ShapePatternFillType">Shape<wbr>Pattern<wbr>Fill<wbr>Type</a></dt><dd>The <code>ShapePatternFillType</code> enum defines the <a href="struct.Shape.html" title="struct rust_xlsxwriter::Shape"><code>Shape</code></a> pattern fill types.</dd><dt><a class="enum" href="enum.ShapeTextDirection.html" title="enum rust_xlsxwriter::ShapeTextDirection">Shape<wbr>Text<wbr>Direction</a></dt><dd>The <code>ShapeTextDirection</code> enum defines the text direction for <a href="struct.Shape.html" title="struct rust_xlsxwriter::Shape"><code>Shape</code></a> text.</dd><dt><a class="enum" href="enum.ShapeTextHorizontalAlignment.html" title="enum rust_xlsxwriter::ShapeTextHorizontalAlignment">Shape<wbr>Text<wbr>Horizontal<wbr>Alignment</a></dt><dd>The <code>ShapeTextHorizontalAlignment</code> enum defines the horizontal alignment for
+<a href="struct.Shape.html" title="struct rust_xlsxwriter::Shape"><code>Shape</code></a> text.</dd><dt><a class="enum" href="enum.ShapeTextVerticalAlignment.html" title="enum rust_xlsxwriter::ShapeTextVerticalAlignment">Shape<wbr>Text<wbr>Vertical<wbr>Alignment</a></dt><dd>The <code>ShapeTextVerticalAlignment</code> enum defines the vertical alignment for
+<a href="struct.Shape.html" title="struct rust_xlsxwriter::Shape"><code>Shape</code></a> text.</dd><dt><a class="enum" href="enum.TableFunction.html" title="enum rust_xlsxwriter::TableFunction">Table<wbr>Function</a></dt><dd>The <code>TableFunction</code> enum defines functions for worksheet table total rows.</dd><dt><a class="enum" href="enum.TableStyle.html" title="enum rust_xlsxwriter::TableStyle">Table<wbr>Style</a></dt><dd>The <code>TableStyle</code> enum defines the worksheet table styles.</dd><dt><a class="enum" href="enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">Xlsx<wbr>Error</a></dt><dd>The <code>XlsxError</code> enum defines the error values for the <code>rust_xlsxwriter</code>
+library.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.IntoCustomDateTimeUtc.html" title="trait rust_xlsxwriter::IntoCustomDateTimeUtc">Into<wbr>Custom<wbr>Date<wbr>Time<wbr>Utc</a></dt><dd>Trait to map user date types to an Excel UTC date.</dd><dt><a class="trait" href="trait.IntoCustomProperty.html" title="trait rust_xlsxwriter::IntoCustomProperty">Into<wbr>Custom<wbr>Property</a></dt><dd>Trait to map different Rust types into Excel data types used in custom document properties.</dd><dt><a class="trait" href="trait.IntoDataValidationValue.html" title="trait rust_xlsxwriter::IntoDataValidationValue">Into<wbr>Data<wbr>Validation<wbr>Value</a></dt><dd>Trait to map rust types into data validation types</dd><dt><a class="trait" href="trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime">Into<wbr>Excel<wbr>Date<wbr>Time</a></dt><dd>Trait to map user date/time types to an Excel serial datetimes.</dd><dt><a class="trait" href="trait.IntoFilterData.html" title="trait rust_xlsxwriter::IntoFilterData">Into<wbr>Filter<wbr>Data</a></dt><dd>Trait to map different Rust types into Excel data types used in filters.</dd><dt><a class="trait" href="trait.IntoShapeFormat.html" title="trait rust_xlsxwriter::IntoShapeFormat">Into<wbr>Shape<wbr>Format</a></dt><dd>Trait to map types into a <code>ShapeFormat</code>.</dd></dl></section></div></main></body></html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The `DataValidation` struct represents a data validation in Excel."><title>DataValidation in rust_xlsxwriter - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="rust_xlsxwriter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../rust_xlsxwriter/index.html"><img src="https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png" alt="logo"></a><h2><a href="../rust_xlsxwriter/index.html">rust_<wbr>xlsxwriter</a><span class="version">0.77.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Data<wbr>Validation</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#working-with-data-validation" title="Working with Data Validation">Working with Data Validation</a><ul><li><a href="#using-cell-references-in-data-validations" title="Using cell references in Data Validations">Using cell references in Data Validations</a></li></ul></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.allow_any_value" title="allow_any_value">allow_any_value</a></li><li><a href="#method.allow_custom" title="allow_custom">allow_custom</a></li><li><a href="#method.allow_date" title="allow_date">allow_date</a></li><li><a href="#method.allow_date_formula" title="allow_date_formula">allow_date_formula</a></li><li><a href="#method.allow_decimal_number" title="allow_decimal_number">allow_decimal_number</a></li><li><a href="#method.allow_decimal_number_formula" title="allow_decimal_number_formula">allow_decimal_number_formula</a></li><li><a href="#method.allow_list_formula" title="allow_list_formula">allow_list_formula</a></li><li><a href="#method.allow_list_strings" title="allow_list_strings">allow_list_strings</a></li><li><a href="#method.allow_text_length" title="allow_text_length">allow_text_length</a></li><li><a href="#method.allow_text_length_formula" title="allow_text_length_formula">allow_text_length_formula</a></li><li><a href="#method.allow_time" title="allow_time">allow_time</a></li><li><a href="#method.allow_time_formula" title="allow_time_formula">allow_time_formula</a></li><li><a href="#method.allow_whole_number" title="allow_whole_number">allow_whole_number</a></li><li><a href="#method.allow_whole_number_formula" title="allow_whole_number_formula">allow_whole_number_formula</a></li><li><a href="#method.ignore_blank" title="ignore_blank">ignore_blank</a></li><li><a href="#method.new" title="new">new</a></li><li><a href="#method.set_error_message" title="set_error_message">set_error_message</a></li><li><a href="#method.set_error_style" title="set_error_style">set_error_style</a></li><li><a href="#method.set_error_title" title="set_error_title">set_error_title</a></li><li><a href="#method.set_input_message" title="set_input_message">set_input_message</a></li><li><a href="#method.set_input_title" title="set_input_title">set_input_title</a></li><li><a href="#method.set_multi_range" title="set_multi_range">set_multi_range</a></li><li><a href="#method.show_dropdown" title="show_dropdown">show_dropdown</a></li><li><a href="#method.show_error_message" title="show_error_message">show_error_message</a></li><li><a href="#method.show_input_message" title="show_input_message">show_input_message</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-DataValidation" title="Clone">Clone</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-DataValidation" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-DataValidation" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-DataValidation" title="Send">Send</a></li><li><a href="#impl-Sync-for-DataValidation" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-DataValidation" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-DataValidation" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate rust_<wbr>xlsxwriter</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">rust_xlsxwriter</a></div><h1>Struct <span class="struct">DataValidation</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/rust_xlsxwriter/data_validation.rs.html#180-193">Source</a> </span></div><pre class="rust item-decl"><code>pub struct DataValidation { <span class="comment">/* private fields */</span> }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The <code>DataValidation</code> struct represents a data validation in Excel.</p>
+<p><code>DataValidation</code> is used in conjunction with the
+<a href="worksheet/struct.Worksheet.html#method.add_data_validation" title="method rust_xlsxwriter::worksheet::Worksheet::add_data_validation"><code>Worksheet::add_data_validation()</code></a>
+method.</p>
+<h2 id="working-with-data-validation"><a class="doc-anchor" href="#working-with-data-validation">§</a>Working with Data Validation</h2>
+<p>Data validation is a feature of Excel that allows you to restrict the data
+that a user enters in a cell and to display associated help and warning
+messages. It also allows you to restrict input to values in a dropdown list.</p>
+<p>A typical use case would be to restrict data in a cell to integer values
+within a certain range, to provide a help message to explain the required
+value, and to issue a warning if the input data doesn’t meet the defined
+criteria. For example:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_intro1.png"></p>
+<p>The example above was created with the following code:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{DataValidation, DataValidationRule, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    worksheet.write(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Enter rating in cell D2:"</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_whole_number(DataValidationRule::Between(<span class="number">1</span>, <span class="number">5</span>))
+        .set_input_title(<span class="string">"Enter a star rating!"</span>)<span class="question-mark">?
+        </span>.set_input_message(<span class="string">"Enter rating 1-5.\nWhole numbers only."</span>)<span class="question-mark">?
+        </span>.set_error_title(<span class="string">"Value outside allowed range"</span>)<span class="question-mark">?
+        </span>.set_error_message(<span class="string">"The input value must be an integer in the range 1-5."</span>)<span class="question-mark">?</span>;
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file.
+    </span>workbook.save(<span class="string">"data_validation.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Another common data validation task is to limit input to values on a
+dropdown list.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_strings.png"></p>
+<p>The example above was created with the following code:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rust_xlsxwriter::{DataValidation, Workbook, XlsxError};
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), XlsxError&gt; {
+    <span class="comment">// Create a new Excel file object.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>workbook = Workbook::new();
+    <span class="kw">let </span>worksheet = workbook.add_worksheet();
+
+    worksheet.write(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Select value in cell D2:"</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>data_validation =
+        DataValidation::new().allow_list_strings(<span class="kw-2">&amp;</span>[<span class="string">"Pass"</span>, <span class="string">"Fail"</span>, <span class="string">"Incomplete"</span>])<span class="question-mark">?</span>;
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;
+
+    <span class="comment">// Save the file.
+    </span>workbook.save(<span class="string">"data_validation.xlsx"</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>For more information and examples see the API documentation below.</p>
+<h3 id="using-cell-references-in-data-validations"><a class="doc-anchor" href="#using-cell-references-in-data-validations">§</a>Using cell references in Data Validations</h3>
+<p>Excel allows the values for data validation to be either a “literal” number,
+date or time value or a cell reference such as <code>=D1</code>. In the
+<code>DataValidation</code> interfaces the cell reference values are represented using
+a <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> value, like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_whole_number_formula(
+            DataValidationRule::LessThanOrEqualTo(Formula::new(<span class="string">"=D1"</span>)));</code></pre></div>
+<p>In Excel this creates the following data validation:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_whole_number_formula.png"></p>
+<p>As a syntactic shorthand you can also use <code>into()</code> for <code>Formula</code> like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_whole_number_formula(DataValidationRule::LessThanOrEqualTo(<span class="string">"=D1"</span>.into()));</code></pre></div>
+<p>APIs that use <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> can also take Excel formulas, where appropriate.</p>
+<p><strong>Note</strong>: the contents of the <code>Formula</code> aren’t validated by
+<code>rust_xlsxwriter</code> so if you are using anything other than a simple cell
+reference you should take care to ensure that the ranges or formulas are
+valid in Excel.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-DataValidation" class="impl"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#195-1329">Source</a><a href="#impl-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.new" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#203-218">Source</a><h4 class="code-header">pub fn <a href="#method.new" class="fn">new</a>() -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Create a new cell Data Validation struct.</p>
+<p>The default type of a new data validation is equivalent to Excel’s “Any”
+data validation. Refer to the <code>allow_TYPE()</code> functions below to
+constrain the data validation to defined types and to apply rules.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_whole_number" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#271-275">Source</a><h4 class="code-header">pub fn <a href="#method.allow_whole_number" class="fn">allow_whole_number</a>(self, rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.i32.html">i32</a>&gt;) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to integers using defined rules.</p>
+<p>Set a data validation rule to restrict cell input to integers based on
+<a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”. Excel
+refers to this data validation type as “Whole number” but it equates to
+any Rust type that can convert <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into"><code>Into</code></a> a <a href="https://doc.rust-lang.org/1.89.0/std/primitive.i32.html" title="primitive i32"><code>i32</code></a> (<code>i64/u64</code> values
+aren’t supported by Excel).</p>
+<h5 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with <a href="https://doc.rust-lang.org/1.89.0/std/primitive.i32.html" title="primitive i32"><code>i32</code></a> values.</li>
+</ul>
+<h5 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to integer values in a fixed range.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation =
+        DataValidation::new().allow_whole_number(DataValidationRule::Between(<span class="number">1</span>, <span class="number">10</span>));
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_whole_number.png"></p>
+<p>The Excel Data Validation dialog for this file should look something like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_whole_number_dialog.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_whole_number_formula" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#331-338">Source</a><h4 class="code-header">pub fn <a href="#method.allow_whole_number_formula" class="fn">allow_whole_number_formula</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to integers using defined rules and
+a cell reference.</p>
+<p>Set a data validation rule to restrict cell input to integers based on
+<a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”. Excel
+refers to this data validation type as “Whole number”. The values used
+for the rules should be a cell reference represented by a <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>,
+see <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a> and the example below.</p>
+<h5 id="parameters-1"><a class="doc-anchor" href="#parameters-1">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with cell references using
+<a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> values. See <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a>.</li>
+</ul>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to integer values based on a value from another cell.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_whole_number_formula(DataValidationRule::LessThanOrEqualTo(<span class="string">"=D1"</span>.into()));
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>The Excel Data Validation dialog for the output file should look
+something like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_whole_number_formula.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_decimal_number" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#391-395">Source</a><h4 class="code-header">pub fn <a href="#method.allow_decimal_number" class="fn">allow_decimal_number</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.f64.html">f64</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to floating point numbers using
+defined rules.</p>
+<p>Set a data validation rule to restrict cell input to floating point
+numbers based on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less
+than”. Excel refers to this data validation type as “Decimal” but it
+equates to the Rust type <a href="https://doc.rust-lang.org/1.89.0/std/primitive.f64.html" title="primitive f64"><code>f64</code></a>.</p>
+<h5 id="parameters-2"><a class="doc-anchor" href="#parameters-2">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with <a href="https://doc.rust-lang.org/1.89.0/std/primitive.f64.html" title="primitive f64"><code>f64</code></a> values.</li>
+</ul>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to floating point values in a fixed range.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation =
+        DataValidation::new().allow_decimal_number(DataValidationRule::Between(-<span class="number">9.9</span>, <span class="number">9.9</span>));
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_decimal_number.png"></p>
+<p>The Excel Data Validation dialog for this file should look something like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_decimal_number_dialog.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_decimal_number_formula" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#452-459">Source</a><h4 class="code-header">pub fn <a href="#method.allow_decimal_number_formula" class="fn">allow_decimal_number_formula</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to floating point numbers using
+defined rules and a cell reference.</p>
+<p>Set a data validation rule to restrict cell input to floating point
+numbers based on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less
+than”. Excel refers to this data validation type as “Decimal”. The
+values used for the rules should be a cell reference represented by a
+<a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>, see <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a> and the
+example below.</p>
+<h5 id="parameters-3"><a class="doc-anchor" href="#parameters-3">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with cell references using
+<a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> values. See <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a>.</li>
+</ul>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to floating point values based on a value from another
+cell.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_decimal_number_formula(DataValidationRule::LessThanOrEqualTo(<span class="string">"=D1"</span>.into()));
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>The Excel Data Validation dialog for the output file should look something like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_decimal_number_formula.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_list_strings" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#554-576">Source</a><h4 class="code-header">pub fn <a href="#method.allow_list_strings" class="fn">allow_list_strings</a>(
+    self,
+    list: &amp;[impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.str.html">str</a>&gt;],
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a>, <a class="enum" href="enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Set a data validation rule to restrict cell input to a selection of
+strings via a dropdown menu.</p>
+<p>This type of validation presents the user with a list of allowed strings
+via a dropdown menu similar to online forms.</p>
+<p>Excel has a 255 character limit to the the string used to store the
+comma-separated list of strings, including the commas. This limit makes
+it unsuitable for long lists such as a list of provinces or states. For
+longer lists it is better to place the string values somewhere in the
+Excel workbook and refer to them using a range formula via the
+<a href="struct.DataValidation.html#method.allow_list_formula" title="method rust_xlsxwriter::DataValidation::allow_list_formula"><code>DataValidation::allow_list_formula()</code></a> method shown below.</p>
+<h5 id="parameters-4"><a class="doc-anchor" href="#parameters-4">§</a>Parameters</h5>
+<ul>
+<li><code>list</code>: A list of string like objects.</li>
+</ul>
+<h5 id="errors"><a class="doc-anchor" href="#errors">§</a>Errors</h5>
+<ul>
+<li><a href="enum.XlsxError.html#variant.DataValidationError" title="variant rust_xlsxwriter::XlsxError::DataValidationError"><code>XlsxError::DataValidationError</code></a> - The length of the combined
+comma-separated list of strings, including commas, exceeds Excel’s
+limit of 255 characters, see the explanation above.</li>
+</ul>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts users to a selection of values from a dropdown list.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation =
+        DataValidation::new().allow_list_strings(<span class="kw-2">&amp;</span>[<span class="string">"Pass"</span>, <span class="string">"Fail"</span>, <span class="string">"Incomplete"</span>])<span class="question-mark">?</span>;
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_strings.png"></p>
+<p>The Excel Data Validation dialog for this file should look something
+like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_strings_dialog.png"></p>
+<p>The following is a similar example but it demonstrates how to
+pre-populate a default choice.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation =
+        DataValidation::new().allow_list_strings(<span class="kw-2">&amp;</span>[<span class="string">"Pass"</span>, <span class="string">"Fail"</span>, <span class="string">"Incomplete"</span>])<span class="question-mark">?</span>;
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;
+
+    <span class="comment">// Add a default string to the cell with the data validation
+    // to pre-populate a default choice.
+    </span>worksheet.write(<span class="number">1</span>, <span class="number">3</span>, <span class="string">"Pass"</span>)<span class="question-mark">?</span>;</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_list_formula" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#637-642">Source</a><h4 class="code-header">pub fn <a href="#method.allow_list_formula" class="fn">allow_list_formula</a>(self, list: <a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a>) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation rule to restrict cell input to a selection of
+strings via a dropdown menu and a cell range reference.</p>
+<p>The strings for the dropdown should be placed somewhere in the
+worksheet/workbook and should be referred to via a cell range reference
+represented by a <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>, see <a href="#using-cell-references-in-data-validations">Using cell references in Data
+Validations</a> and the example below.</p>
+<h5 id="parameters-5"><a class="doc-anchor" href="#parameters-5">§</a>Parameters</h5>
+<ul>
+<li><code>list</code>: A cell range reference such as <code>=B1:B9</code>, <code>=$B$1:$B$9</code> or
+<code>=Sheet2!B1:B9</code> using a <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>. See <a href="#using-cell-references-in-data-validations">Using cell references in
+Data Validations</a>.</li>
+</ul>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts users to a selection of values from a dropdown list. The list data
+is provided from a cell range.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="comment">// Write the string list data to some cells.
+    </span><span class="kw">let </span>string_list = [<span class="string">"Pass"</span>, <span class="string">"Fail"</span>, <span class="string">"Incomplete"</span>];
+    worksheet.write_column(<span class="number">1</span>, <span class="number">5</span>, string_list)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>data_validation = DataValidation::new().allow_list_formula(<span class="string">"F2:F4"</span>.into());
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_formula.png">
+<p>The Excel Data Validation dialog for this file should look something
+like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_formula_dialog.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_date" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#698-705">Source</a><h4 class="code-header">pub fn <a href="#method.allow_date" class="fn">allow_date</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;impl <a class="trait" href="trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime">IntoExcelDateTime</a> + <a class="trait" href="trait.IntoDataValidationValue.html" title="trait rust_xlsxwriter::IntoDataValidationValue">IntoDataValidationValue</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to dates using defined rules.</p>
+<p>Set a data validation rule to restrict cell input to date values based
+on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”. Excel
+refers to this data validation type as “Date”.</p>
+<p>This method uses date types that implement <a href="trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a>. The
+main date type supported is <a href="struct.ExcelDateTime.html" title="struct rust_xlsxwriter::ExcelDateTime"><code>ExcelDateTime</code></a>. If the <code>chrono</code> feature
+is enabled you can also use <a href="https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html"><code>chrono::NaiveDate</code></a>.</p>
+<h5 id="parameters-6"><a class="doc-anchor" href="#parameters-6">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with <a href="trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a> values.</li>
+</ul>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to date values in a fixed range.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new().allow_date(DataValidationRule::Between(
+        ExcelDateTime::parse_from_str(<span class="string">"2025-01-01"</span>)<span class="question-mark">?</span>,
+        ExcelDateTime::parse_from_str(<span class="string">"2025-12-12"</span>)<span class="question-mark">?</span>,
+    ));
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>The Excel Data Validation dialog for this file should look something
+like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_date_dialog.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_date_formula" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#726-730">Source</a><h4 class="code-header">pub fn <a href="#method.allow_date_formula" class="fn">allow_date_formula</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to dates using defined rules and a
+cell reference.</p>
+<p>Set a data validation rule to restrict cell input to date values based
+on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”. Excel
+refers to this data validation type as “Date”.</p>
+<p>The values used for the rules should be a cell reference represented by
+a <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>, see <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a> and the
+<code>allow_TYPE_formula()</code> examples above.</p>
+<h5 id="parameters-7"><a class="doc-anchor" href="#parameters-7">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with cell references using
+<a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> values. See <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a>.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_time" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#786-793">Source</a><h4 class="code-header">pub fn <a href="#method.allow_time" class="fn">allow_time</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;impl <a class="trait" href="trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime">IntoExcelDateTime</a> + <a class="trait" href="trait.IntoDataValidationValue.html" title="trait rust_xlsxwriter::IntoDataValidationValue">IntoDataValidationValue</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to time values using defined rules.</p>
+<p>Set a data validation rule to restrict cell input to time values based
+on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”. Excel
+refers to this data validation type as “Time”.</p>
+<p>This method uses time types that implement <a href="trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a>. The
+main time type supported is <a href="struct.ExcelDateTime.html" title="struct rust_xlsxwriter::ExcelDateTime"><code>ExcelDateTime</code></a>. If the <code>chrono</code> feature
+is enabled you can also use <a href="https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html"><code>chrono::NaiveTime</code></a>.</p>
+<h5 id="parameters-8"><a class="doc-anchor" href="#parameters-8">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with <a href="trait.IntoExcelDateTime.html" title="trait rust_xlsxwriter::IntoExcelDateTime"><code>IntoExcelDateTime</code></a> values.</li>
+</ul>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to time values in a fixed range.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new().allow_time(DataValidationRule::Between(
+        ExcelDateTime::parse_from_str(<span class="string">"6:00"</span>)<span class="question-mark">?</span>,
+        ExcelDateTime::parse_from_str(<span class="string">"12:00"</span>)<span class="question-mark">?</span>,
+    ));
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>The Excel Data Validation dialog for this file should look something
+like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_time_dialog.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_time_formula" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#814-818">Source</a><h4 class="code-header">pub fn <a href="#method.allow_time_formula" class="fn">allow_time_formula</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to time values using defined rules
+and a cell reference.</p>
+<p>Set a data validation rule to restrict cell input to time values based
+on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”. Excel
+refers to this data validation type as “Time”.</p>
+<p>The values used for the rules should be a cell reference represented by
+a <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>, see <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a> and the
+<code>allow_TYPE_formula()</code> examples above.</p>
+<h5 id="parameters-9"><a class="doc-anchor" href="#parameters-9">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with cell references using
+<a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> values. See <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a>.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_text_length" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#868-872">Source</a><h4 class="code-header">pub fn <a href="#method.allow_text_length" class="fn">allow_text_length</a>(self, rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u32.html">u32</a>&gt;) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to string lengths using defined
+rules.</p>
+<p>Set a data validation rule to restrict cell input to string lengths
+based on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”.
+Excel refers to this data validation type as “Text length” but it
+equates to any Rust type that can convert <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into"><code>Into</code></a> a <a href="https://doc.rust-lang.org/1.89.0/std/primitive.u32.html" title="primitive u32"><code>u32</code></a> (<code>u64</code>
+values or strings of that length aren’t supported by Excel).</p>
+<h5 id="parameters-10"><a class="doc-anchor" href="#parameters-10">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with <a href="https://doc.rust-lang.org/1.89.0/std/primitive.u32.html" title="primitive u32"><code>u32</code></a> values.</li>
+</ul>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to strings whose length is in a fixed range.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation =
+        DataValidation::new().allow_text_length(DataValidationRule::Between(<span class="number">4</span>, <span class="number">8</span>));
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>The Excel Data Validation dialog for this file should look something
+like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_text_length_dialog.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_text_length_formula" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#893-900">Source</a><h4 class="code-header">pub fn <a href="#method.allow_text_length_formula" class="fn">allow_text_length_formula</a>(
+    self,
+    rule: <a class="enum" href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule">DataValidationRule</a>&lt;<a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a>&gt;,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input to string lengths using defined
+rules and a cell reference.</p>
+<p>Set a data validation rule to restrict cell input to string lengths
+based on <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> rules such as “between” or “less than”.
+Excel refers to this data validation type as “Text length”.</p>
+<p>The values used for the rules should be a cell reference represented by
+a <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a>, see <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a> and the
+<code>allow_TYPE_formula()</code> examples above.</p>
+<h5 id="parameters-11"><a class="doc-anchor" href="#parameters-11">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="enum.DataValidationRule.html" title="enum rust_xlsxwriter::DataValidationRule"><code>DataValidationRule</code></a> with cell references using
+<a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> values. See <a href="#using-cell-references-in-data-validations">Using cell references in Data Validations</a>.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_custom" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#948-953">Source</a><h4 class="code-header">pub fn <a href="#method.allow_custom" class="fn">allow_custom</a>(self, rule: <a class="struct" href="struct.Formula.html" title="struct rust_xlsxwriter::Formula">Formula</a>) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to limit input based on a custom formula.</p>
+<p>Set a data validation rule to restrict cell input based on an Excel
+formula that returns a boolean value. Excel refers to this data
+validation type as “Custom”.</p>
+<h5 id="parameters-12"><a class="doc-anchor" href="#parameters-12">§</a>Parameters</h5>
+<ul>
+<li><code>rule</code>: A <a href="struct.Formula.html" title="struct rust_xlsxwriter::Formula"><code>Formula</code></a> value. You should ensure that the formula is
+valid in Excel.</li>
+</ul>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+restricts input to text/strings that are uppercase.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation =
+        DataValidation::new().allow_custom(<span class="string">"=AND(ISTEXT(D2), EXACT(D2, UPPER(D2)))"</span>.into());
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>The Excel Data Validation dialog for this file should look something
+like this:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_custom_dialog.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.allow_any_value" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#965-969">Source</a><h4 class="code-header">pub fn <a href="#method.allow_any_value" class="fn">allow_any_value</a>(self) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set a data validation to allow any input data.</p>
+<p>The “Any” data validation type doesn’t restrict data input and is mainly
+used to allow access to the “Input Message” dialog when a user enters data
+in a cell.</p>
+<p>This is the default validation type for <a href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation"><code>DataValidation</code></a> if no other
+<code>allow_TYPE()</code> method is used. Situations where this type of data
+validation are required are uncommon.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.ignore_blank" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#988-991">Source</a><h4 class="code-header">pub fn <a href="#method.ignore_blank" class="fn">ignore_blank</a>(self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set the data validation option that defines how blank cells are handled.</p>
+<p>By default Excel data validations have an “Ignore blank” option turned
+on. This allows the user to optionally leave the cell blank and not
+enter any value. This is generally the best default option since it
+allows users to exit the cell without inputting any data.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_whole_number_dialog.png"></p>
+<p>If you need to ensure that the user inserts some information then you
+can use <code>ignore_blank()</code> to turn this option off.</p>
+<h5 id="parameters-13"><a class="doc-anchor" href="#parameters-13">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is on by default.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.show_dropdown" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1010-1013">Source</a><h4 class="code-header">pub fn <a href="#method.show_dropdown" class="fn">show_dropdown</a>(self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Turn on/off the in-cell dropdown for list data validations.</p>
+<p>By default the Excel list data validation has an “In-cell drop-down”
+option turned on. This shows a dropdown arrow for list style data
+validations and displays the list items.</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_strings_dialog.png"></p>
+<p>If this option is turned off the data validation will restrict input to
+the specified list values but it won’t display a visual indicator of
+what those values are.</p>
+<h5 id="parameters-14"><a class="doc-anchor" href="#parameters-14">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is on by default.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.show_input_message" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1029-1032">Source</a><h4 class="code-header">pub fn <a href="#method.show_input_message" class="fn">show_input_message</a>(self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Toggle option to show an input message when the cell is entered.</p>
+<p>This function is used to toggle the option that controls whether an
+input message is shown when a data validation cell is entered.</p>
+<p>The option only has an effect if there is an input message, so for the
+majority of use cases it isn’t required.</p>
+<p>See also <a href="struct.DataValidation.html#method.set_input_message" title="method rust_xlsxwriter::DataValidation::set_input_message"><code>DataValidation::set_input_message()</code></a> below.</p>
+<h5 id="parameters-15"><a class="doc-anchor" href="#parameters-15">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is on by default.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_input_title" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1052-1064">Source</a><h4 class="code-header">pub fn <a href="#method.set_input_title" class="fn">set_input_title</a>(
+    self,
+    text: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a>, <a class="enum" href="enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Set the title for the input message when the cell is entered.</p>
+<p>This option is used to set a title in bold for the input message when a
+data validation cell is entered.</p>
+<p>The title is only visible if there is also an input message. See the
+<a href="struct.DataValidation.html#method.set_input_message" title="method rust_xlsxwriter::DataValidation::set_input_message"><code>DataValidation::set_input_message()</code></a> example below.</p>
+<h5 id="errors-1"><a class="doc-anchor" href="#errors-1">§</a>Errors</h5>
+<ul>
+<li><a href="enum.XlsxError.html#variant.DataValidationError" title="variant rust_xlsxwriter::XlsxError::DataValidationError"><code>XlsxError::DataValidationError</code></a> - The length of the title exceeds
+Excel’s limit of 32 characters.</li>
+</ul>
+<h5 id="parameters-16"><a class="doc-anchor" href="#parameters-16">§</a>Parameters</h5>
+<ul>
+<li><code>text</code>: Title string. Must be less than or equal to the Excel limit
+of 32 characters.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_input_message" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1120-1135">Source</a><h4 class="code-header">pub fn <a href="#method.set_input_message" class="fn">set_input_message</a>(
+    self,
+    text: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a>, <a class="enum" href="enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Set the input message when a data validation cell is entered.</p>
+<p>This option is used to set an input message when a data validation cell
+is entered. This can we used to explain to the user what the data
+validation rules are for the cell.</p>
+<h5 id="errors-2"><a class="doc-anchor" href="#errors-2">§</a>Errors</h5>
+<ul>
+<li><a href="enum.XlsxError.html#variant.DataValidationError" title="variant rust_xlsxwriter::XlsxError::DataValidationError"><code>XlsxError::DataValidationError</code></a> - The length of the message exceeds
+Excel’s limit of 255 characters.</li>
+</ul>
+<h5 id="parameters-17"><a class="doc-anchor" href="#parameters-17">§</a>Parameters</h5>
+<ul>
+<li><code>text</code>: Message string. Must be less than or equal to the Excel limit
+of 255 characters. The string can contain newlines to split it over
+several lines.</li>
+</ul>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+uses an input message to explain to the user what type of input is
+required.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_whole_number(DataValidationRule::Between(<span class="number">1</span>, <span class="number">5</span>))
+        .set_input_title(<span class="string">"Enter a star rating!"</span>)<span class="question-mark">?
+        </span>.set_input_message(<span class="string">"Enter rating 1-5.\nWhole numbers only."</span>)<span class="question-mark">?</span>;
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_set_input_message.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.show_error_message" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1150-1153">Source</a><h4 class="code-header">pub fn <a href="#method.show_error_message" class="fn">show_error_message</a>(self, enable: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.bool.html">bool</a>) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Toggle option to show an error message when there is a validation error.</p>
+<p>This function is used to toggle the option that controls whether an
+error message is shown when there is a validation error.</p>
+<p>If this option is toggled off then any data can be entered in a cell and
+an error message will not be raised, which has limited practical
+applications for a data validation.</p>
+<h5 id="parameters-18"><a class="doc-anchor" href="#parameters-18">§</a>Parameters</h5>
+<ul>
+<li><code>enable</code>: Turn the property on/off. It is on by default.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_error_title" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1204-1216">Source</a><h4 class="code-header">pub fn <a href="#method.set_error_title" class="fn">set_error_title</a>(
+    self,
+    text: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a>, <a class="enum" href="enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Set the title for the error message when there is a validation error.</p>
+<p>This option is used to set a title in bold for the error message when
+there is a validation error.</p>
+<h5 id="errors-3"><a class="doc-anchor" href="#errors-3">§</a>Errors</h5>
+<ul>
+<li><a href="enum.XlsxError.html#variant.DataValidationError" title="variant rust_xlsxwriter::XlsxError::DataValidationError"><code>XlsxError::DataValidationError</code></a> - The length of the title exceeds
+Excel’s limit of 32 characters.</li>
+</ul>
+<h5 id="parameters-19"><a class="doc-anchor" href="#parameters-19">§</a>Parameters</h5>
+<ul>
+<li><code>text</code>: Title string. Must be less than or equal to the Excel limit
+of 32 characters.</li>
+</ul>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+shows a custom error title.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_whole_number(DataValidationRule::Between(<span class="number">1</span>, <span class="number">10</span>))
+        .set_error_title(<span class="string">"Danger, Will Robinson!"</span>)<span class="question-mark">?</span>;
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<img src="https://rustxlsxwriter.github.io/images/data_validation_set_error_title.png">
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_error_message" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1271-1286">Source</a><h4 class="code-header">pub fn <a href="#method.set_error_message" class="fn">set_error_message</a>(
+    self,
+    text: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a>, <a class="enum" href="enum.XlsxError.html" title="enum rust_xlsxwriter::XlsxError">XlsxError</a>&gt;</h4></section></summary><div class="docblock"><p>Set the error message when there is a validation error.</p>
+<p>This option is used to set an error message when there is a validation
+error. This can we used to explain to the user what the data validation
+rules are for the cell.</p>
+<h5 id="errors-4"><a class="doc-anchor" href="#errors-4">§</a>Errors</h5>
+<ul>
+<li><a href="enum.XlsxError.html#variant.DataValidationError" title="variant rust_xlsxwriter::XlsxError::DataValidationError"><code>XlsxError::DataValidationError</code></a> - The length of the message exceeds
+Excel’s limit of 255 characters.</li>
+</ul>
+<h5 id="parameters-20"><a class="doc-anchor" href="#parameters-20">§</a>Parameters</h5>
+<ul>
+<li><code>text</code>: Message string. Must be less than or equal to the Excel limit
+of 255 characters. The string can contain newlines to split it over
+several lines.</li>
+</ul>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<p>Example of adding a data validation to a worksheet cell. This validation
+shows a custom error message.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let </span>data_validation = DataValidation::new()
+        .allow_whole_number(DataValidationRule::Between(<span class="number">1</span>, <span class="number">10</span>))
+        .set_error_title(<span class="string">"Value outside allowed range"</span>)<span class="question-mark">?
+        </span>.set_error_message(<span class="string">"The input value must be an integer in the range 1-10."</span>)<span class="question-mark">?</span>;
+
+    worksheet.add_data_validation(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="kw-2">&amp;</span>data_validation)<span class="question-mark">?</span>;</code></pre></div>
+<p>Output file:</p>
+<p><img
+src="https://rustxlsxwriter.github.io/images/data_validation_set_error_message.png"></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_error_style" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1297-1300">Source</a><h4 class="code-header">pub fn <a href="#method.set_error_style" class="fn">set_error_style</a>(
+    self,
+    error_style: <a class="enum" href="enum.DataValidationErrorStyle.html" title="enum rust_xlsxwriter::DataValidationErrorStyle">DataValidationErrorStyle</a>,
+) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set the style of the error dialog type for a data validation.</p>
+<p>Set the error dialog to be either “Stop” (the default), “Warning” or
+“Information”. This option only has an effect on Windows.</p>
+<h5 id="parameters-21"><a class="doc-anchor" href="#parameters-21">§</a>Parameters</h5>
+<ul>
+<li><code>error_style</code>: A <a href="enum.DataValidationErrorStyle.html" title="enum rust_xlsxwriter::DataValidationErrorStyle"><code>DataValidationErrorStyle</code></a> enum value.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.set_multi_range" class="method"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#1311-1314">Source</a><h4 class="code-header">pub fn <a href="#method.set_multi_range" class="fn">set_multi_range</a>(self, range: impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.89.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class="docblock"><p>Set an additional multi-cell range for the data validation.</p>
+<p>The <code>set_multi_range()</code> method is used to extend a data validation
+over non-contiguous ranges like <code>"B3 I3 B9:D12 I9:K12"</code>.</p>
+<h5 id="parameters-22"><a class="doc-anchor" href="#parameters-22">§</a>Parameters</h5>
+<ul>
+<li><code>range</code>: A string like type representing an Excel range.</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-DataValidation" class="impl"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#179">Source</a><a href="#impl-Clone-for-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../src/rust_xlsxwriter/data_validation.rs.html#179">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#213-215">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-DataValidation" class="impl"><a href="#impl-Freeze-for-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section><section id="impl-RefUnwindSafe-for-DataValidation" class="impl"><a href="#impl-RefUnwindSafe-for-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section><section id="impl-Send-for-DataValidation" class="impl"><a href="#impl-Send-for-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section><section id="impl-Sync-for-DataValidation" class="impl"><a href="#impl-Sync-for-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section><section id="impl-Unpin-for-DataValidation" class="impl"><a href="#impl-Unpin-for-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section><section id="impl-UnwindSafe-for-DataValidation" class="impl"><a href="#impl-UnwindSafe-for-DataValidation" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.DataValidation.html" title="struct rust_xlsxwriter::DataValidation">DataValidation</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.89.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.89.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#209">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#211">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#217">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.89.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/borrow.rs.html#218">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.89.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#483">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/clone.rs.html#485">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.89.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#774">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#757-759">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#767">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#82-84">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#86">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#87">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/alloc/borrow.rs.html#91">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.89.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.89.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#813-815">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#817">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#820">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#798-800">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#802">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.89.0/src/core/convert/mod.rs.html#805">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.89.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.89.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main></body></html>

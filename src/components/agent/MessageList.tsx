@@ -1,5 +1,5 @@
 ﻿import { AlertTriangle, RotateCw, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { AgentMessage } from '../../types/agent';
 import { useAgentStore } from '../../stores/agentStore';
 import { ContextPreview } from './ContextPreview';
@@ -109,40 +109,11 @@ function UserMessage({ message }: { message: AgentMessage }) {
 
 export function MessageList({ messages }: MessageListProps) {
   const { loadedContext, agentStreamingRequestId } = useAgentStore();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const userInteractingRef = useRef(false);
 
   const lastMessage = messages[messages.length - 1];
   const isWaitingForResponse = agentStreamingRequestId
     && lastMessage?.role === 'user'
     && !messages.some(m => m.requestId === agentStreamingRequestId && m.role === 'assistant');
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const handleScroll = () => {
-      const threshold = 100;
-      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-      userInteractingRef.current = !isNearBottom;
-    };
-
-    el.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      el.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || userInteractingRef.current) return;
-
-    el.scrollTo({
-      top: el.scrollHeight,
-      behavior: 'smooth',
-    });
-  }, [messages]);
 
   if (messages.length === 0) {
     return (
@@ -156,7 +127,7 @@ export function MessageList({ messages }: MessageListProps) {
   }
 
   return (
-    <div ref={containerRef} className="space-y-4 p-4" aria-live="polite">
+    <div className="space-y-4 p-4" aria-live="polite">
       {loadedContext && <ContextPreview context={loadedContext} />}
       {messages.map((message) => (
         <article key={message.id} className="group space-y-1">

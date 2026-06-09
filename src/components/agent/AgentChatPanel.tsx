@@ -1,5 +1,5 @@
-import { Bot, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { ArrowDown, Bot, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { onAgentEvent, onSidecarDead, onSidecarRestarted } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
 import { useExcelStore } from '../../stores/excelStore';
@@ -24,12 +24,48 @@ export function AgentChatPanel() {
   } = useAgentStore();
 
   const agentStreamingRequestId = useAgentStore((s) => s.agentStreamingRequestId);
-  const agentStreaming = agentStreamingRequestId !== null;
 
   const [agentInput, setAgentInput] = useState('');
   const [quickPlaceholder, setQuickPlaceholder] = useState<string | null>(null);
 
+  // Auto-scroll state
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const isNearBottomRef = useRef(true);
+
   const fetchPrompts = usePromptStore((s) => s.fetchPrompts);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const threshold = 80;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    isNearBottomRef.current = nearBottom;
+    setIsNearBottom(nearBottom);
+  }, []);
+
+  // Auto-scroll on new messages or streaming deltas
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (!isNearBottomRef.current) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isStreaming = agentStreamingRequestId !== null;
+
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: isStreaming || prefersReducedMotion ? 'instant' : 'smooth',
+    });
+  }, [messages, agentStreamingRequestId]);
+
+  // Reset scroll state when messages are cleared
+  useEffect(() => {
+    if (messages.length === 0) {
+      isNearBottomRef.current = true;
+      setIsNearBottom(true);
+    }
+  }, [messages.length]);
 
   const handleClear = useCallback(() => {
     useExcelStore.getState().clearAllContext();
@@ -97,8 +133,35 @@ export function AgentChatPanel() {
         </div>
       )}
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="relative min-h-0 flex-1 overflow-auto"
+      >
         <MessageList messages={messages} />
+        {!isNearBottom && (
+          <button
+            type="button"
+            onClick={() => {
+              const el = scrollContainerRef.current;
+              if (el) {
+                el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+                isNearBottomRef.current = true;
+                setIsNearBottom(true);
+              }
+            }}
+            className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border shadow-md transition-opacity hover:opacity-100"
+            style={{
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
+              color: 'var(--muted)',
+              opacity: 0.8,
+            }}
+            aria-label="滚动到底部"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       <QuickActionBar

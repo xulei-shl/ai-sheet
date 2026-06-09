@@ -4,6 +4,7 @@ import type { AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
 import type { ModelConfig } from '../types/config';
 import type { Prompt, PromptInput } from '../types/prompt';
 import type { FormulaCacheEntry, PinnedFormula } from '../types/formula';
+import type { SkillInfo, SkillDetail, SkillInput, FileNode } from '../types/skill';
 import type {
   ColumnInfo,
   SampleData,
@@ -196,6 +197,47 @@ export function stopAgentStream() {
 
 export function setAgentCwd(cwd: string) {
   return invoke<void>('set_agent_cwd', { cwd });
+}
+
+// Skills
+export function listSkills(projectRoot: string) {
+  return invoke<SkillInfo[]>('list_skills', { projectRoot });
+}
+
+export function readSkill(projectRoot: string, name: string) {
+  return invoke<SkillDetail>('read_skill', { projectRoot, name });
+}
+
+export function readSkillFile(projectRoot: string, name: string, filePath: string) {
+  return invoke<string>('read_skill_file', { projectRoot, name, filePath });
+}
+
+export function listSkillFiles(projectRoot: string, name: string) {
+  return invoke<FileNode[]>('list_skill_files', { projectRoot, name });
+}
+
+export function createSkill(projectRoot: string, input: SkillInput) {
+  return invoke<SkillInfo>('create_skill', { projectRoot, input });
+}
+
+export function deleteSkill(projectRoot: string, name: string) {
+  return invoke<void>('delete_skill', { projectRoot, name });
+}
+
+export function updateSkillFile(projectRoot: string, name: string, filePath: string, content: string) {
+  return invoke<void>('update_skill_file', { projectRoot, name, filePath, content });
+}
+
+export function deleteSkillFile(projectRoot: string, name: string, filePath: string) {
+  return invoke<void>('delete_skill_file', { projectRoot, name, filePath });
+}
+
+export function createSkillFile(projectRoot: string, name: string, filePath: string, content: string) {
+  return invoke<void>('create_skill_file', { projectRoot, name, filePath, content });
+}
+
+export function importSkillFromFolder(projectRoot: string, sourcePath: string, skillName?: string) {
+  return invoke<SkillInfo>('import_skill_from_folder', { projectRoot, sourcePath, skillName: skillName ?? null });
 }
 
 // Events

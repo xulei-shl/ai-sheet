@@ -4,5 +4,6 @@ pub mod formula_cache;
 pub mod llm;
 pub mod pinned_formula;
 pub mod prompt;
+pub mod skill;
 pub mod sidecar;
 pub mod system;

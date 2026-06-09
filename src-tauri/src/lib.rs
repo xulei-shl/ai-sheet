@@ -158,6 +158,16 @@ pub fn run() {
             commands::pinned_formula::get_pinned_formulas,
             commands::pinned_formula::add_pinned_formula,
             commands::pinned_formula::delete_pinned_formula,
+            commands::skill::list_skills,
+            commands::skill::read_skill,
+            commands::skill::read_skill_file,
+            commands::skill::list_skill_files,
+            commands::skill::create_skill,
+            commands::skill::delete_skill,
+            commands::skill::update_skill_file,
+            commands::skill::delete_skill_file,
+            commands::skill::create_skill_file,
+            commands::skill::import_skill_from_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

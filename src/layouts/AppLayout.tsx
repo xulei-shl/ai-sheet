@@ -8,6 +8,7 @@ import {
   PanelRightClose,
   Settings,
   Sigma,
+  Wrench,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -27,6 +28,7 @@ import { FormulaPage } from '../pages/FormulaPage';
 import { AiPage } from '../pages/AiPage';
 import { ConfigPage } from '../pages/ConfigPage';
 import { PromptsPage } from '../pages/PromptsPage';
+import { SkillsPage } from '../pages/SkillsPage';
 
 const tabs: Array<{ id: AppTab; label: string; icon: typeof FileSpreadsheet; description: string }> = [
   { id: 'data', label: '数据加载', icon: FileSpreadsheet, description: '上传 Excel 文件，预览 Sheet 和列数据' },
@@ -34,6 +36,7 @@ const tabs: Array<{ id: AppTab; label: string; icon: typeof FileSpreadsheet; des
   { id: 'ai', label: 'LLM 处理', icon: Bot, description: '提示词生成、LLM 批量处理和 Python 脚本执行' },
   { id: 'config', label: '配置管理', icon: Settings, description: '管理 LLM API 配置，支持自动降级' },
   { id: 'prompts', label: '提示词管理', icon: MessageSquare, description: '管理和复用已保存的提示词模板' },
+  { id: 'skills', label: '技能管理', icon: Wrench, description: '查看、新增和删除 AI 技能工作流' },
 ];
 
 function ResizableHandle({ onResize }: { onResize: (delta: number) => void }) {
@@ -238,6 +241,7 @@ export function AppLayout() {
           {currentTab === 'ai' && <AiPage />}
           {currentTab === 'config' && <ConfigPage />}
           {currentTab === 'prompts' && <PromptsPage />}
+          {currentTab === 'skills' && <SkillsPage />}
         </div>
       </main>
 

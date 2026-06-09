@@ -1,13 +1,11 @@
-import { createAgentSession, SessionManager, AuthStorage, ModelRegistry, SettingsManager, DefaultResourceLoader, getAgentDir, createSyntheticSourceInfo } from '@earendil-works/pi-coding-agent';
-import type { AgentSession, Skill } from '@earendil-works/pi-coding-agent';
+import { createAgentSession, SessionManager, AuthStorage, ModelRegistry, SettingsManager, DefaultResourceLoader, getAgentDir } from '@earendil-works/pi-coding-agent';
+import type { AgentSession } from '@earendil-works/pi-coding-agent';
 import type { BridgeClient } from './bridge.js';
 import { createCustomTools } from './tools/mod.js';
 import { buildSystemPrompt } from './prompts/system.js';
 import { buildModel } from './provider-map.js';
 import { setUseProxy } from './proxy-state.js';
 import type { AgentContext } from './protocol.js';
-import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
 
 export interface SheetAgentContext {
   session: AgentSession;
@@ -61,32 +59,10 @@ export async function createSheetAgent(bridge: BridgeClient, initialCwd: string)
     }
   }
 
-  // 构建 ResourceLoader，通过 skillsOverride 确保 python-processing skill 始终可用
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const projectRoot = resolve(__dirname, '..', '..');
-  const pythonSkillDir = join(projectRoot, '.pi', 'skills', 'python-processing');
-  const pythonSkill: Skill = {
-    name: 'python-processing',
-    description: 'Python 数据处理工作流。使用 pandas + openpyxl 编写并执行 Python 脚本处理 Excel 数据，自动修复错误，直到成功。当用户需要用 Python 处理 Excel 数据时使用此技能。',
-    filePath: join(pythonSkillDir, 'SKILL.md'),
-    baseDir: pythonSkillDir,
-    sourceInfo: createSyntheticSourceInfo(join(pythonSkillDir, 'SKILL.md'), {
-      source: 'custom',
-      scope: 'project',
-    }),
-    disableModelInvocation: false,
-  };
-
+  // 构建 ResourceLoader，自动发现 .pi/skills/ 下所有技能
   const loader = new DefaultResourceLoader({
     cwd: initialCwd,
     agentDir: getAgentDir(),
-    skillsOverride: (current) => {
-      const existing = current.skills.some((s) => s.name === 'python-processing');
-      return {
-        skills: existing ? current.skills : [...current.skills, pythonSkill],
-        diagnostics: current.diagnostics,
-      };
-    },
   });
   await loader.reload();
 

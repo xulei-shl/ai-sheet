@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AppTab = 'data' | 'formula' | 'ai' | 'config' | 'prompts';
+export type AppTab = 'data' | 'formula' | 'ai' | 'config' | 'prompts' | 'skills';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';

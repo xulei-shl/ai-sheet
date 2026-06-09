@@ -17,6 +17,7 @@ import { buildModel } from './provider-map.js';
 
 const args = parseArgs();
 const bridgePort = args.bridgePort;
+let currentCwd = args.dbDir;
 let bridge: BridgeClient | null = null;
 let session: AgentSession | null = null;
 let modelRegistry: ModelRegistry | null = null;
@@ -24,10 +25,12 @@ let authStorage: AuthStorage | null = null;
 let batchRunner: BatchRunner | null = null;
 const activeBatches = new Map<string, BatchRunner>();
 
-function parseArgs(): { bridgePort: number } {
+function parseArgs(): { bridgePort: number; dbDir: string } {
   const portIndex = process.argv.indexOf('--bridge-port');
   const bridgePort = portIndex !== -1 ? parseInt(process.argv[portIndex + 1], 10) : 0;
-  return { bridgePort };
+  const dbDirIndex = process.argv.indexOf('--db-dir');
+  const dbDir = dbDirIndex !== -1 ? process.argv[dbDirIndex + 1] : process.cwd();
+  return { bridgePort, dbDir };
 }
 
 const log = (msg: string) => process.stderr.write(`[sidecar] ${msg}\n`);
@@ -111,7 +114,7 @@ async function initialize() {
   try {
     const { createSheetAgent } = await import('./agent.js');
     if (bridge) {
-      const ctx = await createSheetAgent(bridge);
+      const ctx = await createSheetAgent(bridge, currentCwd);
       session = ctx.session;
       modelRegistry = ctx.modelRegistry;
       authStorage = ctx.authStorage;
@@ -241,7 +244,7 @@ async function handleSteer(command: Extract<SidecarCommand, { type: 'steer' }>) 
     if (context.sampleDataPreview) {
       sampleText = `\n样例数据:\n${context.sampleDataPreview}`;
     }
-    const contextText = `[系统上下文更新] 当前文件：${fileList}${sampleText}`;
+    const contextText = `[系统上下文更新] 当前文件：${fileList}\n当前工作目录：${currentCwd}${sampleText}`;
 
     await session.steer(contextText);
     emit({ type: 'agent_delta', id: command.id, delta: '上下文已更新。' });
@@ -368,6 +371,16 @@ async function handleReset() {
   log('conversation context reset');
 }
 
+async function handleSetCwd(command: Extract<SidecarCommand, { type: 'set_cwd' }>) {
+  currentCwd = command.cwd;
+  if (session) {
+    await session.steer(
+      `[系统通知] 工作目录已变更为: ${command.cwd}。后续使用 bash/read/write/edit 工具时，请使用此目录作为基准路径。如需执行命令，请先 cd 到该目录。`
+    );
+  }
+  emit({ type: 'cwd_changed', id: command.id, cwd: command.cwd });
+}
+
 async function handleCommand(command: SidecarCommand) {
   switch (command.type) {
     case 'ping':
@@ -381,6 +394,9 @@ async function handleCommand(command: SidecarCommand) {
       break;
     case 'set_model':
       await handleSetModel(command);
+      break;
+    case 'set_cwd':
+      await handleSetCwd(command);
       break;
     case 'batch_start':
       await handleBatchStart(command.params);

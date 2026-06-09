@@ -40,3 +40,8 @@ pub async fn clear_agent_context(state: State<'_, AppState>) -> Result<(), AppEr
 pub async fn stop_agent_stream(state: State<'_, AppState>) -> Result<(), AppError> {
     state.sidecar_manager.stop_stream().await
 }
+
+#[tauri::command]
+pub async fn set_agent_cwd(state: State<'_, AppState>, cwd: String) -> Result<(), AppError> {
+    state.sidecar_manager.send_set_cwd(cwd).await
+}

@@ -37,9 +37,10 @@ pub fn run() {
             let app_handle = app.handle().clone();
 
             // Initialize database
-            match app.path().app_data_dir() {
+            let db_dir_str: Option<String> = match app.path().app_data_dir() {
                 Ok(data_dir) => {
                     let db_path = data_dir.join("ai-sheet.db");
+                    let db_dir_str = data_dir.to_string_lossy().to_string();
                     match Database::open(&db_path) {
                         Ok(database) => {
                             let db = Arc::new(database);
@@ -55,11 +56,13 @@ pub fn run() {
                             eprintln!("Failed to open database: {}", e);
                         }
                     }
+                    Some(db_dir_str)
                 }
                 Err(e) => {
                     eprintln!("Failed to resolve app data dir: {}", e);
+                    None
                 }
-            }
+            };
 
             // 从 settings 表恢复 active_model 到内存
             let state = app.state::<AppState>();
@@ -84,6 +87,11 @@ pub fn run() {
 
             let state = app.state::<AppState>();
             let bridge_server = state.bridge_server.clone();
+
+            // 设置 sidecar 的默认工作目录为 DB 数据目录
+            if let Some(dir) = db_dir_str {
+                state.sidecar_manager.set_db_dir(dir);
+            }
 
             let bridge_app_handle = app_handle.clone();
             let sidecar = state.sidecar_manager.clone();
@@ -132,6 +140,7 @@ pub fn run() {
             commands::sidecar::steer_agent,
             commands::sidecar::clear_agent_context,
             commands::sidecar::stop_agent_stream,
+            commands::sidecar::set_agent_cwd,
             commands::system::get_app_status,
             commands::config::get_user_models,
             commands::config::add_user_model,

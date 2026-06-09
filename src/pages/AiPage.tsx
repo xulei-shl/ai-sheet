@@ -91,6 +91,9 @@ export function AiPage() {
                 <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
                   在右侧 AI 面板中对话，让 AI 为你编写并执行 Python 数据处理脚本，自动修复错误，支持 pandas 和 openpyxl。
                 </p>
+                <p className="mt-1 text-[10px] opacity-70" style={{ color: 'var(--muted)' }}>
+                  提示：可在对话中使用 <code className="px-1 py-0.5 rounded" style={{ background: 'var(--bg)', fontFamily: 'monospace' }}>/skill:python-processing</code> 显式激活工作流
+                </p>
                 <button
                   onClick={() => {
                     useAgentStore.getState().sendMessage(
@@ -107,11 +110,8 @@ export function AiPage() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-lg p-4 text-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
-            <p className="mb-2">请先在左侧"数据"页面上传 Excel 文件，然后在右栏通过 AI 对话开始处理。</p>
-            <p className="text-xs opacity-80">
-              <strong>提示：</strong>你可以直接在对话中使用 <code className="px-1 py-0.5 rounded" style={{ background: 'var(--bg)', fontFamily: 'monospace' }}>/skill:python-processing</code> 显式激活 Python 处理工作流。
-            </p>
+          <div className="mt-6 rounded-lg p-4 text-center text-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
+            请先在左侧"数据"页面上传 Excel 文件，然后在右栏通过 AI 对话开始处理
           </div>
         </div>
       </div>

@@ -54,6 +54,7 @@ export interface LoadedFile {
 export interface AgentContext {
   loadedFiles?: LoadedFile[];
   sampleDataPreview?: string;
+  cwd?: string;
 }
 
 export type SidecarEvent =

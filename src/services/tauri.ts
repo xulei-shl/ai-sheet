@@ -194,6 +194,10 @@ export function stopAgentStream() {
   return invoke<void>('stop_agent_stream');
 }
 
+export function setAgentCwd(cwd: string) {
+  return invoke<void>('set_agent_cwd', { cwd });
+}
+
 // Events
 export function onAgentEvent(handler: (event: SidecarEvent) => void) {
   return listen<SidecarEvent>('agent-event', (event) => handler(event.payload));

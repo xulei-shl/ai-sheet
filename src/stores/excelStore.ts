@@ -9,6 +9,7 @@ import {
   applyExcelFormula,
   getExcelProcessingStatus,
   steerAgent,
+  setAgentCwd,
 } from '../services/tauri';
 import type {
   ExcelFileInfo,
@@ -28,6 +29,7 @@ interface ExcelStore {
   loading: boolean;
   error: string | null;
   includeSampleData: boolean;
+  currentCwd: string | null;
 
   addFile: (path: string) => Promise<void>;
   removeFile: (index: number) => void;
@@ -59,6 +61,7 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   loading: false,
   error: null,
   includeSampleData: false,
+  currentCwd: null,
 
   addFile: async (path: string) => {
     set({ loading: true, error: null });
@@ -83,11 +86,24 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
         selectedColumns: {},
         previewData: {},
       };
+
+      // 首次加载 Excel 时，设置 agent 工作目录为文件所在目录
+      const isFirstFile = get().files.length === 0;
+      const parentDir = path.replace(/[/\\][^/\\]+$/, '');
+      const cwdUpdate = isFirstFile && get().currentCwd === null
+        ? { currentCwd: parentDir }
+        : {};
+
       set((state) => ({
         files: [...state.files, fileInfo],
         selections: [...state.selections, selection],
         loading: false,
+        ...cwdUpdate,
       }));
+
+      if (cwdUpdate.currentCwd) {
+        setAgentCwd(parentDir).catch(() => {});
+      }
     } catch (e) {
       set({ loading: false, error: e instanceof Error ? e.message : String(e) });
     }
@@ -225,7 +241,7 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
       return;
     }
 
-    const context: AgentContext = { loadedFiles };
+    const context: AgentContext = { loadedFiles, cwd: get().currentCwd ?? undefined };
 
     // Build optional sample data preview (first 3 rows)
     if (includeSampleData) {

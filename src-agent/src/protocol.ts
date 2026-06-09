@@ -12,6 +12,7 @@ export type SidecarCommand =
   | { id: string; type: 'user_message'; content: string }
   | { id: string; type: 'steer'; context: AgentContext }
   | { id: string; type: 'set_model'; model: SetModelInfo }
+  | { id: string; type: 'set_cwd'; cwd: string }
   | { id: string; type: 'batch_start'; params: BatchParams }
   | { id: string; type: 'batch_pause'; batchId: string }
   | { id: string; type: 'batch_resume'; batchId: string }
@@ -33,6 +34,7 @@ export type SidecarEvent =
   | { type: 'batch_error'; batchId: string; message: string }
   | { type: 'batch_paused'; batchId: string }
   | { type: 'sidecar_ready' }
+  | { type: 'cwd_changed'; id: string; cwd: string }
   | { type: 'model_switch_result'; id: string; success: boolean; error?: string; modelName?: string };
 
 export interface LoadedColumn {
@@ -56,6 +58,7 @@ export interface AgentContext {
   loadedFiles?: LoadedFile[];
   selectedColumns?: string[];
   sampleDataPreview?: string;
+  cwd?: string;
 }
 
 export interface BatchParams {

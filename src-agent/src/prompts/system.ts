@@ -42,6 +42,8 @@ export function buildSystemPrompt(context?: AgentContext): string {
 ${filesBlock || '（未加载数据上下文）'}
 ${sampleBlock}
 ## 注意事项
+- 当前工作目录（cwd）为用户 Excel 文件所在目录，使用 bash/read/write/edit 时以此为路径基准
+- 如需操作项目自身文件，请使用绝对路径
 - 生成公式前先确认数据列和 Sheet 名称
 - 执行 Python 代码前检查依赖是否已安装
 - 写入 Excel 前确认用户意图

@@ -27,12 +27,19 @@ pub struct SidecarManager {
     last_heartbeat: RwLock<Option<Instant>>,
     is_streaming: RwLock<bool>,
     bridge_port: std::sync::RwLock<Option<u16>>,
+    db_dir: std::sync::RwLock<Option<String>>,
 }
 
 impl SidecarManager {
     pub fn set_bridge_port(&self, port: u16) {
         if let Ok(mut guard) = self.bridge_port.write() {
             *guard = Some(port);
+        }
+    }
+
+    pub fn set_db_dir(&self, dir: String) {
+        if let Ok(mut guard) = self.db_dir.write() {
+            *guard = Some(dir);
         }
     }
 
@@ -46,6 +53,11 @@ impl SidecarManager {
         let bridge_port = self.bridge_port.read().ok().and_then(|guard| *guard);
         if let Some(port) = bridge_port {
             cmd.arg("--bridge-port").arg(port.to_string());
+        }
+
+        let db_dir = self.db_dir.read().ok().and_then(|guard| guard.clone());
+        if let Some(dir) = db_dir {
+            cmd.arg("--db-dir").arg(&dir);
         }
 
         let mut child = cmd
@@ -122,6 +134,16 @@ impl SidecarManager {
         let payload = json!({
             "id": id,
             "type": "reset",
+        });
+        self.write_json_line(payload).await
+    }
+
+    pub async fn send_set_cwd(&self, cwd: String) -> AppResult<()> {
+        let id = format!("cwd-{}", current_millis());
+        let payload = json!({
+            "id": id,
+            "type": "set_cwd",
+            "cwd": cwd,
         });
         self.write_json_line(payload).await
     }

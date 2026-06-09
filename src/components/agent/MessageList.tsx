@@ -1,4 +1,4 @@
-import { AlertTriangle, RotateCw, Trash2 } from 'lucide-react';
+﻿import { AlertTriangle, RotateCw, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { AgentMessage } from '../../types/agent';
 import { useAgentStore } from '../../stores/agentStore';
@@ -108,16 +108,14 @@ function UserMessage({ message }: { message: AgentMessage }) {
 }
 
 export function MessageList({ messages }: MessageListProps) {
-  const { loadedContext, agentStreamingRequestId, directStreamingRequestId } = useAgentStore();
+  const { loadedContext, agentStreamingRequestId } = useAgentStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const userInteractingRef = useRef(false);
 
-  // 判断是否需要显示等待动效：
-  // 最后一条消息是用户消息，且正在等待响应（有 streamingRequestId 但还没有对应的 assistant 消息）
   const lastMessage = messages[messages.length - 1];
-  const isWaitingForResponse = (agentStreamingRequestId || directStreamingRequestId)
+  const isWaitingForResponse = agentStreamingRequestId
     && lastMessage?.role === 'user'
-    && !messages.some(m => m.requestId === (agentStreamingRequestId || directStreamingRequestId) && m.role === 'assistant');
+    && !messages.some(m => m.requestId === agentStreamingRequestId && m.role === 'assistant');
 
   useEffect(() => {
     const el = containerRef.current;
@@ -181,12 +179,10 @@ export function MessageList({ messages }: MessageListProps) {
               <UserMessage message={message} />
             ) : (
               <>
-                {/* 工具调用展示 */}
                 {message.toolCalls && message.toolCalls.length > 0 && (
                   <ToolCallsBlock toolCalls={message.toolCalls} />
                 )}
 
-                {/* 主内容 */}
                 {message.isError ? (
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
@@ -214,7 +210,6 @@ export function MessageList({ messages }: MessageListProps) {
           )}
         </article>
       ))}
-      {/* 等待动效：在用户发送消息后、收到首个响应前显示 */}
       {isWaitingForResponse && (
         <article className="group space-y-1">
           <div className="text-xs uppercase tracking-wide" style={{ color: 'var(--muted)' }}>

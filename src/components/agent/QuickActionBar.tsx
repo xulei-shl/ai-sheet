@@ -1,4 +1,4 @@
-import { Sigma, Sparkles, AlertCircle } from 'lucide-react';
+﻿import { Sigma, Sparkles, AlertCircle } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useAgentStore } from '../../stores/agentStore';
 import { useExcelStore } from '../../stores/excelStore';
@@ -32,9 +32,8 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
     return () => clearTimeout(t);
   }, [feedback]);
   const status = useAgentStore((s) => s.status);
-  const directStreamingRequestId = useAgentStore((s) => s.directStreamingRequestId);
-  const appliedModelName = useAgentStore((s) => s.appliedModelName);
-  const sendDirectLlmMessage = useAgentStore((s) => s.sendDirectLlmMessage);
+  const agentStreamingRequestId = useAgentStore((s) => s.agentStreamingRequestId);
+  const sendMessage = useAgentStore((s) => s.sendMessage);
   const loadedContext = useAgentStore((s) => s.loadedContext);
 
   const selections = useExcelStore((s) => s.selections);
@@ -44,9 +43,9 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
   const prompts = usePromptStore((s) => s.prompts);
 
   const hasExcel = (loadedContext?.loadedFiles?.length ?? 0) > 0;
-  const isDirectStreaming = directStreamingRequestId !== null;
+  const isStreaming = agentStreamingRequestId !== null;
   const isReady = status?.ready ?? false;
-  const canClick = hasExcel && !!appliedModelName && !isDirectStreaming && isReady;
+  const canClick = hasExcel && !isStreaming && isReady;
 
   const handleQuickAction = useCallback(
     (promptName: string) => {
@@ -105,11 +104,11 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
       const displaySummary = buildDisplaySummary(prompt.name, ctx, false, sampleMissing, input);
       const fullPrompt = buildDirectPrompt(prompt.content, ctx, input);
 
-      // 清空输入后再发送
+      // 清空输入后通过 agent 消息发送
       onAgentInputChange('');
       onSetQuickPlaceholder(null);
 
-      sendDirectLlmMessage(prompt.id, displaySummary, fullPrompt).catch(() => {});
+      sendMessage(input, displaySummary, fullPrompt).catch(() => {});
     },
     [
       canClick,
@@ -121,7 +120,7 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
       prompts,
       onAgentInputChange,
       onSetQuickPlaceholder,
-      sendDirectLlmMessage,
+      sendMessage,
     ],
   );
 
@@ -144,15 +143,13 @@ export function QuickActionBar({ agentInput, onAgentInputChange, onSetQuickPlace
           title={
             !hasExcel
               ? '请先在左侧加载 Excel 文件'
-              : !appliedModelName
-                ? '请先在 Agent 输入框选择模型'
-                : !isReady
-                  ? 'Sidecar 未就绪'
-                  : isDirectStreaming
-                    ? '正在生成中...'
-                    : agentInput.trim()
-                      ? `结合输入需求 + Excel 上下文 · ${label}`
-                      : `请先在输入框输入具体需求 · ${label}`
+              : !isReady
+                ? 'Sidecar 未就绪'
+                : isStreaming
+                  ? '正在生成中...'
+                  : agentInput.trim()
+                    ? `结合输入需求 + Excel 上下文 · ${label}`
+                    : `请先在输入框输入具体需求 · ${label}`
           }
           onClick={() => handleQuickAction(name)}
           className="inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs transition-colors hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"

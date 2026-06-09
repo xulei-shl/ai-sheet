@@ -1,4 +1,4 @@
-use std::sync::Arc;
+﻿use std::sync::Arc;
 
 use tauri::{Emitter, Manager};
 use tokio::sync::RwLock;
@@ -132,7 +132,6 @@ pub fn run() {
             commands::sidecar::steer_agent,
             commands::sidecar::clear_agent_context,
             commands::sidecar::stop_agent_stream,
-            commands::sidecar::send_direct_llm_message,
             commands::system::get_app_status,
             commands::config::get_user_models,
             commands::config::add_user_model,

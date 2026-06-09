@@ -1,5 +1,4 @@
-import type { Prompt } from '../../types/prompt';
-import type { DirectLlmContext } from '../../services/tauri';
+﻿import type { Prompt } from '../../types/prompt';
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -44,11 +43,19 @@ export function findPromptByName(prompts: Prompt[], name: string): Prompt | unde
   return prompts.find((p) => p.name === name);
 }
 
+// ── Local types ─────────────────────────────────────────────
+
+interface QuickActionContext {
+  fileName: string;
+  sheets: Array<{ sheet: string; columns: string[] }>;
+  samplePreview?: string;
+}
+
 // ── Prompt construction ────────────────────────────────────
 
 export function buildDirectPrompt(
   template: string,
-  ctx: DirectLlmContext,
+  ctx: QuickActionContext,
   userInput: string,
 ): string {
   const contextBlock = formatContext(ctx);
@@ -66,7 +73,7 @@ ${template}`;
 
 export function buildDisplaySummary(
   actionName: string,
-  ctx: DirectLlmContext,
+  ctx: QuickActionContext,
   usedFallback: boolean,
   sampleMissing: boolean,
   userInput: string,
@@ -80,7 +87,7 @@ export function buildDisplaySummary(
   return `${prefix}${actionName} · 「${truncated}」 · ${fileNameShort} · Sheet: ${sheets} · 列: ${allCols}${suffix}`;
 }
 
-function formatContext(ctx: DirectLlmContext): string {
+function formatContext(ctx: QuickActionContext): string {
   const lines: string[] = [];
   lines.push(`文件: ${ctx.fileName}`);
   if (ctx.sheets.length > 0) {

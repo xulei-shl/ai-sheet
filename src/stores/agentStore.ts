@@ -1,35 +1,28 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import {
   clearActiveAgentModel,
   clearAgentContext,
   getAgentStatus,
   restartSidecar,
   sendAgentMessage,
-  sendDirectLlmMessage as sendDirectLlmMessageRust,
   setActiveAgentModel,
   type ActiveAgentModel,
-  type DirectLlmRequest,
 } from '../services/tauri';
 import type { AgentMessage, AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
 import { useConfigStore } from './configStore';
 import { useUiStore } from './uiStore';
-
-function resolveRequestKind(id: string): 'agent' | 'direct' {
-  return id.startsWith('direct-') ? 'direct' : 'agent';
-}
 
 interface AgentStore {
   messages: AgentMessage[];
   status: AgentStatus | null;
   error: string | null;
   agentStreamingRequestId: string | null;
-  directStreamingRequestId: string | null;
   isApplyingModel: boolean;
   appliedModelName: string | null;
   loadedContext: AgentContext | null;
 
   refreshStatus: () => Promise<void>;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, displayContent?: string, fullContent?: string) => Promise<void>;
   restart: () => Promise<void>;
   applyModel: (name: string | null) => Promise<void>;
   handleEvent: (event: SidecarEvent) => void;
@@ -38,7 +31,6 @@ interface AgentStore {
   clearMessages: () => void;
   deleteMessage: (id: string) => void;
   retryMessage: (id: string) => Promise<void>;
-  sendDirectLlmMessage: (action: string, userDisplay: string, fullPrompt: string) => Promise<void>;
 }
 
 export const useAgentStore = create<AgentStore>((set, get) => ({
@@ -46,7 +38,6 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   status: null,
   error: null,
   agentStreamingRequestId: null,
-  directStreamingRequestId: null,
   isApplyingModel: false,
   appliedModelName: null,
   loadedContext: null,
@@ -57,7 +48,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     set({ status, error: isApplyingModel ? null : (status.ready ? null : status.message) });
   },
 
-  sendMessage: async (content) => {
+  sendMessage: async (content, displayContent, fullContent) => {
     const trimmed = content.trim();
     if (!trimmed) return;
 
@@ -67,6 +58,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       id: `user-${Date.now()}`,
       role: 'user',
       content: trimmed,
+      displayContent,
+      fullContent,
     };
 
     set((state) => ({
@@ -76,7 +69,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     }));
 
     try {
-      await sendAgentMessage(trimmed);
+      await sendAgentMessage(fullContent ?? trimmed);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       set((s) => ({
@@ -123,7 +116,6 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
           useProxy: target.useProxy,
         };
         await setActiveAgentModel(payload);
-        // isApplyingModel 保持 true，等 model_switch_result 事件回来后再清除
       }
     } catch (error) {
       set({
@@ -136,25 +128,16 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   handleEvent: (event) => {
     if (event.type === 'agent_error') {
       if (event.id) {
-        const kind = resolveRequestKind(event.id);
         set((s) => {
           const existing = s.messages.find((m) => m.requestId === event.id && m.role === 'assistant');
           if (existing) {
-            // 找到对应的 assistant 消息，将其内容替换为错误信息
             const messages = s.messages.map((m) =>
               m.requestId === event.id && m.role === 'assistant'
                 ? { ...m, content: event.message, isStreaming: false, isError: true }
                 : m,
             );
-            return {
-              messages,
-              [kind === 'agent'
-                ? 'agentStreamingRequestId'
-                : 'directStreamingRequestId']: null,
-            };
+            return { messages, agentStreamingRequestId: null };
           }
-          // 没有找到匹配的 assistant 消息（如 LLM 超时，从未收到 agent_delta），
-          // 需要新建一条错误消息
           return {
             messages: [
               ...s.messages,
@@ -166,13 +149,10 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
                 isError: true,
               },
             ],
-            [kind === 'agent'
-              ? 'agentStreamingRequestId'
-              : 'directStreamingRequestId']: null,
+            agentStreamingRequestId: null,
           };
         });
       } else {
-        // 没有 id 的错误（如初始化错误）也显示在消息列表中
         set((s) => ({
           messages: [
             ...s.messages,
@@ -244,7 +224,12 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         const messages = [...s.messages];
         const msg = messages[idx];
         const toolCalls = msg.toolCalls || [];
-        const toolCallIdx = toolCalls.findLastIndex((tc) => tc.tool === event.tool && tc.status === 'running');
+        const toolCallIdx = (() => {
+  for (let i = toolCalls.length - 1; i >= 0; i--) {
+    if (toolCalls[i].tool === event.tool && toolCalls[i].status === 'running') return i;
+  }
+  return -1;
+})();
         if (toolCallIdx !== -1) {
           const updated = [...toolCalls];
           updated[toolCallIdx] = {
@@ -265,9 +250,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         messages: s.messages.map((m) =>
           m.requestId === event.id ? { ...m, isStreaming: false } : m,
         ),
-        [resolveRequestKind(event.id) === 'agent'
-          ? 'agentStreamingRequestId'
-          : 'directStreamingRequestId']: null,
+        agentStreamingRequestId: null,
       }));
       return;
     }
@@ -288,7 +271,6 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     set((state) => ({
       error: isApplyingModel ? state.error : message,
       agentStreamingRequestId: null,
-      directStreamingRequestId: null,
       status: state.status ? { ...state.status, ready: false, message } : null,
     }));
   },
@@ -303,16 +285,13 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   },
 
   deleteMessage: (id) => {
-    const { messages, agentStreamingRequestId, directStreamingRequestId } = get();
+    const { messages, agentStreamingRequestId } = get();
     const idx = messages.findIndex((m) => m.id === id);
     if (idx === -1) return;
     const removed = messages.slice(idx);
     const clears: Record<string, null> = {};
     if (removed.some((m) => m.requestId === agentStreamingRequestId)) {
       clears.agentStreamingRequestId = null;
-    }
-    if (removed.some((m) => m.requestId === directStreamingRequestId)) {
-      clears.directStreamingRequestId = null;
     }
     set({ messages: messages.slice(0, idx), ...clears });
   },
@@ -333,7 +312,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     set({ agentStreamingRequestId: pendingId });
 
     try {
-      await sendAgentMessage(userMsg.content);
+      await sendAgentMessage(userMsg.fullContent ?? userMsg.content);
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : String(error),
@@ -341,61 +320,5 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       });
     }
   },
-
-  sendDirectLlmMessage: async (action, userDisplay, fullPrompt) => {
-    const { status, directStreamingRequestId } = get();
-    if (directStreamingRequestId) throw new Error('direct LLM 正在生成中');
-    if (!status?.ready) throw new Error('Sidecar 未就绪');
-
-    const { loadedContext } = get();
-    if (!loadedContext?.loadedFiles?.length) throw new Error('未加载 Excel 上下文');
-
-    const first = loadedContext.loadedFiles[0];
-    const context: DirectLlmRequest['context'] = {
-      fileName: first.path,
-      sheets: first.sheets.map((s) => ({ sheet: s.sheetName, columns: s.columns.map((c) => `${c.letter}(${c.name})`) })),
-    };
-
-    const requestId = `direct-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-
-    const userMsg: AgentMessage = {
-      id: `user-${requestId}`,
-      requestId,
-      role: 'user',
-      content: userDisplay,
-      displayContent: userDisplay,
-      fullContent: fullPrompt,
-    };
-    const assistantMsg: AgentMessage = {
-      id: `assistant-${requestId}`,
-      requestId,
-      role: 'assistant',
-      content: '',
-      isStreaming: true,
-    };
-
-    set((s) => ({
-      messages: [...s.messages, userMsg, assistantMsg],
-      directStreamingRequestId: requestId,
-      error: null,
-    }));
-
-    try {
-      await sendDirectLlmMessageRust({
-        requestId,
-        action,
-        content: fullPrompt,
-        context,
-      });
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      set((s) => ({
-        error: errorMsg,
-        messages: s.messages.map((m) =>
-          m.requestId === requestId ? { ...m, content: m.content || errorMsg, isStreaming: false, isError: true } : m,
-        ),
-        directStreamingRequestId: null,
-      }));
-    }
-  },
 }));
+

@@ -1,4 +1,4 @@
-// 在所有其他模块之前加载 .env，使 HTTP_PROXY/HTTPS_PROXY 环境变量可用
+﻿// 在所有其他模块之前加载 .env，使 HTTP_PROXY/HTTPS_PROXY 环境变量可用
 // dist/main.js 向上两级到达项目根目录
 import { config as loadDotenv } from 'dotenv';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,6 @@ import type { BridgeClient } from './bridge.js';
 import type { AgentSession, ModelRegistry, AuthStorage } from '@earendil-works/pi-coding-agent';
 import { BatchRunner } from './batch/runner.js';
 import type { RowCompleteUpdate } from './batch/progress.js';
-import { runDirectLlmStream, abortDirectLlm } from './direct-llm.js';
 import { getUseProxy, setUseProxy } from './proxy-state.js';
 import { buildModel } from './provider-map.js';
 
@@ -359,14 +358,6 @@ async function handleBatchStart(params: Extract<SidecarCommand, { type: 'batch_s
   });
 }
 
-async function handleDirectLlmMessage(command: Extract<SidecarCommand, { type: 'direct_llm_message' }>) {
-  if (!bridge) {
-    emit({ type: 'agent_error', id: command.id, message: 'Bridge 未初始化' });
-    return;
-  }
-  await runDirectLlmStream(bridge, command, emit);
-}
-
 async function handleReset() {
   if (!session) {
     emit({ type: 'agent_error', message: 'Agent 未初始化' });
@@ -384,9 +375,6 @@ async function handleCommand(command: SidecarCommand) {
       break;
     case 'user_message':
       await handleUserMessage(command);
-      break;
-    case 'direct_llm_message':
-      await handleDirectLlmMessage(command);
       break;
     case 'steer':
       await handleSteer(command);
@@ -422,7 +410,7 @@ async function handleCommand(command: SidecarCommand) {
       await handleReset();
       break;
     case 'stop':
-      abortDirectLlm();
+      // 目前 AgentSession 不支持从外部中断，此处为空操作
       break;
   }
 }
@@ -441,7 +429,7 @@ process.on('unhandledRejection', (reason) => {
 const reader = createInterface({ input: process.stdin });
 
 reader.on('line', (line) => {
-  if (!line.trim()) return; // 跳过管道关闭时的空行
+  if (!line.trim()) return;
   void (async () => {
     try {
       const command = JSON.parse(line) as SidecarCommand;

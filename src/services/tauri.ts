@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+﻿import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import type { AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
 import type { ModelConfig } from '../types/config';
@@ -192,25 +192,6 @@ export function clearAgentContext() {
 
 export function stopAgentStream() {
   return invoke<void>('stop_agent_stream');
-}
-
-// Direct LLM
-export interface DirectLlmContext {
-  fileName: string;
-  sheets: Array<{ sheet: string; columns: string[] }>;
-  samplePreview?: string;
-  includeSampleData?: boolean;
-}
-
-export interface DirectLlmRequest {
-  requestId: string;
-  action: string;
-  content: string;
-  context: DirectLlmContext;
-}
-
-export function sendDirectLlmMessage(req: DirectLlmRequest) {
-  return invoke<void>('send_direct_llm_message', { req });
 }
 
 // Events

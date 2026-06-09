@@ -1,4 +1,4 @@
-use std::{
+﻿use std::{
     path::PathBuf,
     sync::Arc,
     time::{Duration, Instant},
@@ -14,7 +14,7 @@ use tokio::{
 
 use crate::{
     error::{AppError, AppResult},
-    models::{agent::{AgentStatus, DirectLlmRequest}, config::ActiveModel},
+    models::agent::AgentStatus,
 };
 
 const HEARTBEAT_TIMEOUT: Duration = Duration::from_secs(15);
@@ -138,23 +138,7 @@ impl SidecarManager {
         Ok(())
     }
 
-    pub async fn send_direct_llm_message(&self, req: DirectLlmRequest) -> AppResult<()> {
-        let payload = json!({
-            "id": req.request_id,
-            "type": "direct_llm_message",
-            "action": req.action,
-            "content": req.content,
-            "context": {
-                "fileName": req.context.file_name,
-                "sheets": req.context.sheets,
-                "samplePreview": req.context.sample_preview,
-            },
-        });
-        *self.is_streaming.write().await = true;
-        self.write_json_line(payload).await
-    }
-
-    pub async fn send_set_model(&self, model: ActiveModel) -> AppResult<()> {
+    pub async fn send_set_model(&self, model: crate::models::config::ActiveModel) -> AppResult<()> {
         let id = format!("set-model-{}", current_millis());
         let payload = json!({
             "id": id,
@@ -236,12 +220,11 @@ impl SidecarManager {
 
             while let Ok(Some(line)) = lines.next_line().await {
                 if line.trim().is_empty() {
-                    continue; // 跳过管道关闭时的空行
+                    continue;
                 }
                 match serde_json::from_str::<Value>(&line) {
                     Ok(value) => manager.handle_sidecar_event(&app, value).await,
                     Err(_) => {
-                        // 非 JSON 行（如 dotenv 日志）静默跳过，避免干扰前端
                         eprintln!("[sidecar] ignoring non-JSON stdout line: {line}");
                     }
                 }

@@ -141,6 +141,8 @@ pub fn run() {
             commands::prompt::save_prompt,
             commands::prompt::update_prompt,
             commands::prompt::delete_prompt,
+            commands::llm::llm_chat_completions,
+            commands::llm::llm_test_connection,
             commands::formula_cache::get_formula_history,
             commands::formula_cache::save_formula_cache,
             commands::formula_cache::touch_formula_cache,

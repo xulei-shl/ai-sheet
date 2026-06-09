@@ -7,6 +7,7 @@ import {
   updateUserModel as apiUpdateUserModel,
   deleteUserModel as apiDeleteUserModel,
 } from '../services/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { getApiKey, setApiKey, deleteApiKey } from '../services/secureStore';
 
 function secureKeyFor(name: string): string {
@@ -113,12 +114,16 @@ export const useConfigStore = create<ConfigStore>((set, get) => ({
 
   testConnection: async (model) => {
     try {
-      const response = await fetch(`${model.baseUrl}/models`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${model.apiKey}` },
-        signal: AbortSignal.timeout(10000),
+      const result = await invoke<{
+        success: boolean;
+        error?: string;
+      }>('llm_test_connection', {
+        req: {
+          baseUrl: model.baseUrl,
+          apiKey: model.apiKey,
+        },
       });
-      return response.ok ? null : `HTTP ${response.status}: ${response.statusText}`;
+      return result.success ? null : (result.error ?? '连接失败');
     } catch (e) {
       return e instanceof Error ? e.message : String(e);
     }

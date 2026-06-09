@@ -1,6 +1,7 @@
 pub mod config;
 pub mod excel;
 pub mod formula_cache;
+pub mod llm;
 pub mod pinned_formula;
 pub mod prompt;
 pub mod sidecar;

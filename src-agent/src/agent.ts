@@ -1,11 +1,12 @@
 import { createAgentSession, SessionManager, AuthStorage, ModelRegistry, SettingsManager, DefaultResourceLoader, getAgentDir } from '@earendil-works/pi-coding-agent';
 import type { AgentSession } from '@earendil-works/pi-coding-agent';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import type { BridgeClient } from './bridge.js';
 import { createCustomTools } from './tools/mod.js';
-import { buildSystemPrompt } from './prompts/system.js';
 import { buildModel } from './provider-map.js';
 import { setUseProxy } from './proxy-state.js';
-import type { AgentContext } from './protocol.js';
 
 export interface SheetAgentContext {
   session: AgentSession;
@@ -59,10 +60,24 @@ export async function createSheetAgent(bridge: BridgeClient, initialCwd: string)
     }
   }
 
-  // 构建 ResourceLoader，自动发现 .pi/skills/ 下所有技能
+  // 构建 ResourceLoader，注入 AGENTS.md 元规则
+  // dist/agent.js → ../../ → 项目根目录/.pi/AGENTS.md
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const agentsMdPath = join(__dirname, '..', '..', '.pi', 'AGENTS.md');
+
   const loader = new DefaultResourceLoader({
     cwd: initialCwd,
     agentDir: getAgentDir(),
+    agentsFilesOverride: (current) => {
+      try {
+        const content = readFileSync(agentsMdPath, 'utf-8');
+        return {
+          agentsFiles: [...current.agentsFiles, { path: agentsMdPath, content }],
+        };
+      } catch {
+        return current;
+      }
+    },
   });
   await loader.reload();
 

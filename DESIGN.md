@@ -1,6 +1,13 @@
 # Design
 
-> AI-Sheet 综合设计与架构文档（v7，2026-06-09）
+> AI-Sheet 综合设计与架构文档（v8，2026-06-09）
+>
+> v8 变更：新增 AGENTS.md 元规则机制——`.pi/AGENTS.md` 定义 agent 身份、
+> 交互规则、Excel 专业规则、Python 执行规则、回答风格等元规则；
+> 通过 `DefaultResourceLoader.agentsFilesOverride` 注入系统提示词，
+> 与动态 cwd 解耦，确保任意工作目录下均可加载；
+> 原 `system.ts` 中硬编码的静态角色与规则迁移至 AGENTS.md，
+> 动态上下文（文件信息、样例数据）仍由 `session.steer()` 注入。
 >
 > v7 变更：新增技能管理模块——Rust 后端 Skill 命令（文件系统 CRUD）、
 > 前端 SkillsPage（三栏布局：技能列表+文件树+内容预览）、
@@ -474,12 +481,12 @@ ai-sheet/
 │   ├── tsconfig.json
 │   └── src/
 │       ├── main.ts                （stdin JSONL 路由 + 启动 AgentSession + 双 Dispatcher + .env 加载 + --db-dir 解析 + set_cwd 处理）
-│       ├── agent.ts               （createSheetAgent：注册自定义工具 + 系统提示词 + provider-map 拆分 + ResourceLoader 自动发现技能）
+│       ├── agent.ts               （createSheetAgent：注册自定义工具 + provider-map 拆分 + ResourceLoader 自动发现技能 + agentsFilesOverride 注入 AGENTS.md）
 │       ├── bridge.ts              （HTTP BridgeClient，30s AbortSignal 超时）
 │       ├── protocol.ts            （SidecarCommand / SidecarEvent 类型）
 │       ├── proxy-state.ts         （每模型代理开关运行时状态：getUseProxy / setUseProxy）
 │       ├── provider-map.ts        （providerType → { provider, api } 映射，运行时正确拆分）
-│       ├── prompts/system.ts      （系统提示词模板，动态注入上下文）
+│       ├── prompts/system.ts      （占位模块，静态规则已迁移至 .pi/AGENTS.md，动态上下文由 steer() 注入）
 │       ├── tools/
 │       │   ├── mod.ts             （createCustomTools 聚合）
 │       │   ├── excel-tools.ts     （read_excel / write_excel / apply_formula）
@@ -494,6 +501,9 @@ ai-sheet/
 
 ├── .env                           ← 代理配置（HTTP_PROXY/HTTPS_PROXY，不入库）
 ├── .env.example                   ← 代理配置模板（入库）
+├── .pi/
+│   ├── AGENTS.md                  ← Agent 元规则（身份、交互规则、专业规则、风格），通过 agentsFilesOverride 注入
+│   └── skills/                    ← 技能目录（SKILL.md 自动发现）
     ├── main.tsx                   （挂载 + ErrorBoundary 包裹）
     ├── App.tsx                    （Provider + AppLayout）
     ├── layouts/
@@ -729,15 +739,38 @@ emit('cwd_changed')
 运行时行为一致：启动时仅注入 name + description 元数据到系统提示词，
 agent 自主判断是否需要 read 加载完整 SKILL.md 内容后执行。
 
+**AGENTS.md 元规则注入**：`.pi/AGENTS.md` 定义 agent 的身份、交互规则（追问与确认）、
+Excel 专业规则、Python 执行规则、回答风格等元规则。由于 `DefaultResourceLoader`
+从 cwd 向上遍历发现 `AGENTS.md`，而 cwd 随用户加载的 Excel 文件动态变化，
+因此通过 `agentsFilesOverride` 回调显式注入，确保任意工作目录下均可加载：
+
 ```ts
-// src-agent/src/agent.ts（v7 简化）
+// src-agent/src/agent.ts（v8）
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const agentsMdPath = join(__dirname, '..', '..', '.pi', 'AGENTS.md');
+
 const loader = new DefaultResourceLoader({
   cwd: initialCwd,
   agentDir: getAgentDir(),
+  agentsFilesOverride: (current) => {
+    try {
+      const content = readFileSync(agentsMdPath, 'utf-8');
+      return {
+        agentsFiles: [...current.agentsFiles, { path: agentsMdPath, content }],
+      };
+    } catch {
+      return current; // 文件缺失时优雅降级
+    }
+  },
 });
 await loader.reload();
-// .pi/skills/ 下所有 */SKILL.md 自动发现，无需 skillsOverride
 ```
+
+路径解析与 `main.ts` 加载 `.env` 采用同一模式：`dist/agent.js → ../../ → 项目根/.pi/AGENTS.md`。
+
+**system.ts 职责变更**：原 `buildSystemPrompt()` 硬编码的静态角色与规则
+已迁移至 AGENTS.md，`system.ts` 现仅保留空函数占位。动态上下文（加载的文件、
+样例数据）由 `main.ts` 的 `handleSteer()` 通过 `session.steer()` 在运行时注入。
 
 **技能管理 UI**：前端新增「技能管理」Tab（SkillsPage），三栏布局：
 左侧技能列表（搜索/新建/删除）→ 中间文件树（递归浏览技能目录内所有文件和子目录）→
@@ -1035,6 +1068,6 @@ agent_delta/done → agentStore.handleEvent (按 msg- 前缀匹配)
 
 ---
 
-**文档版本**：v7.0
+**文档版本**：v8.0
 **更新日期**：2026-06-09
 **维护者**：项目工程团队

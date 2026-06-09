@@ -160,80 +160,96 @@ impl ExcelService {
     pub fn write_results(req: &WriteResultsRequest) -> AppResult<()> {
         use rust_xlsxwriter::*;
 
-        let mut workbook: Xlsx<_> = open_workbook(&req.path).map_err(|e| {
+        // Read all sheets from the original workbook
+        let mut source: Xlsx<_> = open_workbook(&req.path).map_err(|e| {
             map_open_error(e, &req.path)
         })?;
 
-        let range = workbook
-            .worksheet_range(&req.sheet)
-            .map_err(|e| AppError::Service(format!("Sheet '{}' not found: {}", req.sheet, e)))?;
-
-        let mut all_rows = range.rows();
-
-        let mut headers: Vec<String> = all_rows
-            .next()
-            .map(|row| row.iter().map(|c| c.to_string()).collect())
-            .unwrap_or_default();
-
-        // 若列名不存在，自动追加到 header 末尾（新建列）
-        let col_idx = match headers.iter().position(|h| h == &req.column) {
-            Some(idx) => idx,
-            None => {
-                headers.push(req.column.clone());
-                headers.len() - 1
-            }
-        };
-
-        let mut data_rows: Vec<Vec<String>> = all_rows
-            .map(|row| row.iter().map(|c| cell_to_string(c)).collect())
-            .collect();
-
-        // 新建列时，为每行补空字符串以匹配列数
-        let expected_cols = headers.len();
-        for row in &mut data_rows {
-            while row.len() < expected_cols {
-                row.push(String::new());
-            }
-        }
-
-        // Build a map of original formulas to preserve them
-        let formula_range = workbook
-            .worksheet_formula(&req.sheet)
-            .map_err(|e| AppError::Service(format!("Failed to read formulas: {}", e)))?;
-        let (start_row, start_col) = formula_range.start().unwrap_or((0, 0));
-        let formula_map: HashMap<(u32, u16), String> = formula_range
-            .cells()
-            .filter(|(_, _, f)| !f.is_empty())
-            .map(|(r, c, f)| ((r as u32 + start_row, c as u16 + start_col as u16), f.clone()))
-            .collect();
+        let sheet_names = source.sheet_names().to_vec();
 
         let tmp_path = format!("{}.tmp", req.path);
         let mut new_book = Workbook::new();
-        let sheet = new_book.add_worksheet();
-        sheet.set_name(&req.sheet)?;
-
         let header_format = Format::new().set_bold();
 
-        for (col_i, header) in headers.iter().enumerate() {
-            sheet.write_string_with_format(0, col_i as u16, header.as_str(), &header_format)?;
-        }
+        for name in &sheet_names {
+            let range = source
+                .worksheet_range(name)
+                .map_err(|e| AppError::Service(format!("Sheet '{}' not found: {}", name, e)))?;
 
-        for (row_i, row) in data_rows.iter().enumerate() {
-            for (col_j, value) in row.iter().enumerate() {
-                let excel_row = (row_i + 1) as u32;
-                let pos = (excel_row, col_j as u16);
-                if let Some(orig_f) = formula_map.get(&pos) {
-                    let formula = Formula::new(orig_f.as_str());
-                    sheet.write_formula(excel_row, col_j as u16, formula)?;
-                } else {
-                    sheet.write_string(excel_row, col_j as u16, value.as_str())?;
+            let mut all_rows = range.rows();
+            let mut headers: Vec<String> = all_rows
+                .next()
+                .map(|row| row.iter().map(|c| c.to_string()).collect())
+                .unwrap_or_default();
+
+            let mut data_rows: Vec<Vec<String>> = all_rows
+                .map(|row| row.iter().map(|c| cell_to_string(c)).collect())
+                .collect();
+
+            // Read original formulas for this sheet
+            let formula_map: HashMap<(u32, u16), String> = source
+                .worksheet_formula(name)
+                .ok()
+                .map(|fr| {
+                    let (sr, sc) = fr.start().unwrap_or((0, 0));
+                    fr.cells()
+                        .filter(|(_, _, f)| !f.is_empty())
+                        .map(|(r, c, f)| ((r as u32 + sr, c as u16 + sc as u16), f.clone()))
+                        .collect()
+                })
+                .unwrap_or_default();
+
+            // If this is the target sheet, add the result column
+            if name == &req.sheet {
+                let col_idx = match headers.iter().position(|h| h == &req.column) {
+                    Some(idx) => idx,
+                    None => {
+                        headers.push(req.column.clone());
+                        headers.len() - 1
+                    }
+                };
+
+                // Pad rows for new column
+                let expected_cols = headers.len();
+                for row in &mut data_rows {
+                    while row.len() < expected_cols {
+                        row.push(String::new());
+                    }
+                }
+
+                // Write results
+                for result in &req.results {
+                    let row_idx = result.row;
+                    if row_idx < data_rows.len() {
+                        // Only write if the cell doesn't already have a formula
+                        let excel_row = (row_idx + 1) as u32;
+                        if !formula_map.contains_key(&(excel_row, col_idx as u16)) {
+                            data_rows[row_idx][col_idx] = result.value.clone();
+                        }
+                    }
                 }
             }
-        }
 
-        for result in &req.results {
-            let excel_row = result.row as u32 + 1;
-            sheet.write_string(excel_row, col_idx as u16, result.value.as_str())?;
+            // Write sheet to new workbook
+            let sheet = new_book.add_worksheet();
+            sheet.set_name(name)?;
+
+            for (col_i, header) in headers.iter().enumerate() {
+                sheet.write_string_with_format(0, col_i as u16, header.as_str(), &header_format)?;
+            }
+
+            for (row_i, row) in data_rows.iter().enumerate() {
+                for (col_j, value) in row.iter().enumerate() {
+                    let excel_row = (row_i + 1) as u32;
+                    let pos = (excel_row, col_j as u16);
+                    if let Some(orig_f) = formula_map.get(&pos) {
+                        let formula = Formula::new(orig_f.as_str());
+                        sheet.write_formula(excel_row, col_j as u16, formula)?;
+                    } else {
+                        sheet.write_string(excel_row, col_j as u16, value.as_str())?;
+                    }
+                }
+            }
         }
 
         new_book.save(&tmp_path)?;
@@ -252,77 +268,109 @@ impl ExcelService {
     pub fn apply_formula(req: &ApplyFormulaRequest) -> AppResult<()> {
         use rust_xlsxwriter::*;
 
-        let mut workbook: Xlsx<_> = open_workbook(&req.path).map_err(|e| {
+        // Read all sheets from the original workbook
+        let mut source: Xlsx<_> = open_workbook(&req.path).map_err(|e| {
             map_open_error(e, &req.path)
         })?;
 
-        let range = workbook
-            .worksheet_range(&req.sheet)
-            .map_err(|e| AppError::Service(format!("Sheet '{}' not found: {}", req.sheet, e)))?;
-
-        let mut all_rows = range.rows();
-
-        let mut headers: Vec<String> = all_rows
-            .next()
-            .map(|row| row.iter().map(|c| c.to_string()).collect())
-            .unwrap_or_default();
-
-        let col_idx = match headers.iter().position(|h| h == &req.column) {
-            Some(idx) => idx,
-            None => {
-                if req.strategy == "append" {
-                    headers.push(req.column.clone());
-                    headers.len() - 1
-                } else {
-                    return Err(AppError::Service(format!("Column '{}' not found", req.column)));
-                }
-            }
-        };
-
-        let data_rows: Vec<Vec<String>> = all_rows
-            .map(|row| row.iter().map(|c| cell_to_string(c)).collect())
-            .collect();
-
-        // Build a map of original formulas to preserve them
-        let formula_range = workbook
-            .worksheet_formula(&req.sheet)
-            .map_err(|e| AppError::Service(format!("Failed to read formulas: {}", e)))?;
-        let (start_row, start_col) = formula_range.start().unwrap_or((0, 0));
-        let formula_map: HashMap<(u32, u16), String> = formula_range
-            .cells()
-            .filter(|(_, _, f)| !f.is_empty())
-            .map(|(r, c, f)| ((r as u32 + start_row, c as u16 + start_col as u16), f.clone()))
-            .collect();
+        let sheet_names = source.sheet_names().to_vec();
 
         let tmp_path = format!("{}.tmp", req.path);
         let mut new_book = Workbook::new();
-        let sheet = new_book.add_worksheet();
-        sheet.set_name(&req.sheet)?;
-
         let header_format = Format::new().set_bold();
 
-        for (col_i, header) in headers.iter().enumerate() {
-            sheet.write_string_with_format(0, col_i as u16, header.as_str(), &header_format)?;
-        }
+        for name in &sheet_names {
+            let range = source
+                .worksheet_range(name)
+                .map_err(|e| AppError::Service(format!("Sheet '{}' not found: {}", name, e)))?;
 
-        let append_mode = req.strategy == "append" && col_idx >= data_rows.first().map_or(0, |r| r.len());
+            let mut all_rows = range.rows();
+            let mut headers: Vec<String> = all_rows
+                .next()
+                .map(|row| row.iter().map(|c| c.to_string()).collect())
+                .unwrap_or_default();
 
-        for (row_i, row) in data_rows.iter().enumerate() {
-            let col_count = if append_mode { col_idx + 1 } else { row.len() };
-            for col_j in 0..col_count {
-                let excel_row = (row_i + 1) as u32;
-                if col_j == col_idx {
-                    let formula_str = req.formula.replace("{}", &(excel_row + 1).to_string());
-                    let formula = Formula::new(formula_str.as_str());
-                    sheet.write_formula(excel_row, col_j as u16, formula)?;
-                } else {
-                    let pos = (excel_row, col_j as u16);
-                    if let Some(orig_f) = formula_map.get(&pos) {
-                        let formula = Formula::new(orig_f.as_str());
-                        sheet.write_formula(excel_row, col_j as u16, formula)?;
-                    } else {
-                        let value = row.get(col_j).map(|s| s.as_str()).unwrap_or("");
-                        sheet.write_string(excel_row, col_j as u16, value)?;
+            let data_rows: Vec<Vec<String>> = all_rows
+                .map(|row| row.iter().map(|c| cell_to_string(c)).collect())
+                .collect();
+
+            // Read original formulas for this sheet
+            let formula_map: HashMap<(u32, u16), String> = source
+                .worksheet_formula(name)
+                .ok()
+                .map(|fr| {
+                    let (sr, sc) = fr.start().unwrap_or((0, 0));
+                    fr.cells()
+                        .filter(|(_, _, f)| !f.is_empty())
+                        .map(|(r, c, f)| ((r as u32 + sr, c as u16 + sc as u16), f.clone()))
+                        .collect()
+                })
+                .unwrap_or_default();
+
+            // If this is the target sheet, apply the formula column
+            if name == &req.sheet {
+                let col_idx = match headers.iter().position(|h| h == &req.column) {
+                    Some(idx) => idx,
+                    None => {
+                        if req.strategy == "append" {
+                            headers.push(req.column.clone());
+                            headers.len() - 1
+                        } else {
+                            return Err(AppError::Service(format!("Column '{}' not found", req.column)));
+                        }
+                    }
+                };
+
+                let append_mode = req.strategy == "append"
+                    && col_idx >= data_rows.first().map_or(0, |r| r.len());
+
+                // Write sheet with formula applied
+                let sheet = new_book.add_worksheet();
+                sheet.set_name(name)?;
+
+                for (col_i, header) in headers.iter().enumerate() {
+                    sheet.write_string_with_format(0, col_i as u16, header.as_str(), &header_format)?;
+                }
+
+                for (row_i, row) in data_rows.iter().enumerate() {
+                    let col_count = if append_mode { col_idx + 1 } else { row.len() };
+                    for col_j in 0..col_count {
+                        let excel_row = (row_i + 1) as u32;
+                        if col_j == col_idx {
+                            let formula_str = req.formula.replace("{}", &(excel_row + 1).to_string());
+                            let formula = Formula::new(formula_str.as_str());
+                            sheet.write_formula(excel_row, col_j as u16, formula)?;
+                        } else {
+                            let pos = (excel_row, col_j as u16);
+                            if let Some(orig_f) = formula_map.get(&pos) {
+                                let formula = Formula::new(orig_f.as_str());
+                                sheet.write_formula(excel_row, col_j as u16, formula)?;
+                            } else {
+                                let value = row.get(col_j).map(|s| s.as_str()).unwrap_or("");
+                                sheet.write_string(excel_row, col_j as u16, value)?;
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Non-target sheet: copy as-is
+                let sheet = new_book.add_worksheet();
+                sheet.set_name(name)?;
+
+                for (col_i, header) in headers.iter().enumerate() {
+                    sheet.write_string_with_format(0, col_i as u16, header.as_str(), &header_format)?;
+                }
+
+                for (row_i, row) in data_rows.iter().enumerate() {
+                    for (col_j, value) in row.iter().enumerate() {
+                        let excel_row = (row_i + 1) as u32;
+                        let pos = (excel_row, col_j as u16);
+                        if let Some(orig_f) = formula_map.get(&pos) {
+                            let formula = Formula::new(orig_f.as_str());
+                            sheet.write_formula(excel_row, col_j as u16, formula)?;
+                        } else {
+                            sheet.write_string(excel_row, col_j as u16, value.as_str())?;
+                        }
                     }
                 }
             }
@@ -725,6 +773,90 @@ mod tests {
         assert_eq!(sample.sample_size, 1);
         assert_eq!(sample.total_rows, 3);
         assert_eq!(sample.rows[0][0], "Alice");
+        let _ = std::fs::remove_file(&path);
+    }
+
+    fn create_multi_sheet_xlsx() -> PathBuf {
+        let tmp = std::env::temp_dir().join(format!("test-multi-{}.xlsx", std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        let mut workbook = Workbook::new();
+        let sheet1 = workbook.add_worksheet();
+        sheet1.set_name("Sheet1").unwrap();
+        sheet1.write_string(0, 0, "Name").unwrap();
+        sheet1.write_string(1, 0, "Alice").unwrap();
+        let sheet2 = workbook.add_worksheet();
+        sheet2.set_name("Sheet2").unwrap();
+        sheet2.write_string(0, 0, "Product").unwrap();
+        sheet2.write_string(1, 0, "Widget").unwrap();
+        let sheet3 = workbook.add_worksheet();
+        sheet3.set_name("Sheet3").unwrap();
+        sheet3.write_string(0, 0, "City").unwrap();
+        sheet3.write_string(1, 0, "Beijing").unwrap();
+        workbook.save(tmp.to_str().unwrap()).unwrap();
+        tmp
+    }
+
+    #[test]
+    fn test_write_results_preserves_all_sheets() {
+        let path = create_multi_sheet_xlsx();
+
+        // Write results to Sheet1
+        let req = WriteResultsRequest {
+            path: path.to_str().unwrap().to_string(),
+            sheet: "Sheet1".into(),
+            column: "Result".into(),
+            results: vec![
+                WriteResult { row: 0, value: "OK".into() },
+            ],
+        };
+        ExcelService::write_results(&req).unwrap();
+
+        // Verify all 3 sheets still exist
+        let info = ExcelService::get_info(path.to_str().unwrap()).unwrap();
+        assert_eq!(info.sheets.len(), 3);
+        assert_eq!(info.sheets[0].name, "Sheet1");
+        assert_eq!(info.sheets[1].name, "Sheet2");
+        assert_eq!(info.sheets[2].name, "Sheet3");
+
+        // Verify Sheet1 got the new column
+        let cols = ExcelService::get_column_names(path.to_str().unwrap(), "Sheet1").unwrap();
+        assert_eq!(cols.len(), 2);
+        assert_eq!(cols[1].name, "Result");
+
+        // Verify Sheet2 and Sheet3 data is intact
+        for sheet_name in &["Sheet2", "Sheet3"] {
+            let cols = ExcelService::get_column_names(path.to_str().unwrap(), sheet_name).unwrap();
+            assert_eq!(cols.len(), 1, "Sheet {} should have 1 column", sheet_name);
+        }
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn test_apply_formula_preserves_all_sheets() {
+        let path = create_multi_sheet_xlsx();
+
+        // Apply formula to Sheet1
+        let req = ApplyFormulaRequest {
+            path: path.to_str().unwrap().to_string(),
+            sheet: "Sheet1".into(),
+            column: "Result".into(),
+            formula: "=UPPER(A{})".into(),
+            strategy: "append".into(),
+        };
+        ExcelService::apply_formula(&req).unwrap();
+
+        // Verify all 3 sheets still exist
+        let info = ExcelService::get_info(path.to_str().unwrap()).unwrap();
+        assert_eq!(info.sheets.len(), 3);
+        assert_eq!(info.sheets[0].name, "Sheet1");
+        assert_eq!(info.sheets[1].name, "Sheet2");
+        assert_eq!(info.sheets[2].name, "Sheet3");
+
+        // Verify Sheet2 and Sheet3 data is intact
+        for sheet_name in &["Sheet2", "Sheet3"] {
+            let cols = ExcelService::get_column_names(path.to_str().unwrap(), sheet_name).unwrap();
+            assert_eq!(cols.len(), 1, "Sheet {} should have 1 column", sheet_name);
+        }
         let _ = std::fs::remove_file(&path);
     }
 }

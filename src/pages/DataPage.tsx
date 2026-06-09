@@ -266,8 +266,8 @@ export function DataPage() {
           <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>数据源</span>
           <button
             onClick={handleClickOpen}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
-            style={{ background: 'var(--primary)' }}
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-opacity hover:opacity-90 cursor-pointer"
+            style={{ background: 'var(--primary)', color: 'var(--b3-theme-on-primary)' }}
           >
             <Upload className="h-3 w-3" />
             导入
@@ -424,8 +424,8 @@ export function DataPage() {
                 <Tooltip text="加载选中的 Sheet 到 AI Agent 上下文" side="bottom">
                   <button
                     onClick={handleLoadToContext}
-                    className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
-                    style={{ background: 'var(--primary)' }}
+                    className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium transition-opacity hover:opacity-90 cursor-pointer"
+                    style={{ background: 'var(--primary)', color: 'var(--b3-theme-on-primary)' }}
                   >
                     <Check className="h-3.5 w-3.5" />
                     加载

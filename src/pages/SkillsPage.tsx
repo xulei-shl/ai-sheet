@@ -25,12 +25,6 @@ import type { FileNode } from '../types/skill';
 type Mode = 'view' | 'create' | 'edit';
 type ViewTab = 'preview' | 'raw';
 
-function getProjectRoot(): string {
-  const env = (import.meta as unknown as { env?: Record<string, string> }).env;
-  if (env?.VITE_PROJECT_ROOT) return env.VITE_PROJECT_ROOT;
-  return import.meta.url.replace(/\/src\/pages\/SkillsPage\.tsx$/, '').replace(/\/src-tauri\/.*$/, '').replace(/^file:\/\/\//, '');
-}
-
 function getFileIcon(name: string) {
   const ext = name.split('.').pop()?.toLowerCase() ?? '';
   if (['py', 'js', 'ts', 'jsx', 'tsx', 'rs', 'go', 'sh', 'bat'].includes(ext)) return FileCode;
@@ -133,7 +127,6 @@ export function SkillsPage() {
     clearSelection,
   } = useSkillStore();
 
-  const [projectRoot] = useState(getProjectRoot);
   const [mode, setMode] = useState<Mode>('view');
   const [viewTab, setViewTab] = useState<ViewTab>('preview');
   const [selectedSkillName, setSelectedSkillName] = useState<string | null>(null);
@@ -153,8 +146,8 @@ export function SkillsPage() {
   const [newFileContent, setNewFileContent] = useState('');
 
   useEffect(() => {
-    fetchSkills(projectRoot);
-  }, [projectRoot]);
+    fetchSkills();
+  }, []);
 
   const handleSelectSkill = (name: string) => {
     setSelectedSkillName(name);
@@ -162,12 +155,12 @@ export function SkillsPage() {
     setExpandedDirs(new Set());
     setMode('view');
     setShowNewFile(false);
-    selectSkill(projectRoot, name);
+    selectSkill(name);
   };
 
   const handleFileSelect = (path: string) => {
     if (!selectedSkillName) return;
-    selectFile(projectRoot, selectedSkillName, path);
+    selectFile(selectedSkillName, path);
     setViewTab(isMarkdownFile(path) ? 'preview' : 'raw');
     setMode('view');
     setShowNewFile(false);
@@ -196,17 +189,17 @@ export function SkillsPage() {
     if (!folderPath) return;
 
     const skillName = folderPath.split(/[/\\]/).pop() ?? 'imported-skill';
-    const skill = await importSkillFromFolder(projectRoot, folderPath, skillName);
+    const skill = await importSkillFromFolder(folderPath, skillName);
     if (skill) {
       setSelectedSkillName(skill.name);
       setMode('view');
-      selectSkill(projectRoot, skill.name);
+      selectSkill(skill.name);
     }
   };
 
   const handleSaveCreate = async () => {
     if (!formName.trim() || !formDescription.trim()) return;
-    await createSkill(projectRoot, {
+    await createSkill({
       name: formName.trim(),
       description: formDescription.trim(),
       content: formContent.trim(),
@@ -215,7 +208,7 @@ export function SkillsPage() {
     setFormName('');
     setFormDescription('');
     setFormContent('');
-    fetchSkills(projectRoot);
+    fetchSkills();
   };
 
   const handleEdit = () => {
@@ -227,12 +220,12 @@ export function SkillsPage() {
   const handleSaveEdit = async () => {
     if (!selectedSkillName) return;
     if (selectedFile) {
-      await updateSkillFile(projectRoot, selectedSkillName, selectedFile, editContent);
+      await updateSkillFile(selectedSkillName, selectedFile, editContent);
     } else {
       // Editing SKILL.md: we write the full content (without frontmatter changes for simplicity)
-      await updateSkillFile(projectRoot, selectedSkillName, 'SKILL.md', editContent);
+      await updateSkillFile(selectedSkillName, 'SKILL.md', editContent);
       // Refresh detail after SKILL.md edit
-      selectSkill(projectRoot, selectedSkillName);
+      selectSkill(selectedSkillName);
     }
     setMode('view');
   };
@@ -244,7 +237,7 @@ export function SkillsPage() {
 
   const handleDeleteSkill = async (name: string) => {
     if (!window.confirm(`确定要删除技能 "${name}" 吗？此操作不可撤销。`)) return;
-    await deleteSkill(projectRoot, name);
+    await deleteSkill(name);
     if (selectedSkillName === name) {
       setSelectedSkillName(null);
       clearSelection();
@@ -255,23 +248,23 @@ export function SkillsPage() {
     if (!selectedSkillName) return;
     const fileName = filePath.split(/[/\\]/).pop() ?? filePath;
     if (!window.confirm(`确定要删除 "${fileName}" 吗？此操作不可撤销。`)) return;
-    await deleteSkillFile(projectRoot, selectedSkillName, filePath);
-    refreshFileTree(projectRoot, selectedSkillName);
+    await deleteSkillFile(selectedSkillName, filePath);
+    refreshFileTree(selectedSkillName);
   };
 
   const handleCreateFile = async () => {
     if (!selectedSkillName || !newFilePath.trim()) return;
-    await createSkillFile(projectRoot, selectedSkillName, newFilePath.trim(), newFileContent);
+    await createSkillFile(selectedSkillName, newFilePath.trim(), newFileContent);
     setShowNewFile(false);
     setNewFilePath('');
     setNewFileContent('');
-    refreshFileTree(projectRoot, selectedSkillName);
+    refreshFileTree(selectedSkillName);
   };
 
   const handleRefresh = () => {
-    fetchSkills(projectRoot);
+    fetchSkills();
     if (selectedSkillName) {
-      selectSkill(projectRoot, selectedSkillName);
+      selectSkill(selectedSkillName);
     }
   };
 

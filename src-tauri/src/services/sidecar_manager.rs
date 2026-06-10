@@ -5,7 +5,7 @@
 };
 
 use serde_json::{json, Value};
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
     process::{Child, ChildStdin, Command},
@@ -46,7 +46,7 @@ impl SidecarManager {
     pub async fn start(self: &Arc<Self>, app: AppHandle) -> AppResult<()> {
         self.stop().await.ok();
 
-        let agent_entry = resolve_agent_entry()?;
+        let agent_entry = resolve_agent_entry(&app)?;
         let mut cmd = Command::new("node");
         cmd.arg(&agent_entry);
 
@@ -300,7 +300,10 @@ impl SidecarManager {
     }
 }
 
-fn resolve_agent_entry() -> AppResult<PathBuf> {
+fn resolve_agent_entry(app: &AppHandle) -> AppResult<PathBuf> {
+    // 开发模式：相对于项目根目录
+    // 注意：不能先查 resource_dir() — dev 模式下它返回 target/debug，
+    // 拼出的 \\?\ 前缀路径传给 node 后无法正确解析。
     let cwd = std::env::current_dir()?;
     let root = if cwd.file_name().and_then(|name| name.to_str()) == Some("src-tauri") {
         cwd.parent()
@@ -310,7 +313,26 @@ fn resolve_agent_entry() -> AppResult<PathBuf> {
         cwd
     };
 
-    Ok(root.join("src-agent").join("dist").join("main.js"))
+    let entry = root.join("src-agent").join("dist").join("main.js");
+    if entry.exists() {
+        return Ok(entry);
+    }
+
+    // 生产模式退路：从资源目录查找（仅 dev 路径不存在时启用）
+    match app.path().resource_dir() {
+        Ok(resource_dir) => {
+            let bundled = resource_dir.join("src-agent").join("dist").join("main.js");
+            if bundled.exists() {
+                return Ok(bundled);
+            }
+        }
+        Err(_) => {}
+    }
+
+    Err(AppError::Sidecar(format!(
+        "agent entry not found at {:?}",
+        entry
+    )))
 }
 
 fn current_millis() -> u128 {

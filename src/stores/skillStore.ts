@@ -23,16 +23,16 @@ interface SkillStore {
   error: string | null;
   searchQuery: string;
 
-  fetchSkills: (projectRoot: string) => Promise<void>;
-  selectSkill: (projectRoot: string, name: string) => Promise<void>;
-  selectFile: (projectRoot: string, skillName: string, filePath: string | null) => Promise<void>;
-  createSkill: (projectRoot: string, input: SkillInput) => Promise<void>;
-  deleteSkill: (projectRoot: string, name: string) => Promise<void>;
-  updateSkillFile: (projectRoot: string, skillName: string, filePath: string, content: string) => Promise<void>;
-  deleteSkillFile: (projectRoot: string, skillName: string, filePath: string) => Promise<void>;
-  createSkillFile: (projectRoot: string, skillName: string, filePath: string, content: string) => Promise<void>;
-  importSkillFromFolder: (projectRoot: string, sourcePath: string, skillName?: string) => Promise<SkillInfo | null>;
-  refreshFileTree: (projectRoot: string, skillName: string) => Promise<void>;
+  fetchSkills: () => Promise<void>;
+  selectSkill: (name: string) => Promise<void>;
+  selectFile: (skillName: string, filePath: string | null) => Promise<void>;
+  createSkill: (input: SkillInput) => Promise<void>;
+  deleteSkill: (name: string) => Promise<void>;
+  updateSkillFile: (skillName: string, filePath: string, content: string) => Promise<void>;
+  deleteSkillFile: (skillName: string, filePath: string) => Promise<void>;
+  createSkillFile: (skillName: string, filePath: string, content: string) => Promise<void>;
+  importSkillFromFolder: (sourcePath: string, skillName?: string) => Promise<SkillInfo | null>;
+  refreshFileTree: (skillName: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
   getFilteredSkills: () => SkillInfo[];
   clearSelection: () => void;
@@ -48,22 +48,22 @@ export const useSkillStore = create<SkillStore>((set, get) => ({
   error: null,
   searchQuery: '',
 
-  fetchSkills: async (projectRoot: string) => {
+  fetchSkills: async () => {
     set({ loading: true, error: null });
     try {
-      const skills = await apiListSkills(projectRoot);
+      const skills = await apiListSkills();
       set({ skills, loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
 
-  selectSkill: async (projectRoot: string, name: string) => {
+  selectSkill: async (name: string) => {
     set({ loading: true, error: null });
     try {
       const [detail, fileTree] = await Promise.all([
-        apiReadSkill(projectRoot, name),
-        apiListSkillFiles(projectRoot, name),
+        apiReadSkill(name),
+        apiListSkillFiles(name),
       ]);
       set({ detail, fileTree, selectedFile: null, selectedFileContent: null, loading: false });
     } catch (e) {
@@ -71,31 +71,31 @@ export const useSkillStore = create<SkillStore>((set, get) => ({
     }
   },
 
-  selectFile: async (projectRoot: string, skillName: string, filePath: string | null) => {
+  selectFile: async (skillName: string, filePath: string | null) => {
     if (!filePath) {
       set({ selectedFile: null, selectedFileContent: null });
       return;
     }
     try {
-      const content = await apiReadSkillFile(projectRoot, skillName, filePath);
+      const content = await apiReadSkillFile(skillName, filePath);
       set({ selectedFile: filePath, selectedFileContent: content });
     } catch (e) {
       set({ error: String(e) });
     }
   },
 
-  createSkill: async (projectRoot: string, input: SkillInput) => {
+  createSkill: async (input: SkillInput) => {
     try {
-      const skill = await apiCreateSkill(projectRoot, input);
+      const skill = await apiCreateSkill(input);
       set({ skills: [...get().skills, skill] });
     } catch (e) {
       set({ error: String(e) });
     }
   },
 
-  deleteSkill: async (projectRoot: string, name: string) => {
+  deleteSkill: async (name: string) => {
     try {
-      await apiDeleteSkill(projectRoot, name);
+      await apiDeleteSkill(name);
       const skills = get().skills.filter((s) => s.name !== name);
       const detail = get().detail?.name === name ? null : get().detail;
       set({ skills, detail, fileTree: detail ? get().fileTree : [], selectedFile: null, selectedFileContent: null });
@@ -104,16 +104,16 @@ export const useSkillStore = create<SkillStore>((set, get) => ({
     }
   },
 
-  updateSkillFile: async (projectRoot: string, skillName: string, filePath: string, content: string) => {
+  updateSkillFile: async (skillName: string, filePath: string, content: string) => {
     try {
-      await apiUpdateSkillFile(projectRoot, skillName, filePath, content);
+      await apiUpdateSkillFile(skillName, filePath, content);
       // Update local content if this is the currently selected file
       if (get().selectedFile === filePath) {
         set({ selectedFileContent: content });
       }
       // If SKILL.md was updated, also refresh detail
       if (filePath === 'SKILL.md') {
-        const detail = await apiReadSkill(projectRoot, skillName);
+        const detail = await apiReadSkill(skillName);
         set({ detail });
         // Also update skill info in the list
         const skills = get().skills.map((s) =>
@@ -126,15 +126,15 @@ export const useSkillStore = create<SkillStore>((set, get) => ({
     }
   },
 
-  deleteSkillFile: async (projectRoot: string, skillName: string, filePath: string) => {
+  deleteSkillFile: async (skillName: string, filePath: string) => {
     try {
-      await apiDeleteSkillFile(projectRoot, skillName, filePath);
+      await apiDeleteSkillFile(skillName, filePath);
       // If the deleted file was selected, clear selection
       if (get().selectedFile === filePath) {
         set({ selectedFile: null, selectedFileContent: null });
       }
       // Refresh file tree
-      const fileTree = await apiListSkillFiles(projectRoot, skillName);
+      const fileTree = await apiListSkillFiles(skillName);
       set({ fileTree });
       // If SKILL.md was deleted, refresh detail too
       if (filePath === 'SKILL.md') {
@@ -148,20 +148,20 @@ export const useSkillStore = create<SkillStore>((set, get) => ({
     }
   },
 
-  createSkillFile: async (projectRoot: string, skillName: string, filePath: string, content: string) => {
+  createSkillFile: async (skillName: string, filePath: string, content: string) => {
     try {
-      await apiCreateSkillFile(projectRoot, skillName, filePath, content);
+      await apiCreateSkillFile(skillName, filePath, content);
       // Refresh file tree
-      const fileTree = await apiListSkillFiles(projectRoot, skillName);
+      const fileTree = await apiListSkillFiles(skillName);
       set({ fileTree });
     } catch (e) {
       set({ error: String(e) });
     }
   },
 
-  importSkillFromFolder: async (projectRoot: string, sourcePath: string, skillName?: string) => {
+  importSkillFromFolder: async (sourcePath: string, skillName?: string) => {
     try {
-      const skill = await apiImportSkillFromFolder(projectRoot, sourcePath, skillName);
+      const skill = await apiImportSkillFromFolder(sourcePath, skillName);
       set({ skills: [...get().skills, skill] });
       return skill;
     } catch (e) {
@@ -170,9 +170,9 @@ export const useSkillStore = create<SkillStore>((set, get) => ({
     }
   },
 
-  refreshFileTree: async (projectRoot: string, skillName: string) => {
+  refreshFileTree: async (skillName: string) => {
     try {
-      const fileTree = await apiListSkillFiles(projectRoot, skillName);
+      const fileTree = await apiListSkillFiles(skillName);
       set({ fileTree });
     } catch (e) {
       set({ error: String(e) });

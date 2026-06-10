@@ -200,44 +200,48 @@ export function setAgentCwd(cwd: string) {
 }
 
 // Skills
-export function listSkills(projectRoot: string) {
-  return invoke<SkillInfo[]>('list_skills', { projectRoot });
+export function getAppDataDir() {
+  return invoke<string>('get_app_data_dir');
 }
 
-export function readSkill(projectRoot: string, name: string) {
-  return invoke<SkillDetail>('read_skill', { projectRoot, name });
+export function listSkills() {
+  return invoke<SkillInfo[]>('list_skills');
 }
 
-export function readSkillFile(projectRoot: string, name: string, filePath: string) {
-  return invoke<string>('read_skill_file', { projectRoot, name, filePath });
+export function readSkill(name: string) {
+  return invoke<SkillDetail>('read_skill', { name });
 }
 
-export function listSkillFiles(projectRoot: string, name: string) {
-  return invoke<FileNode[]>('list_skill_files', { projectRoot, name });
+export function readSkillFile(name: string, filePath: string) {
+  return invoke<string>('read_skill_file', { name, filePath });
 }
 
-export function createSkill(projectRoot: string, input: SkillInput) {
-  return invoke<SkillInfo>('create_skill', { projectRoot, input });
+export function listSkillFiles(name: string) {
+  return invoke<FileNode[]>('list_skill_files', { name });
 }
 
-export function deleteSkill(projectRoot: string, name: string) {
-  return invoke<void>('delete_skill', { projectRoot, name });
+export function createSkill(input: SkillInput) {
+  return invoke<SkillInfo>('create_skill', { input });
 }
 
-export function updateSkillFile(projectRoot: string, name: string, filePath: string, content: string) {
-  return invoke<void>('update_skill_file', { projectRoot, name, filePath, content });
+export function deleteSkill(name: string) {
+  return invoke<void>('delete_skill', { name });
 }
 
-export function deleteSkillFile(projectRoot: string, name: string, filePath: string) {
-  return invoke<void>('delete_skill_file', { projectRoot, name, filePath });
+export function updateSkillFile(name: string, filePath: string, content: string) {
+  return invoke<void>('update_skill_file', { name, filePath, content });
 }
 
-export function createSkillFile(projectRoot: string, name: string, filePath: string, content: string) {
-  return invoke<void>('create_skill_file', { projectRoot, name, filePath, content });
+export function deleteSkillFile(name: string, filePath: string) {
+  return invoke<void>('delete_skill_file', { name, filePath });
 }
 
-export function importSkillFromFolder(projectRoot: string, sourcePath: string, skillName?: string) {
-  return invoke<SkillInfo>('import_skill_from_folder', { projectRoot, sourcePath, skillName: skillName ?? null });
+export function createSkillFile(name: string, filePath: string, content: string) {
+  return invoke<void>('create_skill_file', { name, filePath, content });
+}
+
+export function importSkillFromFolder(sourcePath: string, skillName?: string) {
+  return invoke<SkillInfo>('import_skill_from_folder', { sourcePath, skillName: skillName ?? null });
 }
 
 // Events

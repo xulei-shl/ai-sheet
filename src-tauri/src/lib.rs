@@ -1,4 +1,6 @@
-﻿use std::sync::Arc;
+﻿use std::path::Path;
+use std::sync::Arc;
+use std::fs;
 
 use tauri::{Emitter, Manager};
 use tokio::sync::RwLock;
@@ -15,6 +17,25 @@ pub mod db;
 pub mod error;
 pub mod models;
 pub mod services;
+
+/// 递归复制目录
+fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
+    if !dst.exists() {
+        fs::create_dir_all(dst)?;
+    }
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+        if file_type.is_dir() {
+            copy_dir_all(&src_path, &dst_path)?;
+        } else {
+            fs::copy(&src_path, &dst_path)?;
+        }
+    }
+    Ok(())
+}
 
 #[derive(Debug, Default)]
 pub struct AppState {
@@ -63,6 +84,44 @@ pub fn run() {
                     None
                 }
             };
+
+            // 首次运行：将 .pi/ 资源复制到 app_data_dir
+            if let Ok(data_dir) = app.path().app_data_dir() {
+                let pi_dest = data_dir.join(".pi");
+                if !pi_dest.exists() {
+                    let pi_src = None::<std::path::PathBuf>
+                        // 生产模式：从捆绑资源目录查找
+                        .into_iter()
+                        .chain(
+                            app.path()
+                                .resource_dir()
+                                .ok()
+                                .map(|d| d.join(".pi")),
+                        )
+                        // 开发模式：从项目根目录查找
+                        .chain(
+                            std::env::current_dir()
+                                .ok()
+                                .and_then(|cwd| {
+                                    let root = if cwd.file_name().and_then(|n| n.to_str()) == Some("src-tauri") {
+                                        cwd.parent()?.to_path_buf()
+                                    } else {
+                                        cwd
+                                    };
+                                    Some(root.join(".pi"))
+                                }),
+                        )
+                        .find(|p| p.exists());
+                    if let Some(src) = pi_src {
+                        eprintln!("[setup] copying .pi/ from {:?} to {:?}", src, pi_dest);
+                        if let Err(e) = copy_dir_all(&src, &pi_dest) {
+                            eprintln!("[setup] failed to copy .pi/ resources: {}", e);
+                        }
+                    } else {
+                        eprintln!("[setup] no .pi/ source found (skills will be empty)");
+                    }
+                }
+            }
 
             // 从 settings 表恢复 active_model 到内存
             let state = app.state::<AppState>();
@@ -142,6 +201,7 @@ pub fn run() {
             commands::sidecar::stop_agent_stream,
             commands::sidecar::set_agent_cwd,
             commands::system::get_app_status,
+            commands::system::get_app_data_dir,
             commands::config::get_user_models,
             commands::config::add_user_model,
             commands::config::update_user_model,

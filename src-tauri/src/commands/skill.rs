@@ -1,11 +1,14 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use tauri::Manager;
+
 use crate::error::AppResult;
 use crate::models::skill::{FileNode, SkillDetail, SkillInfo, SkillInput};
 
-fn skills_dir(project_root: &str) -> PathBuf {
-    PathBuf::from(project_root).join(".pi").join("skills")
+fn skills_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    Ok(data_dir.join(".pi").join("skills"))
 }
 
 fn parse_frontmatter(raw: &str) -> (String, String) {
@@ -99,8 +102,8 @@ fn validate_skill_name(name: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn list_skills(project_root: String) -> Result<Vec<SkillInfo>, String> {
-    let dir = skills_dir(&project_root);
+pub fn list_skills(app: tauri::AppHandle) -> Result<Vec<SkillInfo>, String> {
+    let dir = skills_dir(&app)?;
     if !dir.exists() {
         return Ok(vec![]);
     }
@@ -143,8 +146,8 @@ pub fn list_skills(project_root: String) -> Result<Vec<SkillInfo>, String> {
 }
 
 #[tauri::command]
-pub fn read_skill(project_root: String, name: String) -> Result<SkillDetail, String> {
-    let skill_dir = skills_dir(&project_root).join(&name);
+pub fn read_skill(app: tauri::AppHandle, name: String) -> Result<SkillDetail, String> {
+    let skill_dir = skills_dir(&app)?.join(&name);
     let skill_file = skill_dir.join("SKILL.md");
 
     if !skill_file.exists() {
@@ -169,11 +172,11 @@ pub fn read_skill(project_root: String, name: String) -> Result<SkillDetail, Str
 
 #[tauri::command]
 pub fn read_skill_file(
-    project_root: String,
+    app: tauri::AppHandle,
     name: String,
     file_path: String,
 ) -> Result<String, String> {
-    let skill_dir = skills_dir(&project_root).join(&name);
+    let skill_dir = skills_dir(&app)?.join(&name);
     let full_path = skill_dir.join(&file_path);
 
     let canonical_skill = skill_dir
@@ -196,10 +199,10 @@ pub fn read_skill_file(
 
 #[tauri::command]
 pub fn list_skill_files(
-    project_root: String,
+    app: tauri::AppHandle,
     name: String,
 ) -> Result<Vec<FileNode>, String> {
-    let skill_dir = skills_dir(&project_root).join(&name);
+    let skill_dir = skills_dir(&app)?.join(&name);
 
     if !skill_dir.exists() {
         return Err(format!("Skill '{}' not found", name));
@@ -209,10 +212,10 @@ pub fn list_skill_files(
 }
 
 #[tauri::command]
-pub fn create_skill(project_root: String, input: SkillInput) -> Result<SkillInfo, String> {
+pub fn create_skill(app: tauri::AppHandle, input: SkillInput) -> Result<SkillInfo, String> {
     validate_skill_name(&input.name)?;
 
-    let skill_dir = skills_dir(&project_root).join(&input.name);
+    let skill_dir = skills_dir(&app)?.join(&input.name);
     if skill_dir.exists() {
         return Err(format!("Skill '{}' already exists", input.name));
     }
@@ -240,15 +243,15 @@ pub fn create_skill(project_root: String, input: SkillInput) -> Result<SkillInfo
 }
 
 #[tauri::command]
-pub fn delete_skill(project_root: String, name: String) -> Result<(), String> {
+pub fn delete_skill(app: tauri::AppHandle, name: String) -> Result<(), String> {
     validate_skill_name(&name)?;
 
-    let skill_dir = skills_dir(&project_root).join(&name);
+    let skill_dir = skills_dir(&app)?.join(&name);
     if !skill_dir.exists() {
         return Err(format!("Skill '{}' not found", name));
     }
 
-    let canonical_skills = skills_dir(&project_root)
+    let canonical_skills = skills_dir(&app)?
         .canonicalize()
         .map_err(|e| format!("Invalid skills dir: {}", e))?;
     let canonical_skill = skill_dir
@@ -277,12 +280,12 @@ fn ensure_under_skill_dir(skill_dir: &Path, target: &Path) -> Result<PathBuf, St
 
 #[tauri::command]
 pub fn update_skill_file(
-    project_root: String,
+    app: tauri::AppHandle,
     name: String,
     file_path: String,
     content: String,
 ) -> Result<(), String> {
-    let skill_dir = skills_dir(&project_root).join(&name);
+    let skill_dir = skills_dir(&app)?.join(&name);
     if !skill_dir.exists() {
         return Err(format!("Skill '{}' not found", name));
     }
@@ -298,11 +301,11 @@ pub fn update_skill_file(
 
 #[tauri::command]
 pub fn delete_skill_file(
-    project_root: String,
+    app: tauri::AppHandle,
     name: String,
     file_path: String,
 ) -> Result<(), String> {
-    let skill_dir = skills_dir(&project_root).join(&name);
+    let skill_dir = skills_dir(&app)?.join(&name);
     if !skill_dir.exists() {
         return Err(format!("Skill '{}' not found", name));
     }
@@ -321,12 +324,12 @@ pub fn delete_skill_file(
 
 #[tauri::command]
 pub fn create_skill_file(
-    project_root: String,
+    app: tauri::AppHandle,
     name: String,
     file_path: String,
     content: String,
 ) -> Result<(), String> {
-    let skill_dir = skills_dir(&project_root).join(&name);
+    let skill_dir = skills_dir(&app)?.join(&name);
     if !skill_dir.exists() {
         return Err(format!("Skill '{}' not found", name));
     }
@@ -359,7 +362,7 @@ pub fn create_skill_file(
 
 #[tauri::command]
 pub fn import_skill_from_folder(
-    project_root: String,
+    app: tauri::AppHandle,
     source_path: String,
     skill_name: Option<String>,
 ) -> Result<SkillInfo, String> {
@@ -378,7 +381,7 @@ pub fn import_skill_from_folder(
     });
     validate_skill_name(&name)?;
 
-    let skill_dir = skills_dir(&project_root).join(&name);
+    let skill_dir = skills_dir(&app)?.join(&name);
     if skill_dir.exists() {
         return Err(format!("Skill '{}' already exists", name));
     }

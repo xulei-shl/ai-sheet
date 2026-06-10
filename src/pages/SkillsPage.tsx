@@ -555,17 +555,19 @@ export function SkillsPage() {
             <div className="flex flex-1 flex-col overflow-hidden">
               {/* Header */}
               <div
-                className="flex items-center justify-between gap-4 border-b p-4"
+                className="flex items-end justify-between gap-4 border-b p-4"
                 style={{ borderColor: 'var(--border)' }}
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  {selectedFile ? (() => {
-                    const Icon = getFileIcon(selectedFile);
-                    return <Icon className="h-4 w-4 shrink-0" style={{ color: 'var(--primary)' }} />;
-                  })() : null}
-                  <h2 className="truncate text-sm font-semibold" style={{ color: 'var(--ink)' }}>
-                    {activeName}
-                  </h2>
+                <div className="flex flex-col gap-1 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {selectedFile ? (() => {
+                      const Icon = getFileIcon(selectedFile);
+                      return <Icon className="h-4 w-4 shrink-0" style={{ color: 'var(--primary)' }} />;
+                    })() : null}
+                    <h2 className="truncate text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+                      {activeName}
+                    </h2>
+                  </div>
                   {!selectedFile && detail.description && (
                     <span className="text-xs" style={{ color: 'var(--muted)' }}>
                       — {detail.description}

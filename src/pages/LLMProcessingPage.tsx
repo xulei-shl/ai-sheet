@@ -543,7 +543,7 @@ export function LLMProcessingPage() {
 
             <div
               className="flex-1 overflow-y-auto p-3 font-mono text-[11px] leading-relaxed space-y-1 select-text"
-              style={{ background: '#0a0a0a' }}
+              style={{ background: 'var(--surface)' }}
             >
               {batchLogs.length > 0 ? (
                 batchLogs.map((log) => {

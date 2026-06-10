@@ -1,4 +1,4 @@
-import { ArrowDown, Bot, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Bot, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { onAgentEvent, onSidecarDead, onSidecarRestarted } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
@@ -33,16 +33,22 @@ export function AgentChatPanel() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isNearBottom, setIsNearBottom] = useState(true);
   const isNearBottomRef = useRef(true);
+  const [isNearTop, setIsNearTop] = useState(true);
+  const isNearTopRef = useRef(true);
 
   const fetchPrompts = usePromptStore((s) => s.fetchPrompts);
+
+  const scrollThreshold = 80;
 
   const handleScroll = useCallback(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
-    const threshold = 80;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < scrollThreshold;
     isNearBottomRef.current = nearBottom;
     setIsNearBottom(nearBottom);
+    const nearTop = el.scrollTop < scrollThreshold;
+    isNearTopRef.current = nearTop;
+    setIsNearTop(nearTop);
   }, []);
 
   // Auto-scroll on new messages or streaming deltas
@@ -65,6 +71,8 @@ export function AgentChatPanel() {
     if (messages.length === 0) {
       isNearBottomRef.current = true;
       setIsNearBottom(true);
+      isNearTopRef.current = true;
+      setIsNearTop(true);
     }
   }, [messages.length]);
 
@@ -134,35 +142,62 @@ export function AgentChatPanel() {
         </div>
       )}
 
-      <div
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="relative min-h-0 flex-1 overflow-auto"
-      >
-        <MessageList messages={messages} />
-        {!isNearBottom && (
-          <button
-            type="button"
-            onClick={() => {
-              const el = scrollContainerRef.current;
-              if (el) {
-                el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-                isNearBottomRef.current = true;
-                setIsNearBottom(true);
-              }
-            }}
-            className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border shadow-md transition-opacity hover:opacity-100"
-            style={{
-              background: 'var(--surface)',
-              borderColor: 'var(--border)',
-              color: 'var(--muted)',
-              opacity: 0.8,
-            }}
-            aria-label="滚动到底部"
-          >
-            <ArrowDown className="h-4 w-4" />
-          </button>
-        )}
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="absolute inset-0 overflow-auto"
+        >
+          <MessageList messages={messages} />
+        </div>
+        <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex flex-col gap-2">
+          {!isNearTop && (
+            <button
+              type="button"
+              onClick={() => {
+                const el = scrollContainerRef.current;
+                if (el) {
+                  el.scrollTo({ top: 0, behavior: 'smooth' });
+                  isNearTopRef.current = true;
+                  setIsNearTop(true);
+                }
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full border shadow-md transition-opacity hover:opacity-100"
+              style={{
+                background: 'var(--surface)',
+                borderColor: 'var(--border)',
+                color: 'var(--muted)',
+                opacity: 0.8,
+              }}
+              aria-label="滚动到顶部"
+            >
+              <ArrowUp className="h-4 w-4" />
+            </button>
+          )}
+          {!isNearBottom && (
+            <button
+              type="button"
+              onClick={() => {
+                const el = scrollContainerRef.current;
+                if (el) {
+                  el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+                  isNearBottomRef.current = true;
+                  setIsNearBottom(true);
+                }
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full border shadow-md transition-opacity hover:opacity-100"
+              style={{
+                background: 'var(--surface)',
+                borderColor: 'var(--border)',
+                color: 'var(--muted)',
+                opacity: 0.8,
+              }}
+              aria-label="滚动到底部"
+            >
+              <ArrowDown className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <QuickActionBar

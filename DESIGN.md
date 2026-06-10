@@ -1,6 +1,12 @@
 # Design
 
-> AI-Sheet 综合设计与架构文档（v8，2026-06-09）
+> AI-Sheet 综合设计与架构文档（v9，2026-06-10）
+>
+> v9 变更：路径统一与资源打包——`.pi/` 目录和 `src-agent/dist/` 捆绑为 Tauri 资源，
+> 首次运行时自动复制到 `app_data_dir`；Rust skill 命令移除 `project_root` 参数，
+> 改用 `app.path().app_data_dir()`；AGENTS.md 从 `initialCwd`（即 `--db-dir` 传入的 app_data_dir）
+> 读取；前端 `SkillsPage` 不再通过 `import.meta.url` 推断项目根路径。
+> 三端（Rust、Agent、前端）统一使用 `app_data_dir()` 作为基准路径。
 >
 > v8 变更：新增 AGENTS.md 元规则机制——`.pi/AGENTS.md` 定义 agent 身份、
 > 交互规则、Excel 专业规则、Python 执行规则、回答风格等元规则；
@@ -375,12 +381,15 @@ Excel 读写是 CPU 密集 + 内存密集操作，calamine / rust_xlsxwriter
 
 `src-tauri/src/services/sidecar_manager.rs`：
 
-- `start()`：解析 `src-agent/dist/main.js` → `node` 启动子进程 →
-  `stdin` / `stdout` 管道 → 启动 stdout reader + heartbeat monitor。
+- `start(app)`：调用 `resolve_agent_entry(&app)` 查找 agent 入口脚本 →
+  `node` 启动子进程 → `stdin` / `stdout` 管道 → 启动 stdout reader + heartbeat monitor。
+  `resolve_agent_entry` 优先查找 dev 路径（`project_root/src-agent/dist/main.js`），
+  若不存在则退到生产模式（`resource_dir/src-agent/dist/main.js`），
+  避免 dev 模式下 `resource_dir()` 返回 `target/debug/` 导致 `\\?\` 前缀路径被 Node.js 误解析。
 - `set_bridge_port(port)`：在启动前由 `lib.rs` 注入 HTTP Bridge 端口，
   通过 `--bridge-port` 参数传给 Node.js。
-- `set_db_dir(dir)`：在启动前由 `lib.rs` 注入 DB 数据目录，
-  通过 `--db-dir` 参数传给 Node.js，作为 Agent 的默认工作目录。
+- `set_db_dir(dir)`：在启动前由 `lib.rs` 注入 DB 数据目录（`app.path().app_data_dir()`），
+  通过 `--db-dir` 参数传给 Node.js，作为 Agent 的默认工作目录和 `.pi/skills/` 扫描基准。
 - `send_user_message(content)`：写 `{"type":"user_message","content":...}` 到 stdin。
 - `steer(context)`：写 `{"type":"steer","context":...}`，用于上下文注入。
 - `send_set_cwd(cwd)`：写 `{"type":"set_cwd","cwd":...}`，动态切换 Agent 工作目录。
@@ -455,8 +464,9 @@ ai-sheet/
 │       │   ├── formula_cache.rs   （历史查询 / 保存 / touch）
 │       │   ├── sidecar.rs         （status / send / steer / set_cwd / stop / restart）
 │       │   ├── skill.rs           （list/read/read_file/list_files/create/delete/
-│       │   │                       update_file/delete_file/create_file/import_folder）
-│       │   └── system.rs          （get_app_status）
+│       │   │                       update_file/delete_file/create_file/import_folder——
+│       │   │                       v9 起移除 project_root 参数，改用 app.path().app_data_dir()）
+│       │   └── system.rs          （get_app_status / get_app_data_dir）
 │       ├── services/              （业务服务）
 │       │   ├── excel_service.rs   （calamine + rust_xlsxwriter 读写）
 │       │   ├── config_service.rs  （默认模型 + 用户模型 + fallback 链）
@@ -501,9 +511,13 @@ ai-sheet/
 
 ├── .env                           ← 代理配置（HTTP_PROXY/HTTPS_PROXY，不入库）
 ├── .env.example                   ← 代理配置模板（入库）
-├── .pi/
+├── .pi/                           ← 捆绑资源，首次运行复制到 app_data_dir
 │   ├── AGENTS.md                  ← Agent 元规则（身份、交互规则、专业规则、风格），通过 agentsFilesOverride 注入
-│   └── skills/                    ← 技能目录（SKILL.md 自动发现）
+│   └── skills/                    ← 技能目录（DefaultResourceLoader 自动发现 + 首次运行复制）
+│       └── python-processing/
+│           └── SKILL.md           ← 默认技能
+│
+└── src/                           ← React 前端
     ├── main.tsx                   （挂载 + ErrorBoundary 包裹）
     ├── App.tsx                    （Provider + AppLayout）
     ├── layouts/
@@ -728,7 +742,9 @@ emit('cwd_changed')
 | 实际 cwd | `createAgentSession({ cwd: initialCwd })` | 决定内置工具的路径解析基准 |
 | 逻辑 cwd | `session.steer()` 通知 + `AgentContext.cwd` 字段 | 告知 agent 当前工作目录，引导其使用正确路径 |
 
-**默认 cwd**：Tauri app data 目录（DB 数据库文件所在目录），通过 `--db-dir` 参数传入 sidecar。
+**默认 cwd**：Tauri app_data 目录（DB 数据库文件所在目录），通过 `--db-dir` 参数传入 sidecar。
+三端路径统一：Rust skill 命令、Agent `DefaultResourceLoader`、前端 `SkillsPage` 均以此为基准。
+`.pi/` 目录在首次运行时由 `lib.rs` 从捆绑资源复制到 `app_data_dir/.pi/`（支持 dev 模式从项目根目录退路复制）。
 
 **Excel 加载切换**：前端 `addFile` 检测到首个 Excel 文件时，提取其父目录，
 通过 `set_agent_cwd` → Rust → sidecar `set_cwd` 命令更新 `currentCwd`，
@@ -745,9 +761,8 @@ Excel 专业规则、Python 执行规则、回答风格等元规则。由于 `De
 因此通过 `agentsFilesOverride` 回调显式注入，确保任意工作目录下均可加载：
 
 ```ts
-// src-agent/src/agent.ts（v8）
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const agentsMdPath = join(__dirname, '..', '..', '.pi', 'AGENTS.md');
+// src-agent/src/agent.ts（v9）
+const agentsMdPath = join(initialCwd, '.pi', 'AGENTS.md');
 
 const loader = new DefaultResourceLoader({
   cwd: initialCwd,
@@ -766,7 +781,9 @@ const loader = new DefaultResourceLoader({
 await loader.reload();
 ```
 
-路径解析与 `main.ts` 加载 `.env` 采用同一模式：`dist/agent.js → ../../ → 项目根/.pi/AGENTS.md`。
+`initialCwd` 由 `main.ts` 从 `--db-dir` 参数解析，值为 Tauri `app_data_dir()`。
+`AGENTS.md` 由首次运行时的资源复制机制从捆绑资源拷贝到 `app_data_dir/.pi/AGENTS.md`，
+因此此处直接读 `join(initialCwd, '.pi', 'AGENTS.md')` 即可，不再依赖 `__dirname` 相对路径。
 
 **system.ts 职责变更**：原 `buildSystemPrompt()` 硬编码的静态角色与规则
 已迁移至 AGENTS.md，`system.ts` 现仅保留空函数占位。动态上下文（加载的文件、
@@ -776,26 +793,28 @@ await loader.reload();
 左侧技能列表（搜索/新建/删除）→ 中间文件树（递归浏览技能目录内所有文件和子目录）→
 右侧内容预览（Markdown 预览/原文切换、代码文件等宽显示）。
 
-后端通过 10 个 Rust Tauri Commands 提供技能 CRUD 和文件浏览/编辑能力：
+后端通过 10 个 Rust Tauri Commands 提供技能 CRUD 和文件浏览/编辑能力（v9 起移除 `project_root` 参数，改用 `app.path().app_data_dir()`）：
 
 | 命令 | 说明 |
 |------|------|
-| `list_skills(project_root)` | 列出 `.pi/skills/` 下所有技能（解析 SKILL.md frontmatter） |
-| `read_skill(project_root, name)` | 读取指定技能的 SKILL.md 全文 |
-| `read_skill_file(project_root, name, file_path)` | 读取技能目录下任意子文件（含路径遍历安全检查） |
-| `list_skill_files(project_root, name)` | 递归读取技能目录结构，返回 `FileNode` 树 |
-| `create_skill(project_root, input)` | 创建技能目录 + SKILL.md（自动生成 frontmatter） |
-| `delete_skill(project_root, name)` | 删除技能整个目录（含安全检查） |
-| `update_skill_file(project_root, name, file_path, content)` | 更新技能目录下指定文件内容 |
-| `delete_skill_file(project_root, name, file_path)` | 删除技能目录下指定文件或子目录 |
-| `create_skill_file(project_root, name, file_path, content)` | 在技能目录下新建子文件（自动创建父目录） |
-| `import_skill_from_folder(project_root, source_path, skill_name?)` | 从本地文件夹导入，递归复制到 `.pi/skills/` 下 |
+| `list_skills(app)` | 列出 `app_data_dir/.pi/skills/` 下所有技能（解析 SKILL.md frontmatter） |
+| `read_skill(app, name)` | 读取指定技能的 SKILL.md 全文 |
+| `read_skill_file(app, name, file_path)` | 读取技能目录下任意子文件（含路径遍历安全检查） |
+| `list_skill_files(app, name)` | 递归读取技能目录结构，返回 `FileNode` 树 |
+| `create_skill(app, input)` | 创建技能目录 + SKILL.md（自动生成 frontmatter） |
+| `delete_skill(app, name)` | 删除技能整个目录（含安全检查） |
+| `update_skill_file(app, name, file_path, content)` | 更新技能目录下指定文件内容 |
+| `delete_skill_file(app, name, file_path)` | 删除技能目录下指定文件或子目录 |
+| `create_skill_file(app, name, file_path, content)` | 在技能目录下新建子文件（自动创建父目录） |
+| `import_skill_from_folder(app, source_path, skill_name?)` | 从本地文件夹导入，递归复制到 `app_data_dir/.pi/skills/` 下 |
 
 **前端交互**：
 - **编辑**：任何文件点击"编辑"后切换为 textarea，保存调用 `update_skill_file`
 - **新增子文件**：文件树顶部"+"按钮，输入相对路径（如 `scripts/run.py`），自动创建父目录
 - **删除文件/目录**：每个文件旁的删除按钮，SKILL.md 编辑/删除需谨慎（影响技能发现）
 - **从本地导入**：通过 Tauri `dialog` 插件选择文件夹，递归复制为技能目录；若目标无 SKILL.md 则自动生成
+- **项目根路径**：v9 起不再通过 `import.meta.url` 推断项目根路径（该方式在 Tauri 运行时不可靠），
+  所有 Rust 命令已不再需要传入 `projectRoot` 参数
 
 **数据模型**：
 
@@ -1068,6 +1087,6 @@ agent_delta/done → agentStore.handleEvent (按 msg- 前缀匹配)
 
 ---
 
-**文档版本**：v8.0
-**更新日期**：2026-06-09
+**文档版本**：v9.0
+**更新日期**：2026-06-10
 **维护者**：项目工程团队

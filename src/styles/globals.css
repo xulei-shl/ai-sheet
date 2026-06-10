@@ -463,6 +463,24 @@ textarea:focus-visible {
   accent-color: var(--primary);
 }
 
+.markdown-body--dense > * + * {
+  margin-top: 0.45em;
+}
+
+.markdown-body--dense h1,
+.markdown-body--dense h2,
+.markdown-body--dense h3,
+.markdown-body--dense h4,
+.markdown-body--dense h5,
+.markdown-body--dense h6 {
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+}
+
+.markdown-body--dense li + li {
+  margin-top: 0.2em;
+}
+
 /* ============================================================
    AI Agent Conversation Animations
    ============================================================ */

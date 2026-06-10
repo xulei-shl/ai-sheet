@@ -161,10 +161,11 @@ export function MessageList({ messages }: MessageListProps) {
                   </div>
                 ) : (
                   message.content && (
-                    <MarkdownRenderer
-                      content={message.content}
-                      isStreaming={message.isStreaming}
-                    />
+                  <MarkdownRenderer
+                    content={message.content}
+                    isStreaming={message.isStreaming}
+                    dense
+                  />
                   )
                 )}
               </>

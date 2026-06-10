@@ -1,7 +1,9 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useState } from 'react';
+import remarkFrontmatter from 'remark-frontmatter';
+import { useState, useEffect } from 'react';
 import type { Element } from 'hast';
+import yaml from 'yaml';
 
 function PreBlock({ children, node }: { children?: React.ReactNode; node?: Element }) {
   const codeNode = node?.children?.[0];
@@ -70,13 +72,27 @@ interface MarkdownRendererProps {
   content: string;
   className?: string;
   isStreaming?: boolean;
+  dense?: boolean;
+  onFrontmatter?: (data: Record<string, unknown>) => void;
 }
 
-export function MarkdownRenderer({ content, className, isStreaming }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className, isStreaming, dense, onFrontmatter }: MarkdownRendererProps) {
+  useEffect(() => {
+    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (match?.[1]) {
+      try {
+        const data = yaml.parse(match[1]);
+        if (data && typeof data === 'object') onFrontmatter?.(data as Record<string, unknown>);
+      } catch {}
+    }
+  }, [content, onFrontmatter]);
+
+  const body = content.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trimStart();
+
   return (
-    <div className={`${className || ''} markdown-body`.trim()}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ pre: PreBlock }}>
-        {content}
+    <div className={`${className || ''} markdown-body${dense ? ' markdown-body--dense' : ''}`.trim()}>
+      <ReactMarkdown remarkPlugins={[remarkGfm, remarkFrontmatter]} components={{ pre: PreBlock }}>
+        {body}
       </ReactMarkdown>
       {isStreaming && (
         <span

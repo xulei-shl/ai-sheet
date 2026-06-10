@@ -20,6 +20,7 @@ export function AgentChatPanel() {
     refreshStatus,
     restart,
     sendMessage,
+    stopStreaming,
     status,
   } = useAgentStore();
 
@@ -173,6 +174,7 @@ export function AgentChatPanel() {
         disabled={!isReady}
         isStreaming={isAgentStreaming}
         onSend={sendMessage}
+        onStop={stopStreaming}
         value={agentInput}
         onValueChange={(v) => { setAgentInput(v); setQuickPlaceholder(null); }}
         placeholder={placeholder}

@@ -24,6 +24,7 @@ let modelRegistry: ModelRegistry | null = null;
 let authStorage: AuthStorage | null = null;
 let batchRunner: BatchRunner | null = null;
 const activeBatches = new Map<string, BatchRunner>();
+let abortRequested = false;
 
 function parseArgs(): { bridgePort: number; dbDir: string } {
   const portIndex = process.argv.indexOf('--bridge-port');
@@ -148,12 +149,13 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
 
   log(`handleUserMessage: prompt starting, content length=${command.content.length}`);
 
-  try {
-    let accumulatedText = '';
-    let lastError: string | null = null;
-    let eventsReceived = 0;
+  let accumulatedText = '';
+  let lastError: string | null = null;
+  let eventsReceived = 0;
+  let unsubscribe: (() => void) | null = null;
 
-    const unsubscribe = session.subscribe((event) => {
+  try {
+    unsubscribe = session.subscribe((event) => {
       eventsReceived++;
       log(`event #${eventsReceived}: type=${event.type}`);
 
@@ -172,6 +174,8 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
         if (msg?.role === 'assistant') {
           if (msg?.stopReason === 'error' && msg?.errorMessage) {
             lastError = msg.errorMessage;
+          } else if (msg?.stopReason === 'aborted') {
+            lastError = '__aborted__';
           } else {
             lastError = null;
           }
@@ -205,18 +209,34 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
     log('prompt() starting...');
     await session.prompt(command.content);
     log(`prompt() resolved, events=${eventsReceived}, textLen=${accumulatedText.length}, lastError=${lastError}`);
-    unsubscribe();
-
-    if (lastError) {
-      emit({ type: 'agent_error', id: command.id, message: lastError });
-    } else if (!accumulatedText) {
-      emit({ type: 'agent_error', id: command.id, message: '模型未返回任何输出，请检查模型ID和API配置是否正确' });
-    } else {
-      emit({ type: 'agent_done', id: command.id });
-    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    emit({ type: 'agent_error', id: command.id, message });
+    log(`prompt() threw: ${message}`);
+    // If abort was requested, emit done so the frontend clears streaming state
+    if (abortRequested) {
+      abortRequested = false;
+      emit({ type: 'agent_done', id: command.id });
+    } else {
+      emit({ type: 'agent_error', id: command.id, message });
+    }
+    return;
+  } finally {
+    if (unsubscribe) unsubscribe();
+  }
+
+  // Handle result after prompt completed (either naturally or via abort)
+  if (abortRequested) {
+    abortRequested = false;
+    log('prompt() completed after abort, emitting agent_done');
+    emit({ type: 'agent_done', id: command.id });
+  } else if (lastError === '__aborted__') {
+    emit({ type: 'agent_done', id: command.id });
+  } else if (lastError) {
+    emit({ type: 'agent_error', id: command.id, message: lastError });
+  } else if (!accumulatedText) {
+    emit({ type: 'agent_error', id: command.id, message: '模型未返回任何输出，请检查模型ID和API配置是否正确' });
+  } else {
+    emit({ type: 'agent_done', id: command.id });
   }
 }
 
@@ -426,7 +446,13 @@ async function handleCommand(command: SidecarCommand) {
       await handleReset();
       break;
     case 'stop':
-      // 目前 AgentSession 不支持从外部中断，此处为空操作
+      if (session) {
+        abortRequested = true;
+        log('stop: aborting session');
+        session.abort().catch((error) => {
+          log(`session.abort() failed: ${error}`);
+        });
+      }
       break;
   }
 }

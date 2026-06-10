@@ -6,6 +6,7 @@ import {
   restartSidecar,
   sendAgentMessage,
   setActiveAgentModel,
+  stopAgentStream,
   type ActiveAgentModel,
 } from '../services/tauri';
 import type { AgentMessage, AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
@@ -23,6 +24,7 @@ interface AgentStore {
 
   refreshStatus: () => Promise<void>;
   sendMessage: (content: string, displayContent?: string, fullContent?: string) => Promise<void>;
+  stopStreaming: () => Promise<void>;
   restart: () => Promise<void>;
   applyModel: (name: string | null) => Promise<void>;
   handleEvent: (event: SidecarEvent) => void;
@@ -82,6 +84,15 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
           isError: true,
         }],
       }));
+    }
+  },
+
+  stopStreaming: async () => {
+    try {
+      await stopAgentStream();
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      set({ error: errorMsg });
     }
   },
 

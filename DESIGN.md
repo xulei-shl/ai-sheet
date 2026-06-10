@@ -206,7 +206,7 @@
 | `Ctrl/Cmd+K` | 聚焦 AI 输入框 |
 | `Ctrl/Cmd+B` | 切换左栏 |
 | `Ctrl/Cmd+\` | 切换右栏 |
-| `Escape` | 关闭右栏、停止流式 |
+| `Escape` | 中断 Agent 生成，若未生成则关闭右栏 |
 
 ---
 
@@ -961,7 +961,8 @@ agent_delta/done → agentStore.handleEvent (按 msg- 前缀匹配)
 - 模板从 `promptStore` 取（按 `name` 精确匹配 `Excel公式生成` / `提示词生成`）。
 - Excel 上下文优先用 `agentStore.loadedContext`，仅 sample preview 从 `excelStore` 补。
 - `{}` 占位符表示行号替换（`apply_formula` 实际行为）。
-- `stop` 命令：AgentSession 当前不支持外部中断，为空操作（既有缺陷，未修复）。
+- `stop` 命令：调用 `session.abort()` 中断当前 Agent 运行。支持在 LLM 调用、工具执行等
+  任何阶段中断，中断后前端自动进入就绪状态。
 - 与原 Direct LLM 方案的区别：
   - 不再有独立的 `directStreamingRequestId` / `direct-` 前缀路由（已删除）。
   - 快捷消息纳入对话历史，后续提问可引用此前生成的公式或提示词。

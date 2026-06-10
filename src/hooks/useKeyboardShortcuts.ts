@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useAgentStore } from '../stores/agentStore';
 import { useUiStore } from '../stores/uiStore';
 
 export function useKeyboardShortcuts() {
@@ -43,8 +44,14 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // Escape: Close right sidebar
+      // Escape: Stop streaming if active, else close right sidebar
       if (e.key === 'Escape') {
+        const agentStreamingRequestId = useAgentStore.getState().agentStreamingRequestId;
+        if (agentStreamingRequestId !== null) {
+          e.preventDefault();
+          useAgentStore.getState().stopStreaming();
+          return;
+        }
         if (!rightSidebarCollapsed && !isInput) {
           setRightSidebarCollapsed(true);
         }

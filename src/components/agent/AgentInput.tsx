@@ -9,6 +9,7 @@ interface AgentInputProps {
   disabled?: boolean;
   isStreaming?: boolean;
   onSend: (content: string) => Promise<void>;
+  onStop?: () => void;
   value?: string;
   onValueChange?: (value: string) => void;
   placeholder?: string;
@@ -26,7 +27,7 @@ function ModelAvatar({ name }: { name: string }) {
   );
 }
 
-export function AgentInput({ disabled, isStreaming, onSend, value: controlledValue, onValueChange, placeholder: customPlaceholder }: AgentInputProps) {
+export function AgentInput({ disabled, isStreaming, onSend, onStop, value: controlledValue, onValueChange, placeholder: customPlaceholder }: AgentInputProps) {
   const [localContent, setLocalContent] = useState('');
   const [modelOpen, setModelOpen] = useState(false);
   const modelRef = useRef<HTMLDivElement>(null);
@@ -229,15 +230,28 @@ export function AgentInput({ disabled, isStreaming, onSend, value: controlledVal
               </div>
             )}
           </div>
-          <button
-            type="submit"
-            disabled={!canSend}
-            className="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
-            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
-            aria-label={isStreaming ? '正在生成' : '发送消息'}
-          >
-            {isStreaming ? <Square className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
-          </button>
+          {isStreaming ? (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); onStop?.(); }}
+              className="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md transition-colors hover:opacity-80"
+              style={{ background: 'var(--error)', color: 'white' }}
+              aria-label="中断生成"
+              title="中断生成"
+            >
+              <Square className="h-3.5 w-3.5" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!canSend}
+              className="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+              style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+              aria-label="发送消息"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </form>

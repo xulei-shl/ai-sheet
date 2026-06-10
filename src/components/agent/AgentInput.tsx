@@ -1,5 +1,5 @@
 import { ChevronDown, Send, Square } from 'lucide-react';
-import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAgentStore } from '../../stores/agentStore';
 import { useConfigStore } from '../../stores/configStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -31,6 +31,7 @@ export function AgentInput({ disabled, isStreaming, onSend, onStop, value: contr
   const [localContent, setLocalContent] = useState('');
   const [modelOpen, setModelOpen] = useState(false);
   const modelRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const bootstrapAppliedRef = useRef(false);
 
   const isControlled = controlledValue !== undefined;
@@ -38,6 +39,18 @@ export function AgentInput({ disabled, isStreaming, onSend, onStop, value: contr
   const setContent = isControlled
     ? (v: string) => onValueChange?.(v)
     : setLocalContent;
+
+  const autoGrow = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+    el.style.overflowY = el.scrollHeight > 200 ? 'auto' : 'hidden';
+  }, []);
+
+  useEffect(() => {
+    autoGrow();
+  }, [content, autoGrow]);
 
   const selectedAgentModelName = useUiStore((s) => s.selectedAgentModelName);
   const setSelectedAgentModelName = useUiStore((s) => s.setSelectedAgentModelName);
@@ -139,15 +152,19 @@ export function AgentInput({ disabled, isStreaming, onSend, onStop, value: contr
           输入给 AI-Sheet Agent 的消息
         </label>
         <textarea
+          ref={textareaRef}
           id="agent-input"
           data-ai-input="true"
           value={content}
-          onChange={(event) => setContent(event.target.value)}
+          onChange={(event) => {
+            setContent(event.target.value);
+            autoGrow();
+          }}
           disabled={disabled || isStreaming}
-          rows={3}
+          rows={4}
           placeholder={placeholder}
           className="block w-full resize-none border-0 bg-transparent px-3 pt-2.5 pb-1.5 text-sm outline-none placeholder:opacity-50 disabled:opacity-60"
-          style={{ color: 'var(--ink)' }}
+          style={{ color: 'var(--ink)', minHeight: '80px', maxHeight: '200px', overflowY: 'hidden' }}
           onKeyDown={handleKeyDown}
         />
         <div

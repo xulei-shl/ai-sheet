@@ -11,6 +11,10 @@ import {
   ChevronDown,
   ChevronRight,
   Cpu,
+  Layers,
+  Sliders,
+  Columns3,
+  MessageSquareText,
 } from 'lucide-react';
 import { useExcelStore } from '../stores/excelStore';
 import { usePromptStore } from '../stores/promptStore';
@@ -179,8 +183,9 @@ export function LLMProcessingPage() {
         className="w-72 shrink-0 border-r flex flex-col overflow-hidden"
         style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
       >
-        <div className="p-3 border-b" style={{ borderColor: 'var(--border)' }}>
-          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>数据源</span>
+        <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--border)' }}>
+          <Layers className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
+          <span className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>数据源</span>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
           {files.map((file, fi) => {
@@ -238,134 +243,141 @@ export function LLMProcessingPage() {
         className="w-80 shrink-0 border-r flex flex-col overflow-hidden"
         style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
       >
-        <div className="p-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
-          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>处理配置</span>
-          <Bot className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
+        <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--border)' }}>
+          <Sliders className="h-3.5 w-3.5" style={{ color: 'var(--primary)' }} />
+          <span className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>处理配置</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
-          {/* Model Selection */}
-          <div className="space-y-1">
-            <label className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--muted)' }}>
-              <Cpu className="h-3 w-3" />
-              大模型选择
-            </label>
-            <SearchableSelect
-              options={[
-                { value: '', label: '选择模型' },
-                ...openAIModels.map((m) => ({ value: m.name, label: m.name })),
-              ]}
-              value={selectedModel?.name ?? ''}
-              onChange={(v) => {
-                const model = typeof v === 'string' ? openAIModels.find((m) => m.name === v) ?? null : null;
-                setSelectedModel(model);
-              }}
-              mode="single"
-              placeholder="选择模型..."
-              searchPlaceholder="搜索模型..."
-              formatValue={(sel) => sel[0]?.label || '选择模型'}
-            />
-            {userModels.length > 0 && openAIModels.length === 0 && (
-              <p className="text-[9px]" style={{ color: 'var(--warning)' }}>
-                当前没有 OpenAI Completions 协议的模型，请在配置页面添加
-              </p>
-            )}
-          </div>
-
-          {/* Batch Size */}
-          <div className="space-y-1">
-            <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              批次大小（并发数）
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={batchSize}
-              onChange={(e) => setBatchSize(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-              className="w-full rounded px-2 py-1.5 text-[11px]"
-              style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-            />
-          </div>
-
-          {/* Input Columns Selector */}
-          {availableColumns.length > 0 && (
-            <div className="space-y-1">
-              <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>输入列 (可多选)</label>
-              <SearchableSelect
-                options={availableColumns.map((c) => ({ value: c.name, label: c.name }))}
-                value={inputColumns}
-                onChange={(v) => setInputColumns(Array.isArray(v) ? v : [])}
-                mode="multiple"
-                placeholder="选择输入列..."
-                searchPlaceholder="搜索输入列..."
-              />
+        <div className="flex-1 overflow-y-auto">
+          {/* Section: Model Config */}
+          <div className="px-3 pt-3 pb-2 space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <Cpu className="h-3 w-3" style={{ color: 'var(--muted)' }} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>模型配置</span>
             </div>
-          )}
-
-          {/* Output Column */}
-          {availableColumns.length > 0 && (
-            <div className="space-y-1">
-              <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>输出结果列</label>
+            <div className="space-y-2">
               <SearchableSelect
                 options={[
-                  ...availableColumns
-                    .filter((c) => !inputColumns.includes(c.name))
-                    .map((c) => ({ value: c.name, label: c.name })),
-                  { value: '__new__', label: '[新建列...]' },
+                  { value: '', label: '选择模型' },
+                  ...openAIModels.map((m) => ({ value: m.name, label: m.name })),
                 ]}
-                value={outputColumn}
-                onChange={(v) => setOutputColumn(typeof v === 'string' ? v : '')}
+                value={selectedModel?.name ?? ''}
+                onChange={(v) => {
+                  const model = typeof v === 'string' ? openAIModels.find((m) => m.name === v) ?? null : null;
+                  setSelectedModel(model);
+                }}
                 mode="single"
-                placeholder="选择输出列..."
-                searchPlaceholder="搜索输出列..."
+                placeholder="选择模型..."
+                searchPlaceholder="搜索模型..."
+                formatValue={(sel) => sel[0]?.label || '选择模型'}
               />
-              {outputColumn === '__new__' && (
+              {userModels.length > 0 && openAIModels.length === 0 && (
+                <p className="text-[9px]" style={{ color: 'var(--warning)' }}>
+                  当前没有 OpenAI Completions 协议的模型，请在配置页面添加
+                </p>
+              )}
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[10px]" style={{ color: 'var(--muted)' }}>LLM 温度</label>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'var(--bg)', color: 'var(--primary)' }}>{modelParams.temperature}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={modelParams.temperature}
+                  onChange={(e) => setModelParams({ temperature: parseFloat(e.target.value) })}
+                  className="w-full h-1.5 accent-[var(--primary)] cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mx-3 border-t" style={{ borderColor: 'var(--border)' }} />
+
+          {/* Section: Column Mapping */}
+          <div className="px-3 py-2.5 space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <Columns3 className="h-3 w-3" style={{ color: 'var(--muted)' }} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>数据映射</span>
+            </div>
+            <div className="space-y-2">
+              {availableColumns.length > 0 && (
+                <>
+                  <div className="space-y-1">
+                    <label className="text-[10px]" style={{ color: 'var(--muted)' }}>输入列 (可多选)</label>
+                    <SearchableSelect
+                      options={availableColumns.map((c) => ({ value: c.name, label: c.name }))}
+                      value={inputColumns}
+                      onChange={(v) => setInputColumns(Array.isArray(v) ? v : [])}
+                      mode="multiple"
+                      placeholder="选择输入列..."
+                      searchPlaceholder="搜索输入列..."
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px]" style={{ color: 'var(--muted)' }}>输出结果列</label>
+                    <SearchableSelect
+                      options={[
+                        ...availableColumns
+                          .filter((c) => !inputColumns.includes(c.name))
+                          .map((c) => ({ value: c.name, label: c.name })),
+                        { value: '__new__', label: '[新建列...]' },
+                      ]}
+                      value={outputColumn}
+                      onChange={(v) => setOutputColumn(typeof v === 'string' ? v : '')}
+                      mode="single"
+                      placeholder="选择输出列..."
+                      searchPlaceholder="搜索输出列..."
+                    />
+                    {outputColumn === '__new__' && (
+                      <input
+                        type="text"
+                        value={newColumnName}
+                        onChange={(e) => setNewColumnName(e.target.value)}
+                        placeholder="输入新列名..."
+                        className="w-full rounded px-2 py-1.5 text-[11px] mt-1"
+                        style={{ background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--ink)' }}
+                      />
+                    )}
+                  </div>
+                </>
+              )}
+              <div className="space-y-1">
+                <label className="text-[10px]" style={{ color: 'var(--muted)' }}>错误信息列</label>
                 <input
                   type="text"
-                  value={newColumnName}
-                  onChange={(e) => setNewColumnName(e.target.value)}
-                  placeholder="输入新列名..."
-                  className="w-full rounded px-2 py-1.5 text-[11px] mt-1"
-                  style={{ background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--ink)' }}
+                  value={errorColumn}
+                  onChange={(e) => setErrorColumn(e.target.value)}
+                  className="w-full rounded px-2 py-1.5 text-[11px]"
+                  style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
                 />
-              )}
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px]" style={{ color: 'var(--muted)' }}>批次大小（并发数）</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={batchSize}
+                  onChange={(e) => setBatchSize(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                  className="w-full rounded px-2 py-1.5 text-[11px]"
+                  style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
+                />
+              </div>
             </div>
-          )}
-
-          {/* Error Column */}
-          <div className="space-y-1">
-            <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>错误信息列</label>
-            <input
-              type="text"
-              value={errorColumn}
-              onChange={(e) => setErrorColumn(e.target.value)}
-              className="w-full rounded px-2 py-1.5 text-[11px]"
-              style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--ink)' }}
-            />
           </div>
 
-          {/* Temperature */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>LLM 温度</label>
-              <span className="text-[10px] font-mono px-1 rounded bg-[var(--bg)]" style={{ color: 'var(--primary)' }}>{modelParams.temperature}</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={modelParams.temperature}
-              onChange={(e) => setModelParams({ temperature: parseFloat(e.target.value) })}
-              className="w-full h-1.5 accent-[var(--primary)] cursor-pointer"
-            />
-          </div>
+          <div className="mx-3 border-t" style={{ borderColor: 'var(--border)' }} />
 
-          {/* Prompt Setup */}
-          <div>
-            <label className="text-[10px] font-semibold uppercase tracking-wider mb-1 block" style={{ color: 'var(--muted)' }}>提示词模板</label>
-            <div className="mb-2 flex gap-1">
+          {/* Section: Prompt Template */}
+          <div className="px-3 py-2.5 space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <MessageSquareText className="h-3 w-3" style={{ color: 'var(--muted)' }} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>提示词模板</span>
+            </div>
+            <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => setPromptMode('saved')}
@@ -419,13 +431,17 @@ export function LLMProcessingPage() {
       {/* Right Monitor Workspace */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Workspace Header */}
-        <div className="p-3 border-b flex items-center justify-between shrink-0" style={{ borderColor: 'var(--border)' }}>
-          <div>
-            <span className="text-[10px]" style={{ color: 'var(--muted)' }}>LLM 批量数据处理控制台</span>
-            <h2 className="text-sm font-semibold flex items-center gap-1.5">
+        <div className="px-4 py-3 border-b flex items-center justify-between shrink-0" style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md" style={{ background: 'var(--primary-glow)' }}>
               <Terminal className="h-4 w-4" style={{ color: 'var(--primary)' }} />
-              {currentFile ? `${currentFile.name} · ${selectedSheet || '未选择'}` : '未加载数据'}
-            </h2>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-medium" style={{ color: 'var(--muted)' }}>LLM 批量处理控制台</div>
+              <div className="text-sm font-semibold truncate" style={{ color: 'var(--ink)' }}>
+                {currentFile ? `${currentFile.name} · ${selectedSheet || '未选择'}` : '未加载数据'}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5">

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="ai-sheet-icon-title ai-sheet-icon-desc">
+  <title id="ai-sheet-icon-title">AI Sheet Icon</title>
+  <desc id="ai-sheet-icon-desc">A rounded spreadsheet icon with AI nodes and a sparkle.</desc>
+
+  <defs>
+    <linearGradient id="icon-bg" x1="16" y1="12" x2="112" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#dddbc7"/>
+      <stop offset="1" stop-color="#ceceb4"/>
+    </linearGradient>
+
+    <linearGradient id="icon-accent" x1="34" y1="30" x2="98" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3f50a3"/>
+      <stop offset="1" stop-color="#9db56d"/>
+    </linearGradient>
+
+    <filter id="icon-shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#343250" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect x="12" y="10" width="104" height="104" rx="28" fill="url(#icon-bg)" filter="url(#icon-shadow)"/>
+
+  <!-- Folded corner -->
+  <path d="M88 10h2c14.36 0 26 11.64 26 26v2L88 10Z" fill="#e7e6d3" opacity="0.95"/>
+  <path d="M88 10v22c0 3.31 2.69 6 6 6h22" fill="none" stroke="#b9b8a3" stroke-width="2.5"/>
+
+  <!-- Sheet grid -->
+  <rect x="31" y="36" width="66" height="54" rx="10" fill="#f1efe0" opacity="0.76"/>
+  <path d="M31 54h66M31 72h66M53 36v54M75 36v54" stroke="#455a67" stroke-opacity="0.3" stroke-width="2.5"/>
+
+  <!-- AI curve -->
+  <path d="M41 81C50 61 61 68 68 52C75 36 87 41 94 27" fill="none" stroke="url(#icon-accent)" stroke-width="6" stroke-linecap="round"/>
+
+  <circle cx="41" cy="81" r="5.5" fill="#3f50a3"/>
+  <circle cx="68" cy="52" r="5.5" fill="#9db56d"/>
+  <circle cx="94" cy="27" r="5.5" fill="#3f50a3"/>
+
+  <!-- Spark -->
+  <path d="M92 66l4 9 8.5 4-8.5 4-4 9-4-9-8.5-4 8.5-4 4-9Z" fill="#9db56d"/>
+  <path d="M40 24l2.5 5.3L48 32l-5.5 2.7L40 40l-2.5-5.3L32 32l5.5-2.7L40 24Z" fill="#3f50a3"/>
+</svg>

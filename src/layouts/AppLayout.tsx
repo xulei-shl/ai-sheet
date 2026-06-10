@@ -23,6 +23,8 @@ import { AgentChatPanel } from '../components/agent/AgentChatPanel';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTheme } from '../hooks/useTheme';
+import logoDark from '../../assets/logo/ai-sheet-logo-dark.svg';
+import logoLight from '../../assets/logo/ai-sheet-logo-light.svg';
 import { DataPage } from '../pages/DataPage';
 import { FormulaPage } from '../pages/FormulaPage';
 import { AiPage } from '../pages/AiPage';
@@ -120,7 +122,7 @@ export function AppLayout() {
     SIDEBAR_LEFT_MIN, SIDEBAR_LEFT_MAX,
   );
   useKeyboardShortcuts();
-  useTheme();
+  const resolvedTheme = useTheme();
 
   const handleRightResize = useSidebarResize(
     rightSidebarCollapsed, rightSidebarWidth, setRightSidebarWidth,
@@ -157,9 +159,11 @@ export function AppLayout() {
           className="flex h-14 flex-shrink-0 items-center border-b px-5"
           style={{ borderColor: 'var(--border)' }}
         >
-          <div className="flex items-center gap-2">
-            <div className="text-base font-semibold whitespace-nowrap leading-tight">AI-Sheet</div>
-          </div>
+          <img
+            src={resolvedTheme === 'dark' ? logoDark : logoLight}
+            alt="AI-Sheet"
+            className="h-7 w-auto flex-shrink-0"
+          />
         </header>
         <div className="flex-1 overflow-y-auto p-3">
           <div className="space-y-1">

@@ -5,7 +5,8 @@
 > v9 变更：路径统一与资源打包——`.pi/` 目录和 `src-agent/dist/` 捆绑为 Tauri 资源，
 > 首次运行时自动复制到 `app_data_dir`；Rust skill 命令移除 `project_root` 参数，
 > 改用 `app.path().app_data_dir()`；AGENTS.md 从 `initialCwd`（即 `--db-dir` 传入的 app_data_dir）
-> 读取；前端 `SkillsPage` 不再通过 `import.meta.url` 推断项目根路径。
+> 读取；新增 SYSTEM.md 身份定义 + systemPromptOverride 显式注入（与 AGENTS.md 一致的双注入模式）；
+> 前端 `SkillsPage` 不再通过 `import.meta.url` 推断项目根路径。
 > 三端（Rust、Agent、前端）统一使用 `app_data_dir()` 作为基准路径。
 >
 > v8 变更：新增 AGENTS.md 元规则机制——`.pi/AGENTS.md` 定义 agent 身份、
@@ -511,8 +512,9 @@ ai-sheet/
 
 ├── .env                           ← 代理配置（HTTP_PROXY/HTTPS_PROXY，不入库）
 ├── .env.example                   ← 代理配置模板（入库）
-├── .pi/                           ← 捆绑资源，首次运行复制到 app_data_dir
-│   ├── AGENTS.md                  ← Agent 元规则（身份、交互规则、专业规则、风格），通过 agentsFilesOverride 注入
+├── .pi/                           ← 捆绑资源，首次运行复制到 app_data_dir（§8.2.1）
+│   ├── SYSTEM.md                  ← Agent 身份定义，通过 systemPromptOverride 注入
+│   ├── AGENTS.md                  ← 顶层基础原则，通过 agentsFilesOverride 注入
 │   └── skills/                    ← 技能目录（DefaultResourceLoader 自动发现 + 首次运行复制）
 │       └── python-processing/
 │           └── SKILL.md           ← 默认技能
@@ -729,7 +731,73 @@ Node.js: currentCwd = cwd → session.steer(目录变更通知)
 emit('cwd_changed')
 ```
 
-### 8.2 动态工作目录与技能管理
+### 8.2 资源捆绑、首次运行复制与动态工作目录
+
+#### 8.2.1 资源捆绑与首次运行复制
+
+**问题**：`.pi/` 目录（含 AGENTS.md、SYSTEM.md、skills/）和 `src-agent/dist/` 需要在
+构建时打包到应用资源中，并在首次启动时复制到 `app_data_dir`，使 agent 和 Rust 后端
+能在运行时从已知固定路径读取。开发模式下则直接从项目源码目录读取。
+
+**捆绑配置**（`src-tauri/tauri.conf.json:30-31`）：
+
+```json
+"resources": {
+  "../.pi/": ".pi/",
+}
+```
+
+`../.pi/` 相对于 `src-tauri/`，即项目根目录的 `.pi/` 整个目录树被捆绑为 Tauri 资源。
+
+**首次运行复制逻辑**（`src-tauri/src/lib.rs:88-124`）：
+
+```rust
+if let Ok(data_dir) = app.path().app_data_dir() {
+    let pi_dest = data_dir.join(".pi");
+    if !pi_dest.exists() {  // 仅当目标不存在时才复制
+        let pi_src = None::<std::path::PathBuf>
+            // 生产模式：从捆绑资源目录
+            .into_iter()
+            .chain(app.path().resource_dir().ok().map(|d| d.join(".pi")))
+            // 开发模式：从项目根目录
+            .chain(std::env::current_dir().ok().and_then(|cwd| {
+                let root = if cwd.file_name().and_then(|n| n.to_str()) == Some("src-tauri") {
+                    cwd.parent()?.to_path_buf()
+                } else { cwd };
+                Some(root.join(".pi"))
+            }))
+            .find(|p| p.exists());
+        if let Some(src) = pi_src {
+            copy_dir_all(&src, &pi_dest);
+        }
+    }
+}
+```
+
+**复制行为总结**：
+
+| 场景 | 源路径 | 目标路径 | 触发条件 |
+|------|--------|----------|----------|
+| 生产首次运行 | `resource_dir/.pi/`（捆绑资源） | `app_data_dir/.pi/` | 目标不存在 |
+| 开发首次运行 | `项目根/.pi/`（源码目录） | `app_data_dir/.pi/` | 目标不存在 |
+| 后续运行（含 `npm run tauri:dev`） | — | — | **跳过**（目标已存在） |
+
+> **关键注意**：`if !pi_dest.exists()` 意味着后续 `npm run tauri:dev` **不会**更新
+> `app_data_dir/.pi/`。修改 `.pi/` 下的文件后，需手动删除 `app_data_dir/.pi/` 再重启，
+> 或直接覆盖目标文件，变更才能生效。
+
+**`.pi/` 目录内容**：
+
+```
+.pi/
+├── SYSTEM.md                  ← Agent 身份定义（通过 systemPromptOverride 注入）
+├── AGENTS.md                  ← 顶层基础原则（通过 agentsFilesOverride 注入）
+└── skills/
+    └── python-processing/
+        └── SKILL.md           ← 自动发现
+```
+
+#### 8.2.2 动态工作目录
 
 **问题**：pi agent 的 `cwd` 决定了内置工具（bash/read/write/edit）的相对路径解析基准，
 也控制了 `DefaultResourceLoader` 对 `.pi/skills/` 等项目资源的目录扫描。
@@ -744,29 +812,40 @@ emit('cwd_changed')
 
 **默认 cwd**：Tauri app_data 目录（DB 数据库文件所在目录），通过 `--db-dir` 参数传入 sidecar。
 三端路径统一：Rust skill 命令、Agent `DefaultResourceLoader`、前端 `SkillsPage` 均以此为基准。
-`.pi/` 目录在首次运行时由 `lib.rs` 从捆绑资源复制到 `app_data_dir/.pi/`（支持 dev 模式从项目根目录退路复制）。
+`.pi/` 目录由首次运行复制机制（§8.2.1）从捆绑资源拷贝到 `app_data_dir/.pi/`。
 
 **Excel 加载切换**：前端 `addFile` 检测到首个 Excel 文件时，提取其父目录，
 通过 `set_agent_cwd` → Rust → sidecar `set_cwd` 命令更新 `currentCwd`，
 并 `session.steer()` 通知 agent 目录已变更。多个 Excel 以第一个为准。
 
-**技能自动发现**：`DefaultResourceLoader` 自动扫描 `{cwd}/.pi/skills/*/SKILL.md`，
-所有技能目录均被识别并注入 agent 可用列表。无需硬编码或 `skillsOverride` 回调。
-运行时行为一致：启动时仅注入 name + description 元数据到系统提示词，
-agent 自主判断是否需要 read 加载完整 SKILL.md 内容后执行。
+#### 8.2.3 System Prompt 三层注入
 
-**AGENTS.md 元规则注入**：`.pi/AGENTS.md` 定义 agent 的身份、交互规则（追问与确认）、
-Excel 专业规则、Python 执行规则、回答风格等元规则。由于 `DefaultResourceLoader`
-从 cwd 向上遍历发现 `AGENTS.md`，而 cwd 随用户加载的 Excel 文件动态变化，
-因此通过 `agentsFilesOverride` 回调显式注入，确保任意工作目录下均可加载：
+`.pi/` 下的三个源文件在 agent 启动时分别通过不同机制加载，合并为最终 system prompt：
+
+| 文件 | 加载机制 | 在 System Prompt 中的位置 | 用途 |
+|------|----------|---------------------------|------|
+| `SYSTEM.md` | `systemPromptOverride` 显式读 `join(initialCwd, '.pi', 'SYSTEM.md')` | `customPrompt`（最顶层） | Agent 身份："你是 AI-Sheet..." |
+| `AGENTS.md` | `agentsFilesOverride` + `DefaultResourceLoader` 自动向上遍历 | `<project_context>` | 核心原则、Excel 规则、交互规则 |
+| `skills/*/SKILL.md` | `DefaultResourceLoader` 自动从 `{cwd}/.pi/skills/` 发现 | `<available_skills>` | 技能详情（Python 处理流程等） |
+
+**代码实现**（`src-agent/src/agent.ts`）：
 
 ```ts
-// src-agent/src/agent.ts（v9）
-const agentsMdPath = join(initialCwd, '.pi', 'AGENTS.md');
+// 从 .pi/ 目录显式加载 AGENTS.md 和 SYSTEM.md（与动态 cwd 解耦）
+const piDir = join(initialCwd, '.pi');
+const agentsMdPath = join(piDir, 'AGENTS.md');
+const systemMdPath = join(piDir, 'SYSTEM.md');
 
 const loader = new DefaultResourceLoader({
   cwd: initialCwd,
   agentDir: getAgentDir(),
+  systemPromptOverride: () => {
+    try {
+      return readFileSync(systemMdPath, 'utf-8');
+    } catch {
+      return undefined; // 回退 pi 默认身份
+    }
+  },
   agentsFilesOverride: (current) => {
     try {
       const content = readFileSync(agentsMdPath, 'utf-8');
@@ -782,14 +861,33 @@ await loader.reload();
 ```
 
 `initialCwd` 由 `main.ts` 从 `--db-dir` 参数解析，值为 Tauri `app_data_dir()`。
-`AGENTS.md` 由首次运行时的资源复制机制从捆绑资源拷贝到 `app_data_dir/.pi/AGENTS.md`，
-因此此处直接读 `join(initialCwd, '.pi', 'AGENTS.md')` 即可，不再依赖 `__dirname` 相对路径。
+所有 `.pi/` 文件均由首次运行复制机制（§8.2.1）从捆绑资源拷贝到 `app_data_dir/.pi/`，
+因此 agent 侧直接读 `join(initialCwd, '.pi', ...)` 即可，不再依赖 `__dirname` 相对路径。
 
-**system.ts 职责变更**：原 `buildSystemPrompt()` 硬编码的静态角色与规则
-已迁移至 AGENTS.md，`system.ts` 现仅保留空函数占位。动态上下文（加载的文件、
-样例数据）由 `main.ts` 的 `handleSteer()` 通过 `session.steer()` 在运行时注入。
+**`systemPromptOverride` vs `agentsFilesOverride` 对比**：
 
-**技能管理 UI**：前端新增「技能管理」Tab（SkillsPage），三栏布局：
+| 回调 | 输入 | 输出 | 覆盖目标 |
+|------|------|------|----------|
+| `systemPromptOverride(basePrompt)` | 自动发现的 SYSTEM.md 内容 或 `undefined` | 返回字符串替换 `customPrompt`；返回 `undefined` 回退 pi 默认 | Pi 默认或自动发现的身份层 |
+| `agentsFilesOverride(current)` | `{ agentsFiles: [...] }`（含自动向上遍历结果） | `{ agentsFiles: [...] }` 追加或替换 | `<project_context>` 列表 |
+
+#### 8.2.4 技能自动发现
+
+`DefaultResourceLoader` 自动扫描 `{cwd}/.pi/skills/*/SKILL.md`，
+所有技能目录均被识别并注入 agent 可用列表。无需硬编码或 `skillsOverride` 回调。
+运行时行为一致：启动时仅注入 name + description 元数据到系统提示词，
+agent 自主判断是否需要 read 加载完整 SKILL.md 内容后执行。
+
+#### 8.2.5 Compaction 自动上下文压缩
+
+`SettingsManager.inMemory()` 默认 `compaction.enabled: true`
+（`settings-manager.js:455`，默认值见文档 `settings.md:75`），
+会在长对话中自动对早期消息做摘要压缩，减少 token 消耗。
+项目代码未设置 `compaction` 字段，因此使用默认启用状态。
+
+#### 8.2.6 技能管理 UI
+
+前端提供「技能管理」Tab（SkillsPage），三栏布局：
 左侧技能列表（搜索/新建/删除）→ 中间文件树（递归浏览技能目录内所有文件和子目录）→
 右侧内容预览（Markdown 预览/原文切换、代码文件等宽显示）。
 

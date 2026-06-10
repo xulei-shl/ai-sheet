@@ -59,12 +59,21 @@ export async function createSheetAgent(bridge: BridgeClient, initialCwd: string)
     }
   }
 
-  // AGENTS.md 元规则：从 app_data_dir/.pi/AGENTS.md 读取
-  const agentsMdPath = join(initialCwd, '.pi', 'AGENTS.md');
+  // 从 .pi/ 目录显式加载 AGENTS.md 和 SYSTEM.md（与动态 cwd 解耦）
+  const piDir = join(initialCwd, '.pi');
+  const agentsMdPath = join(piDir, 'AGENTS.md');
+  const systemMdPath = join(piDir, 'SYSTEM.md');
 
   const loader = new DefaultResourceLoader({
     cwd: initialCwd,
     agentDir: getAgentDir(),
+    systemPromptOverride: () => {
+      try {
+        return readFileSync(systemMdPath, 'utf-8');
+      } catch {
+        return undefined;
+      }
+    },
     agentsFilesOverride: (current) => {
       try {
         const content = readFileSync(agentsMdPath, 'utf-8');

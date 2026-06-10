@@ -21,8 +21,10 @@ interface AgentStore {
   isApplyingModel: boolean;
   appliedModelName: string | null;
   loadedContext: AgentContext | null;
+  pendingInputValue: string | null;
 
   refreshStatus: () => Promise<void>;
+  setPendingInputValue: (value: string | null) => void;
   sendMessage: (content: string, displayContent?: string, fullContent?: string) => Promise<void>;
   stopStreaming: () => Promise<void>;
   restart: () => Promise<void>;
@@ -43,6 +45,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   isApplyingModel: false,
   appliedModelName: null,
   loadedContext: null,
+  pendingInputValue: null,
 
   refreshStatus: async () => {
     const status = await getAgentStatus();
@@ -288,6 +291,13 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   setLoadedContext: (context) => {
     set({ loadedContext: context });
+  },
+
+  setPendingInputValue: (value) => {
+    const current = get().pendingInputValue;
+    if (current !== value) {
+      set({ pendingInputValue: value });
+    }
   },
 
   clearMessages: () => {

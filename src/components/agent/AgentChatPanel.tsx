@@ -29,6 +29,17 @@ export function AgentChatPanel() {
   const [agentInput, setAgentInput] = useState('');
   const [quickPlaceholder, setQuickPlaceholder] = useState<string | null>(null);
 
+  const pendingInputValue = useAgentStore((s) => s.pendingInputValue);
+  const setPendingInputValue = useAgentStore((s) => s.setPendingInputValue);
+
+  useEffect(() => {
+    if (pendingInputValue) {
+      setAgentInput(pendingInputValue);
+      setQuickPlaceholder(null);
+      setPendingInputValue(null);
+    }
+  }, [pendingInputValue, setPendingInputValue]);
+
   // Auto-scroll state
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isNearBottom, setIsNearBottom] = useState(true);

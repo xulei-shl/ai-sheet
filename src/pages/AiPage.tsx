@@ -96,9 +96,10 @@ export function AiPage() {
                 </p>
                 <button
                   onClick={() => {
-                    useAgentStore.getState().sendMessage(
-                      '我需要用 Python 处理 Excel 数据。请先查看已加载的数据结构，然后帮我编写处理脚本。如有必要，请使用 /skill:python-processing 工作流。'
+                    useAgentStore.getState().setPendingInputValue(
+                      '我需要用 Python 处理 Excel 数据。请先查看已加载的数据结构，然后帮我编写处理脚本。如有必要，请使用 /skill:python-processing 工作流。我的具体需求是：'
                     );
+                    updateUrl('llm-batch');
                   }}
                   className="mt-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-medium transition-opacity hover:opacity-80"
                   style={{ background: 'var(--primary)', color: 'white' }}

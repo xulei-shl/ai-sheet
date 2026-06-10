@@ -103,6 +103,16 @@ function UserMessage({ message }: { message: AgentMessage }) {
           {full}
         </div>
       )}
+      {expanded && (
+        <button
+          type="button"
+          onClick={() => setExpanded(false)}
+          className="mt-1 text-xs underline opacity-60 hover:opacity-100"
+          style={{ color: 'var(--muted)' }}
+        >
+          收起
+        </button>
+      )}
     </div>
   );
 }

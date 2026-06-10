@@ -13,8 +13,8 @@ export function ErrorState({ title = '调用失败', message, onRetry }: ErrorSt
       aria-live="assertive"
       className="flex items-start gap-3 rounded-lg border p-4 text-sm"
       style={{
-        background: 'oklch(0.6 0.12 20 / 0.1)',
-        borderColor: 'oklch(0.6 0.12 20 / 0.2)',
+        background: 'var(--error-soft)',
+        borderColor: 'var(--error)',
       }}
     >
       <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" style={{ color: 'var(--error)' }} />

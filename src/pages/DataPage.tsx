@@ -185,7 +185,7 @@ export function DataPage() {
               className="rounded-lg border p-3 text-sm text-center"
               style={{
                 borderColor: toast.type === 'warning' ? 'var(--error)' : 'var(--primary)',
-                background: toast.type === 'warning' ? 'oklch(0.6 0.12 20 / 0.1)' : 'oklch(0.5 0.15 150 / 0.1)',
+                background: toast.type === 'warning' ? 'var(--error-soft)' : 'var(--success-soft)',
                 color: toast.type === 'warning' ? 'var(--error)' : 'var(--primary)',
               }}
             >
@@ -194,7 +194,7 @@ export function DataPage() {
           )}
 
           {error && (
-            <div className="rounded-lg border p-4" style={{ borderColor: 'var(--error)', background: 'oklch(0.6 0.12 20 / 0.1)' }}>
+            <div className="rounded-lg border p-4" style={{ borderColor: 'var(--error)', background: 'var(--error-soft)' }}>
               <div className="flex items-center justify-between">
                 <p className="text-sm" style={{ color: 'var(--error)' }}>{error}</p>
                 <button onClick={clearError} className="text-sm font-medium hover:text-[var(--ink)] cursor-pointer" style={{ color: 'var(--muted)' }}>关闭</button>
@@ -244,7 +244,7 @@ export function DataPage() {
           className="absolute inset-0 z-50 flex flex-col items-center justify-center border-4 border-dashed"
           style={{ 
             borderColor: 'var(--primary)', 
-            background: 'oklch(from var(--bg) l c h / 0.9)',
+            background: 'color-mix(in oklch, var(--bg) 90%, transparent)',
             backdropFilter: 'blur(2px)'
           }}
         >
@@ -367,7 +367,7 @@ export function DataPage() {
               className="rounded-lg border p-3 text-xs animate-fade-in"
               style={{
                 borderColor: toast.type === 'warning' ? 'var(--error)' : 'var(--primary)',
-                background: toast.type === 'warning' ? 'oklch(0.6 0.12 20 / 0.1)' : 'oklch(0.5 0.15 150 / 0.1)',
+                background: toast.type === 'warning' ? 'var(--error-soft)' : 'var(--success-soft)',
                 color: toast.type === 'warning' ? 'var(--error)' : 'var(--primary)',
               }}
             >
@@ -376,7 +376,7 @@ export function DataPage() {
           )}
 
           {error && (
-            <div className="rounded-lg border p-3 text-xs" style={{ borderColor: 'var(--error)', background: 'oklch(0.6 0.12 20 / 0.1)' }}>
+            <div className="rounded-lg border p-3 text-xs" style={{ borderColor: 'var(--error)', background: 'var(--error-soft)' }}>
               <div className="flex items-center justify-between">
                 <p style={{ color: 'var(--error)' }}>{error}</p>
                 <button onClick={clearError} className="font-medium hover:text-[var(--ink)] cursor-pointer" style={{ color: 'var(--muted)' }}>关闭</button>

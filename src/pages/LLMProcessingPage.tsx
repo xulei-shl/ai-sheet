@@ -176,7 +176,7 @@ export function LLMProcessingPage() {
     <div className="flex h-full flex-row overflow-hidden bg-[var(--bg)]">
       {/* Left Sidebar: File Tree */}
       <div
-        className="w-60 shrink-0 border-r flex flex-col overflow-hidden"
+        className="w-72 shrink-0 border-r flex flex-col overflow-hidden"
         style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
       >
         <div className="p-3 border-b" style={{ borderColor: 'var(--border)' }}>
@@ -484,7 +484,7 @@ export function LLMProcessingPage() {
         <div className="flex-1 flex flex-col min-h-0 p-3 gap-3">
           {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 rounded-lg border p-2.5 text-xs shrink-0" style={{ borderColor: 'var(--error)', background: 'oklch(0.6 0.12 20 / 0.1)' }}>
+            <div className="flex items-center gap-2 rounded-lg border p-2.5 text-xs shrink-0" style={{ borderColor: 'var(--error)', background: 'var(--primary-soft)' }}>
               <AlertCircle className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--error)' }} />
               <span className="flex-1" style={{ color: 'var(--error)' }}>{error}</span>
               <button onClick={() => setError(null)} className="text-xs font-medium hover:text-[var(--ink)] cursor-pointer shrink-0" style={{ color: 'var(--muted)' }}>关闭</button>
@@ -516,7 +516,7 @@ export function LLMProcessingPage() {
                 {batchProgress.speed > 0 && (
                   <span>预计剩余: {Math.ceil((batchProgress.total - batchProgress.current) / batchProgress.speed)} 分钟</span>
                 )}
-                <span className="font-medium" style={{ color: batchProgress.status === 'paused' ? 'oklch(0.7 0.12 80)' : 'var(--primary)' }}>
+                <span className="font-medium" style={{ color: batchProgress.status === 'paused' ? 'var(--warning)' : 'var(--primary)' }}>
                   {batchProgress.status === 'running' ? '执行中' : batchProgress.status === 'paused' ? '已暂停' : '已完成'}
                 </span>
               </div>
@@ -547,18 +547,18 @@ export function LLMProcessingPage() {
             >
               {batchLogs.length > 0 ? (
                 batchLogs.map((log) => {
-                  let colorClass = 'text-slate-300';
-                  if (log.level === 'error') colorClass = 'text-red-400 font-medium';
-                  else if (log.level === 'success') colorClass = 'text-emerald-400';
-                  else if (log.level === 'warning') colorClass = 'text-amber-400';
+                  let logStyle: React.CSSProperties = { color: 'var(--log-info)' };
+                  if (log.level === 'error') logStyle = { color: 'var(--log-error)', fontWeight: 500 };
+                  else if (log.level === 'success') logStyle = { color: 'var(--log-success)' };
+                  else if (log.level === 'warning') logStyle = { color: 'var(--log-warning)' };
 
                   return (
-                    <div key={log.id} className={`flex items-start gap-1.5 ${colorClass}`}>
+                    <div key={log.id} className="flex items-start gap-1.5" style={logStyle}>
                       <span className="opacity-40 shrink-0 select-none text-[9px]">
                         [{new Date(log.timestamp).toLocaleTimeString()}]
                       </span>
                       {log.row >= 0 && (
-                        <span className="text-indigo-400 shrink-0 font-medium select-none text-[10px]">
+                        <span className="shrink-0 font-medium select-none text-[10px]" style={{ color: 'var(--log-row)' }}>
                           [第 {log.row + 1} 行]
                         </span>
                       )}
@@ -567,7 +567,7 @@ export function LLMProcessingPage() {
                   );
                 })
               ) : (
-                <div className="h-full flex items-center justify-center text-xs opacity-35 select-none text-slate-500 font-sans">
+                <div className="h-full flex items-center justify-center text-xs select-none font-sans" style={{ color: 'var(--log-dim)', opacity: 0.5 }}>
                   控制台空闲，等待任务开始...
                 </div>
               )}

@@ -99,7 +99,7 @@ export function PromptsPage() {
     <div className="flex h-full flex-row overflow-hidden bg-[var(--bg)]">
       {/* Left Sidebar: Search + New + List */}
       <div
-        className="w-80 shrink-0 border-r flex flex-col overflow-hidden"
+        className="w-72 shrink-0 border-r flex flex-col overflow-hidden"
         style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
       >
         <div className="p-4 border-b space-y-3" style={{ borderColor: 'var(--border)' }}>

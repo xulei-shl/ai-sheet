@@ -41,26 +41,41 @@ const tabs: Array<{ id: AppTab; label: string; icon: typeof FileSpreadsheet; des
   { id: 'skills', label: '技能管理', icon: Wrench, description: '查看、新增和删除 AI 技能工作流' },
 ];
 
-function ResizableHandle({ onResize }: { onResize: (delta: number) => void }) {
+function ResizableHandle({
+  onResize,
+  onDragStart,
+  onDragEnd,
+}: {
+  onResize: (delta: number) => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+}) {
   const dragging = useRef(false);
+  const rafId = useRef(0);
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       dragging.current = true;
+      onDragStart?.();
       const startX = e.clientX;
 
       const onMouseMove = (ev: MouseEvent) => {
         if (!dragging.current) return;
-        onResize(ev.clientX - startX);
+        cancelAnimationFrame(rafId.current);
+        rafId.current = requestAnimationFrame(() => {
+          onResize(ev.clientX - startX);
+        });
       };
 
       const onMouseUp = () => {
         dragging.current = false;
+        cancelAnimationFrame(rafId.current);
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        onDragEnd?.();
       };
 
       document.addEventListener('mousemove', onMouseMove);
@@ -68,12 +83,12 @@ function ResizableHandle({ onResize }: { onResize: (delta: number) => void }) {
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
     },
-    [onResize],
+    [onResize, onDragStart, onDragEnd],
   );
 
   return (
     <div
-      className="relative z-10 w-px flex-shrink-0 cursor-col-resize transition-colors hover:w-0.5 hover:bg-[var(--primary)]/40 active:bg-[var(--primary)]/60"
+      className="group/handle relative z-10 w-1 flex-shrink-0 cursor-col-resize hover:w-1.5 hover:bg-[var(--primary)]/30 active:bg-[var(--primary)]/50 transition-colors"
       style={{ background: 'var(--border)' }}
       onMouseDown={onMouseDown}
     />
@@ -129,6 +144,28 @@ export function AppLayout() {
     SIDEBAR_RIGHT_MIN, SIDEBAR_RIGHT_MAX,
   );
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragWidth, setDragWidth] = useState<number | null>(null);
+
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
+  const handleLeftDragResize = useCallback((delta: number) => {
+    handleLeftResize(delta);
+    setDragWidth(Math.min(SIDEBAR_LEFT_MAX, Math.max(SIDEBAR_LEFT_MIN, leftSidebarWidth + delta)));
+  }, [handleLeftResize, leftSidebarWidth]);
+
+  const handleRightDragResize = useCallback((delta: number) => {
+    handleRightResize(-delta);
+    setDragWidth(Math.min(SIDEBAR_RIGHT_MAX, Math.max(SIDEBAR_RIGHT_MIN, rightSidebarWidth - delta)));
+  }, [handleRightResize, rightSidebarWidth]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+    setDragWidth(null);
+  }, []);
+
   // Responsive layout: auto-collapse right sidebar below 1280px
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   useEffect(() => {
@@ -148,7 +185,7 @@ export function AppLayout() {
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>
       {/* ─── Left Sidebar ───────────────────────────────────────────── */}
       <nav
-        className="flex flex-col overflow-hidden border-r transition-[width] duration-200 ease-in-out"
+        className={`flex flex-col overflow-hidden border-r ${isDragging ? '' : 'transition-[width] duration-200 ease-in-out'}`}
         style={{
           width: leftSidebarCollapsed ? 0 : leftSidebarWidth,
           borderColor: 'var(--border)',
@@ -190,7 +227,7 @@ export function AppLayout() {
       </nav>
 
       {!leftSidebarCollapsed && (
-        <ResizableHandle onResize={handleLeftResize} />
+        <ResizableHandle onResize={handleLeftDragResize} onDragStart={handleDragStart} onDragEnd={handleDragEnd} />
       )}
 
       {/* ─── Center Content ─────────────────────────────────────────── */}
@@ -236,7 +273,7 @@ export function AppLayout() {
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           {showSmallScreenWarning && (
-            <div className="flex items-center gap-2 px-4 py-2 text-xs" style={{ background: 'oklch(0.7 0.12 80 / 0.15)', color: 'oklch(0.5 0.1 80)' }}>
+            <div className="flex items-center gap-2 px-4 py-2 text-xs" style={{ background: 'var(--warning)', color: 'var(--ink)', opacity: 0.85 }}>
               <span>屏幕宽度不足，建议使用 1280px 以上屏幕以获得最佳体验</span>
             </div>
           )}
@@ -251,10 +288,10 @@ export function AppLayout() {
 
       {/* ─── Right Sidebar ──────────────────────────────────────────── */}
       {!rightSidebarCollapsed && (
-        <ResizableHandle onResize={(delta) => handleRightResize(-delta)} />
+        <ResizableHandle onResize={handleRightDragResize} onDragStart={handleDragStart} onDragEnd={handleDragEnd} />
       )}
       <aside
-        className="flex flex-col overflow-hidden transition-[width] duration-200 ease-in-out"
+        className={`flex flex-col overflow-hidden ${isDragging ? '' : 'transition-[width] duration-200 ease-in-out'}`}
         style={{
           width: rightSidebarCollapsed ? 0 : rightSidebarWidth,
           background: 'var(--bg)',
@@ -262,6 +299,16 @@ export function AppLayout() {
       >
         <AgentChatPanel />
       </aside>
+
+      {/* Drag width indicator */}
+      {isDragging && dragWidth !== null && (
+        <div
+          className="fixed top-3 left-1/2 -translate-x-1/2 z-50 rounded-md px-3 py-1.5 text-xs font-mono pointer-events-none"
+          style={{ background: 'var(--surface)', color: 'var(--primary)', border: '1px solid var(--primary-glow)', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
+        >
+          {Math.round(dragWidth)}px
+        </div>
+      )}
     </div>
   );
 }

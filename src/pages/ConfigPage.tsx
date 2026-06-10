@@ -488,8 +488,8 @@ function DetailView({
             className="flex items-center gap-2 rounded-md p-3 text-sm"
             style={{
               background: testResult.ok
-                ? 'oklch(0.65 0.1 150 / 0.1)'
-                : 'oklch(0.6 0.12 20 / 0.1)',
+                ? 'var(--success-soft)'
+                : 'var(--error-soft)',
               color: testResult.ok ? 'var(--success)' : 'var(--error)',
             }}
           >
@@ -702,8 +702,8 @@ function FormPanel({
             className="flex items-center gap-2 rounded-md p-3 text-sm"
             style={{
               background: testResult.ok
-                ? 'oklch(0.65 0.1 150 / 0.1)'
-                : 'oklch(0.6 0.12 20 / 0.1)',
+                ? 'var(--success-soft)'
+                : 'var(--error-soft)',
               color: testResult.ok ? 'var(--success)' : 'var(--error)',
             }}
           >

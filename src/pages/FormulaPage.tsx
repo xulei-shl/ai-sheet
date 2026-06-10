@@ -300,14 +300,14 @@ export function FormulaPage() {
 
             {/* Error & Success Messages */}
             {error && (
-              <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border p-3 text-xs shrink-0" style={{ borderColor: 'var(--error)', background: 'oklch(0.6 0.12 20 / 0.1)' }}>
+              <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border p-3 text-xs shrink-0" style={{ borderColor: 'var(--error)', background: 'var(--error-soft)' }}>
                 <AlertCircle className="h-4 w-4 shrink-0" style={{ color: 'var(--error)' }} />
                 <span style={{ color: 'var(--error)' }}>{error}</span>
                 <button onClick={() => setError(null)} className="ml-auto text-xs font-medium hover:text-[var(--ink)] cursor-pointer" style={{ color: 'var(--muted)' }}>关闭</button>
               </div>
             )}
             {success && (
-              <div className="mx-4 mt-3 rounded-lg border p-3 text-xs shrink-0" style={{ borderColor: 'oklch(0.65 0.1 150)', background: 'oklch(0.65 0.1 150 / 0.1)', color: 'var(--success)' }}>
+              <div className="mx-4 mt-3 rounded-lg border p-3 text-xs shrink-0" style={{ borderColor: 'var(--success)', background: 'var(--success-soft)', color: 'var(--success)' }}>
                 {success}
               </div>
             )}

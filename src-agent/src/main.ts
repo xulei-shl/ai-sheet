@@ -251,22 +251,23 @@ async function handleSteer(command: Extract<SidecarCommand, { type: 'steer' }>) 
 
   try {
     const context = command.context;
-    const fileList = (context.loadedFiles ?? [])
-      .map((f) => {
-        const sheets = f.sheets
-          .map((sh) => {
-            const cols = sh.columns.map((c) => `${c.letter}(${c.name})`).join(', ');
-            return `${sh.sheetName}[${cols}]`;
-          })
-          .join('; ');
-        return `${f.name} (${f.path}) -> ${sheets}`;
-      })
-      .join(' || ');
+    const files = context.loadedFiles ?? [];
+    const fileBlocks = files.map((f, i) => {
+      const header = files.length > 1 ? `--- 文件 ${i + 1} ---\n` : '';
+      const sheets = f.sheets
+        .map((sh) => {
+          const cols = sh.columns.map((c) => `${c.letter}(${c.name})`).join(', ');
+          return `${sh.sheetName}[${cols}]`;
+        })
+        .join('; ');
+      return `${header}文件: ${f.name}\n路径: ${f.path}\n工作表: ${sheets}`;
+    });
     let sampleText = '';
     if (context.sampleDataPreview) {
       sampleText = `\n样例数据:\n${context.sampleDataPreview}`;
     }
-    const contextText = `[系统上下文更新] 当前文件：${fileList}\n当前工作目录：${currentCwd}${sampleText}`;
+    const filesBlock = fileBlocks.length > 0 ? `${fileBlocks.join('\n\n')}\n` : '';
+    const contextText = `[系统上下文更新]\n${filesBlock}当前工作目录：${currentCwd}${sampleText}`;
 
     await session.steer(contextText);
     emit({ type: 'agent_delta', id: command.id, delta: '上下文已更新。' });

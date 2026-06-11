@@ -375,7 +375,7 @@ export function LLMProcessingPage() {
           <div className="px-3 py-2.5 space-y-2.5">
             <div className="flex items-center gap-1.5">
               <MessageSquareText className="h-3 w-3" style={{ color: 'var(--muted)' }} />
-              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>提示词模板</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>提示词</span>
             </div>
             <div className="flex gap-1">
               <button

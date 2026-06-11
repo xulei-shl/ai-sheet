@@ -71,8 +71,8 @@ function buildRowPrompt(
   }
 
   if (!hasPlaceholder) {
-    const combined = inputColumns.map((c) => row[c] ?? '').join('|||');
-    prompt = `${prompt}\n${combined}`;
+    const formatted = inputColumns.map((c) => `${c}: ${row[c] ?? ''}`).join('\n');
+    prompt = `${prompt}\n\n---\n${formatted}`;
   }
 
   return prompt;

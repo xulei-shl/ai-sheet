@@ -23,7 +23,6 @@ interface BatchRunParams {
 interface ColumnData {
   columns: string[];
   rows: Array<Record<string, string>>;
-  combined: string[];
   total_rows: number;
 }
 
@@ -94,7 +93,6 @@ export class BatchRunner {
         if (this.abortController.signal.aborted) break;
 
         const row = data.rows[i];
-        const combined = data.combined[i];
 
         const processedStatus = await this.bridge.post<ProcessingStatus>('/api/excel/processing-status', {
           path: params.filePath,
@@ -113,7 +111,6 @@ export class BatchRunner {
             params.prompt,
             params.inputColumns,
             row,
-            combined,
             temperature,
             apiKey,
             3,
@@ -194,17 +191,18 @@ export class BatchRunner {
     promptTemplate: string,
     inputColumns: string[],
     row: Record<string, string>,
-    combined: string,
     temperature: number,
     apiKey: string | undefined,
     maxRetries: number,
   ): Promise<string> {
     let lastError: Error | undefined;
 
+    const formattedColumns = inputColumns.map((c) => `${c}: ${row[c] ?? ''}`).join('\n');
+    const finalPromptTemplate = `${promptTemplate}\n\n---\n${formattedColumns}`;
+
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        const finalPrompt = promptTemplate.replace(/\{combined\}/g, combined);
-        const result = await this._callLLM(model, finalPrompt, temperature, apiKey);
+        const result = await this._callLLM(model, finalPromptTemplate, temperature, apiKey);
         return result;
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));

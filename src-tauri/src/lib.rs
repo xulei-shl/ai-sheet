@@ -147,9 +147,14 @@ pub fn run() {
             let state = app.state::<AppState>();
             let bridge_server = state.bridge_server.clone();
 
-            // 设置 sidecar 的默认工作目录为 DB 数据目录
-            if let Some(dir) = db_dir_str {
-                state.sidecar_manager.set_db_dir(dir);
+            // 设置 sidecar 的默认工作目录和会话持久化路径
+            if let Some(dir) = &db_dir_str {
+                state.sidecar_manager.set_db_dir(dir.clone());
+                let session_path = std::path::Path::new(dir).join("sessions");
+                if let Some(s) = session_path.to_str() {
+                    let _ = std::fs::create_dir_all(&session_path);
+                    state.sidecar_manager.set_session_dir(s.to_string());
+                }
             }
 
             let bridge_app_handle = app_handle.clone();

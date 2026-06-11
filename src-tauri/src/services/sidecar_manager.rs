@@ -28,6 +28,7 @@ pub struct SidecarManager {
     is_streaming: RwLock<bool>,
     bridge_port: std::sync::RwLock<Option<u16>>,
     db_dir: std::sync::RwLock<Option<String>>,
+    session_dir: std::sync::RwLock<Option<String>>,
 }
 
 impl SidecarManager {
@@ -39,6 +40,12 @@ impl SidecarManager {
 
     pub fn set_db_dir(&self, dir: String) {
         if let Ok(mut guard) = self.db_dir.write() {
+            *guard = Some(dir);
+        }
+    }
+
+    pub fn set_session_dir(&self, dir: String) {
+        if let Ok(mut guard) = self.session_dir.write() {
             *guard = Some(dir);
         }
     }
@@ -58,6 +65,11 @@ impl SidecarManager {
         let db_dir = self.db_dir.read().ok().and_then(|guard| guard.clone());
         if let Some(dir) = db_dir {
             cmd.arg("--db-dir").arg(&dir);
+        }
+
+        let session_dir = self.session_dir.read().ok().and_then(|guard| guard.clone());
+        if let Some(dir) = session_dir {
+            cmd.arg("--session-dir").arg(&dir);
         }
 
         let mut child = cmd

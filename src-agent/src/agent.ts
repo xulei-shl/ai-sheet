@@ -13,7 +13,7 @@ export interface SheetAgentContext {
   authStorage: AuthStorage;
 }
 
-export async function createSheetAgent(bridge: BridgeClient, initialCwd: string): Promise<SheetAgentContext> {
+export async function createSheetAgent(bridge: BridgeClient, initialCwd: string, sessionDir?: string): Promise<SheetAgentContext> {
   const customTools = createCustomTools(bridge);
 
   let defaultModel: {
@@ -100,7 +100,7 @@ export async function createSheetAgent(bridge: BridgeClient, initialCwd: string)
     authStorage,
     modelRegistry,
     settingsManager,
-    sessionManager: SessionManager.inMemory(),
+    sessionManager: sessionDir ? SessionManager.create(initialCwd, sessionDir) : SessionManager.inMemory(),
     cwd: initialCwd,
     resourceLoader: loader,
   });

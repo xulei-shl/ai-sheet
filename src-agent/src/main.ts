@@ -26,12 +26,14 @@ let batchRunner: BatchRunner | null = null;
 const activeBatches = new Map<string, BatchRunner>();
 let abortRequested = false;
 
-function parseArgs(): { bridgePort: number; dbDir: string } {
+function parseArgs(): { bridgePort: number; dbDir: string; sessionDir?: string } {
   const portIndex = process.argv.indexOf('--bridge-port');
   const bridgePort = portIndex !== -1 ? parseInt(process.argv[portIndex + 1], 10) : 0;
   const dbDirIndex = process.argv.indexOf('--db-dir');
   const dbDir = dbDirIndex !== -1 ? process.argv[dbDirIndex + 1] : process.cwd();
-  return { bridgePort, dbDir };
+  const sessionDirIndex = process.argv.indexOf('--session-dir');
+  const sessionDir = sessionDirIndex !== -1 ? process.argv[sessionDirIndex + 1] : undefined;
+  return { bridgePort, dbDir, sessionDir };
 }
 
 const log = (msg: string) => process.stderr.write(`[sidecar] ${msg}\n`);
@@ -115,7 +117,7 @@ async function initialize() {
   try {
     const { createSheetAgent } = await import('./agent.js');
     if (bridge) {
-      const ctx = await createSheetAgent(bridge, currentCwd);
+      const ctx = await createSheetAgent(bridge, currentCwd, args.sessionDir);
       session = ctx.session;
       modelRegistry = ctx.modelRegistry;
       authStorage = ctx.authStorage;

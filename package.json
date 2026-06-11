@@ -35,6 +35,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "^5.2.0",
+    "esbuild": "^0.28.0",
     "tailwindcss": "^4.3.0",
     "typescript": "latest",
     "vite": "^6.3.5"

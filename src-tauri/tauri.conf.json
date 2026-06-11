@@ -5,7 +5,7 @@
   "identifier": "com.ai-sheet.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run agent:build && npm run build",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../dist"
   },
@@ -25,7 +25,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": "nsis",
     "icon": ["icons/icon.ico", "icons/icon.png"],
     "resources": {
       "../.pi/": ".pi/",

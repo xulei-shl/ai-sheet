@@ -1,4 +1,4 @@
-﻿use std::{
+use std::{
     path::PathBuf,
     sync::Arc,
     time::{Duration, Instant},
@@ -54,6 +54,7 @@ impl SidecarManager {
         self.stop().await.ok();
 
         let agent_entry = resolve_agent_entry(&app)?;
+        eprintln!("[sidecar] agent entry: {:?}", agent_entry);
         let mut cmd = Command::new("node");
         cmd.arg(&agent_entry);
 
@@ -75,7 +76,7 @@ impl SidecarManager {
         let mut child = cmd
             .stdin(std::process::Stdio::piped())
             .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::inherit())
+            .stderr(std::process::Stdio::piped())
             .spawn()?;
 
         let stdin = child
@@ -86,6 +87,10 @@ impl SidecarManager {
             .stdout
             .take()
             .ok_or_else(|| AppError::Sidecar("failed to open sidecar stdout".into()))?;
+        let stderr = child
+            .stderr
+            .take()
+            .ok_or_else(|| AppError::Sidecar("failed to open sidecar stderr".into()))?;
 
         *self.stdin.lock().await = Some(stdin);
         *self.child.lock().await = Some(child);
@@ -93,6 +98,7 @@ impl SidecarManager {
         *self.is_streaming.write().await = false;
 
         self.spawn_stdout_reader(app.clone(), stdout);
+        self.spawn_stderr_reader(stderr);
         self.spawn_heartbeat_monitor(app);
 
         Ok(())
@@ -270,6 +276,17 @@ impl SidecarManager {
         });
     }
 
+    fn spawn_stderr_reader(self: &Arc<Self>, stderr: tokio::process::ChildStderr) {
+        tauri::async_runtime::spawn(async move {
+            let mut lines = BufReader::new(stderr).lines();
+            while let Ok(Some(line)) = lines.next_line().await {
+                if !line.trim().is_empty() {
+                    eprintln!("[sidecar stderr] {line}");
+                }
+            }
+        });
+    }
+
     fn spawn_heartbeat_monitor(self: &Arc<Self>, app: AppHandle) {
         let manager = Arc::clone(self);
 
@@ -313,9 +330,8 @@ impl SidecarManager {
 }
 
 fn resolve_agent_entry(app: &AppHandle) -> AppResult<PathBuf> {
+    // 优先使用 esbuild 打包的 bundle（无需 node_modules）
     // 开发模式：相对于项目根目录
-    // 注意：不能先查 resource_dir() — dev 模式下它返回 target/debug，
-    // 拼出的 \\?\ 前缀路径传给 node 后无法正确解析。
     let cwd = std::env::current_dir()?;
     let root = if cwd.file_name().and_then(|name| name.to_str()) == Some("src-tauri") {
         cwd.parent()
@@ -325,20 +341,28 @@ fn resolve_agent_entry(app: &AppHandle) -> AppResult<PathBuf> {
         cwd
     };
 
-    let entry = root.join("src-agent").join("dist").join("main.js");
+    // 优先 bundle，回退 main.js
+    let dist_dir = root.join("src-agent").join("dist");
+    let entry = if dist_dir.join("main.bundle.js").exists() {
+        dist_dir.join("main.bundle.js")
+    } else {
+        dist_dir.join("main.js")
+    };
     if entry.exists() {
         return Ok(entry);
     }
 
-    // 生产模式退路：从资源目录查找（仅 dev 路径不存在时启用）
-    match app.path().resource_dir() {
-        Ok(resource_dir) => {
-            let bundled = resource_dir.join("src-agent").join("dist").join("main.js");
-            if bundled.exists() {
-                return Ok(bundled);
-            }
+    // 生产模式退路：从资源目录查找
+    if let Ok(resource_dir) = app.path().resource_dir() {
+        let res_dist = resource_dir.join("src-agent").join("dist");
+        let bundled = if res_dist.join("main.bundle.js").exists() {
+            res_dist.join("main.bundle.js")
+        } else {
+            res_dist.join("main.js")
+        };
+        if bundled.exists() {
+            return Ok(bundled);
         }
-        Err(_) => {}
     }
 
     Err(AppError::Sidecar(format!(

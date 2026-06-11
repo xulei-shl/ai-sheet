@@ -1,10 +1,20 @@
 ﻿// 在所有其他模块之前加载 .env，使 HTTP_PROXY/HTTPS_PROXY 环境变量可用
-// dist/main.js 向上两级到达项目根目录
 import { config as loadDotenv } from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { existsSync } from 'node:fs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-loadDotenv({ path: join(__dirname, '..', '..', '.env'), quiet: true });
+// 多路径查找 .env：生产模式从 --db-dir（app_data_dir），开发模式从项目根
+const dbDirIdx = process.argv.indexOf('--db-dir');
+const dbDir = dbDirIdx !== -1 ? process.argv[dbDirIdx + 1] : undefined;
+const envCandidates = [
+  dbDir && join(dbDir, '.env'),
+  join(__dirname, '..', '..', '.env'), // 开发模式
+].filter(Boolean) as string[];
+const envPath = envCandidates.find((p) => existsSync(p));
+if (envPath) {
+  loadDotenv({ path: envPath, quiet: true });
+}
 
 import { createInterface } from 'node:readline';
 import type { SidecarCommand, SidecarEvent, BatchStats, BatchParams } from './protocol.js';

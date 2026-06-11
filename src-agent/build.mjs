@@ -5,11 +5,12 @@ await build({
   bundle: true,
   platform: 'node',
   format: 'esm',
-  outfile: 'dist/main.bundle.js',
+  outfile: 'dist/main.bundle.mjs',
   external: ['node:*'],
   banner: {
-    js: '// Auto-bundled by esbuild — no node_modules needed at runtime',
+    js: `import{createRequire as __cr}from'node:module';import{fileURLToPath as __ftp}from'node:url';var require=__cr(__ftp(import.meta.url));
+// Auto-bundled by esbuild — no node_modules needed at runtime`,
   },
 });
 
-console.log('sidecar bundle built → dist/main.bundle.js');
+console.log('sidecar bundle built → dist/main.bundle.mjs');

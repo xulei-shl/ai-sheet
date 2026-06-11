@@ -22,6 +22,7 @@ import type { BridgeClient } from './bridge.js';
 import type { AgentSession, ModelRegistry, AuthStorage } from '@earendil-works/pi-coding-agent';
 import { BatchRunner } from './batch/runner.js';
 import type { RowCompleteUpdate } from './batch/progress.js';
+import * as undici from 'undici';
 import { getUseProxy, setUseProxy } from './proxy-state.js';
 import { buildModel } from './provider-map.js';
 
@@ -55,10 +56,6 @@ function emit(event: SidecarEvent) {
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
 async function initialize() {
-  // 配置双 dispatcher：代理（EnvHttpProxyAgent）和直连（Agent）
-  const { createRequire } = await import('node:module');
-  const undici = createRequire(import.meta.url)('undici');
-
   const timeoutConfig = {
     allowH2: false,
     bodyTimeout: 600_000,     // 10 分钟（LLM 可能生成很长的回复）
@@ -114,7 +111,7 @@ async function initialize() {
 
     // 根据当前模型的代理设置选择 dispatcher
     const dispatcher = getUseProxy() ? proxyDispatcher : directDispatcher;
-    return undici.fetch(urlStr, { ...fetchInit, dispatcher });
+    return undici.fetch(urlStr, { ...fetchInit, dispatcher }) as unknown as Promise<Response>;
   };
   log('fetch overridden with dual dispatcher (proxy + direct)');
 

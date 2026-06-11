@@ -98,7 +98,7 @@ impl SidecarManager {
         *self.is_streaming.write().await = false;
 
         self.spawn_stdout_reader(app.clone(), stdout);
-        self.spawn_stderr_reader(stderr);
+        self.spawn_stderr_reader(app.clone(), stderr);
         self.spawn_heartbeat_monitor(app);
 
         Ok(())
@@ -276,12 +276,13 @@ impl SidecarManager {
         });
     }
 
-    fn spawn_stderr_reader(self: &Arc<Self>, stderr: tokio::process::ChildStderr) {
+    fn spawn_stderr_reader(self: &Arc<Self>, app: AppHandle, stderr: tokio::process::ChildStderr) {
         tauri::async_runtime::spawn(async move {
             let mut lines = BufReader::new(stderr).lines();
             while let Ok(Some(line)) = lines.next_line().await {
                 if !line.trim().is_empty() {
                     eprintln!("[sidecar stderr] {line}");
+                    app.emit("sidecar-stderr", json!({ "line": line })).ok();
                 }
             }
         });
@@ -341,27 +342,33 @@ fn resolve_agent_entry(app: &AppHandle) -> AppResult<PathBuf> {
         cwd
     };
 
-    // 优先 bundle，回退 main.js
+    // 优先 bundle（.mjs），回退 .js bundle，最后回退 main.js
     let dist_dir = root.join("src-agent").join("dist");
-    let entry = if dist_dir.join("main.bundle.js").exists() {
+    let entry = if dist_dir.join("main.bundle.mjs").exists() {
+        dist_dir.join("main.bundle.mjs")
+    } else if dist_dir.join("main.bundle.js").exists() {
         dist_dir.join("main.bundle.js")
     } else {
         dist_dir.join("main.js")
     };
     if entry.exists() {
-        return Ok(entry);
+        return Ok(normalize_path(entry));
     }
 
     // 生产模式退路：从资源目录查找
+    // 注意：resource_dir() 在 Windows 上可能返回 \\?\ 前缀路径，
+    // Node.js 无法解析 \\?\ 路径，需使用 normalize_path 去除。
     if let Ok(resource_dir) = app.path().resource_dir() {
         let res_dist = resource_dir.join("src-agent").join("dist");
-        let bundled = if res_dist.join("main.bundle.js").exists() {
+        let bundled = if res_dist.join("main.bundle.mjs").exists() {
+            res_dist.join("main.bundle.mjs")
+        } else if res_dist.join("main.bundle.js").exists() {
             res_dist.join("main.bundle.js")
         } else {
             res_dist.join("main.js")
         };
         if bundled.exists() {
-            return Ok(bundled);
+            return Ok(normalize_path(bundled));
         }
     }
 
@@ -369,6 +376,16 @@ fn resolve_agent_entry(app: &AppHandle) -> AppResult<PathBuf> {
         "agent entry not found at {:?}",
         entry
     )))
+}
+
+/// 去除 Windows 的 \\?\ 路径前缀，使 Node.js 能正确解析
+fn normalize_path(path: PathBuf) -> PathBuf {
+    let path_str = path.to_string_lossy();
+    if let Some(stripped) = path_str.strip_prefix(r"\\?\") {
+        PathBuf::from(stripped)
+    } else {
+        path
+    }
 }
 
 fn current_millis() -> u128 {

@@ -197,7 +197,7 @@ export class BatchRunner {
   ): Promise<string> {
     let lastError: Error | undefined;
 
-    const formattedColumns = inputColumns.map((c) => `${c}: ${row[c] ?? ''}`).join('\n');
+    const formattedColumns = inputColumns.map((c) => `${c}: ${row[c] ?? ''}`).join('\n\n');
     const finalPromptTemplate = `${promptTemplate}\n\n---\n${formattedColumns}`;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {

@@ -71,7 +71,7 @@ function buildRowPrompt(
   }
 
   if (!hasPlaceholder) {
-    const formatted = inputColumns.map((c) => `${c}: ${row[c] ?? ''}`).join('\n');
+    const formatted = inputColumns.map((c) => `${c}: ${row[c] ?? ''}`).join('\n\n');
     prompt = `${prompt}\n\n---\n${formatted}`;
   }
 

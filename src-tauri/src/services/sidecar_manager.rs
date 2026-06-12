@@ -73,6 +73,27 @@ impl SidecarManager {
             cmd.arg("--session-dir").arg(&dir);
         }
 
+        // Windows: 隐藏 node.exe 控制台窗口
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            cmd.as_std_mut().creation_flags(0x08000000); // CREATE_NO_WINDOW
+        }
+
+        // 检测并注入系统代理设置到子进程环境变量
+        {
+            let (http_proxy, https_proxy, no_proxy) = detect_proxy_settings();
+            if let Some(ref url) = http_proxy {
+                cmd.env("HTTP_PROXY", url);
+            }
+            if let Some(ref url) = https_proxy {
+                cmd.env("HTTPS_PROXY", url);
+            }
+            if let Some(ref url) = no_proxy {
+                cmd.env("NO_PROXY", url);
+            }
+        }
+
         let mut child = cmd
             .stdin(std::process::Stdio::piped())
             .stdout(std::process::Stdio::piped())
@@ -393,4 +414,85 @@ fn current_millis() -> u128 {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis()
+}
+
+/// 检测系统代理设置
+///
+/// 优先级：父进程环境变量 > Windows 系统代理设置（注册表）
+/// Windows 注册表路径：HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings
+/// - ProxyServer: 代理地址，格式如 "proxy:8080" 或 "http=proxy:80;https=proxy:443"
+/// - ProxyEnable: DWORD，1 表示启用代理
+/// - ProxyOverride: 绕过代理的主机列表，等价于 NO_PROXY
+fn detect_proxy_settings() -> (Option<String>, Option<String>, Option<String>) {
+    // 优先使用父进程已有的环境变量
+    let http = std::env::var("HTTP_PROXY")
+        .or_else(|_| std::env::var("http_proxy"))
+        .ok();
+    let https = std::env::var("HTTPS_PROXY")
+        .or_else(|_| std::env::var("https_proxy"))
+        .ok();
+    let no = std::env::var("NO_PROXY")
+        .or_else(|_| std::env::var("no_proxy"))
+        .ok();
+
+    // 如果 HTTP_PROXY 已设置，信任父进程环境
+    if http.is_some() {
+        return (http, https, no);
+    }
+
+    // 否则尝试 Windows 系统代理检测
+    #[cfg(windows)]
+    let (reg_http, reg_https, reg_no) = detect_windows_proxy();
+    #[cfg(not(windows))]
+    let (reg_http, reg_https, reg_no) = (None, None, None);
+
+    (http.or(reg_http), https.or(reg_https), no.or(reg_no))
+}
+
+/// 从 Windows 注册表读取系统代理设置
+#[cfg(windows)]
+fn detect_windows_proxy() -> (Option<String>, Option<String>, Option<String>) {
+    use winreg::enums::HKEY_CURRENT_USER;
+    use winreg::RegKey;
+
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let key = match hkcu.open_subkey(r"Software\Microsoft\Windows\CurrentVersion\Internet Settings") {
+        Ok(k) => k,
+        Err(_) => return (None, None, None),
+    };
+
+    let proxy_enable: u32 = key.get_value("ProxyEnable").unwrap_or(0);
+    if proxy_enable == 0 {
+        return (None, None, None);
+    }
+
+    let proxy_server: String = key.get_value("ProxyServer").unwrap_or_default();
+    if proxy_server.is_empty() {
+        return (None, None, None);
+    }
+
+    let no_proxy: String = key.get_value("ProxyOverride").unwrap_or_default();
+    let no_proxy = if no_proxy.is_empty() { None } else { Some(no_proxy) };
+
+    // ProxyServer 格式：
+    //   1. "proxy:8080" — 所有协议共用
+    //   2. "http=proxy:80;https=proxy:443" — 按协议分别设置
+    if proxy_server.contains('=') {
+        let mut http = None;
+        let mut https = None;
+        for entry in proxy_server.split(';') {
+            let entry = entry.trim();
+            if let Some((proto, addr)) = entry.split_once('=') {
+                match proto.trim().to_lowercase().as_str() {
+                    "http" => http = Some(format!("http://{}", addr.trim())),
+                    "https" => https = Some(format!("https://{}", addr.trim())),
+                    _ => {}
+                }
+            }
+        }
+        (http, https, no_proxy)
+    } else {
+        let url = format!("http://{}", proxy_server.trim());
+        (Some(url.clone()), Some(url), no_proxy)
+    }
 }

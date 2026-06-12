@@ -251,11 +251,14 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
         for (const sheetName of sel.selectedSheets) {
           const preview = sel.previewData[sheetName];
           if (preview && preview.rows.length > 0) {
+            const cols = (sel.selectedColumns[sheetName]?.length
+              ? sel.selectedColumns[sheetName]
+              : preview.columns) as string[];
             const sampleRows = preview.rows.slice(0, 3);
-            const header = '| ' + preview.columns.join(' | ') + ' |';
-            const sep = '| ' + preview.columns.map(() => '---').join(' | ') + ' |';
+            const header = '| ' + cols.join(' | ') + ' |';
+            const sep = '| ' + cols.map(() => '---').join(' | ') + ' |';
             const body = sampleRows
-              .map((r) => '| ' + preview.columns.map((c) => String(r[c] ?? '')).join(' | ') + ' |')
+              .map((r) => '| ' + cols.map((c) => String(r[c] ?? '')).join(' | ') + ' |')
               .join('\n');
             sampleParts.push(`Sheet: ${sheetName}\n${header}\n${sep}\n${body}`);
           }

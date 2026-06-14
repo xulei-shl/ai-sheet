@@ -21,10 +21,16 @@ export type SidecarCommand =
   | { id: string; type: 'reset' }
   | { id: string; type: 'stop' };
 
+export interface AgentStats {
+  inputTokens: number;
+  outputTokens: number;
+  contextUsage: number;    // 0~1 的上下文使用率
+}
+
 export type SidecarEvent =
   | { type: 'heartbeat'; timestamp: string }
   | { type: 'agent_delta'; id: string; delta: string }
-  | { type: 'agent_done'; id: string }
+  | { type: 'agent_done'; id: string; stats?: AgentStats }
   | { type: 'agent_error'; id?: string; message: string }
   | { type: 'agent_tool_start'; id: string; tool: string; args: Record<string, unknown> }
   | { type: 'agent_tool_end'; id: string; tool: string; result: string }

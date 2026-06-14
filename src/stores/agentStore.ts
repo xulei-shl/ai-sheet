@@ -9,7 +9,7 @@ import {
   stopAgentStream,
   type ActiveAgentModel,
 } from '../services/tauri';
-import type { AgentMessage, AgentStatus, SidecarEvent, AgentContext } from '../types/agent';
+import type { AgentMessage, AgentStatus, AgentStats, SidecarEvent, AgentContext } from '../types/agent';
 import { useConfigStore } from './configStore';
 import { useUiStore } from './uiStore';
 
@@ -22,6 +22,7 @@ interface AgentStore {
   appliedModelName: string | null;
   loadedContext: AgentContext | null;
   pendingInputValue: string | null;
+  sessionStats: AgentStats | null;
 
   refreshStatus: () => Promise<void>;
   setPendingInputValue: (value: string | null) => void;
@@ -46,6 +47,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   appliedModelName: null,
   loadedContext: null,
   pendingInputValue: null,
+  sessionStats: null,
 
   refreshStatus: async () => {
     const status = await getAgentStatus();
@@ -265,6 +267,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
           m.requestId === event.id ? { ...m, isStreaming: false } : m,
         ),
         agentStreamingRequestId: null,
+        sessionStats: event.stats ?? s.sessionStats,
       }));
       return;
     }
@@ -301,7 +304,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   },
 
   clearMessages: () => {
-    set({ messages: [], error: null });
+    set({ messages: [], error: null, sessionStats: null });
     clearAgentContext();
   },
 

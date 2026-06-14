@@ -6,6 +6,7 @@ import { useExcelStore } from '../../stores/excelStore';
 import { usePromptStore } from '../../stores/promptStore';
 import { ErrorState } from '../ui/ErrorState';
 import { Tooltip } from '../ui/Tooltip';
+import { AgentFooter } from './AgentFooter';
 import { AgentInput } from './AgentInput';
 import { MessageList } from './MessageList';
 import { QuickActionBar } from './QuickActionBar';
@@ -225,6 +226,7 @@ export function AgentChatPanel() {
         onValueChange={(v) => { setAgentInput(v); setQuickPlaceholder(null); }}
         placeholder={placeholder}
       />
+      <AgentFooter />
     </section>
   );
 }

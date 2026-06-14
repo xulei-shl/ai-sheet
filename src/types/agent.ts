@@ -5,6 +5,12 @@ export interface AgentStatus {
   message: string;
 }
 
+export interface AgentStats {
+  inputTokens: number;
+  outputTokens: number;
+  contextUsage: number;
+}
+
 export interface AgentMessage {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'tool';
@@ -59,7 +65,7 @@ export interface AgentContext {
 
 export type SidecarEvent =
   | { type: 'agent_delta'; id: string; delta: string }
-  | { type: 'agent_done'; id: string }
+  | { type: 'agent_done'; id: string; stats?: AgentStats }
   | { type: 'agent_error'; id?: string; message: string }
   | { type: 'agent_tool_start'; id: string; tool: string; args: Record<string, unknown> }
   | { type: 'agent_tool_end'; id: string; tool: string; result: string }

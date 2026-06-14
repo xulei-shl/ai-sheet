@@ -17,7 +17,7 @@ if (envPath) {
 }
 
 import { createInterface } from 'node:readline';
-import type { SidecarCommand, SidecarEvent, BatchStats, BatchParams } from './protocol.js';
+import type { SidecarCommand, SidecarEvent, AgentStats, BatchStats, BatchParams } from './protocol.js';
 import type { BridgeClient } from './bridge.js';
 import type { AgentSession, ModelRegistry, AuthStorage } from '@earendil-works/pi-coding-agent';
 import { BatchRunner } from './batch/runner.js';
@@ -162,6 +162,9 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
   let lastError: string | null = null;
   let eventsReceived = 0;
   let unsubscribe: (() => void) | null = null;
+  let rawInputTokens: number | undefined;
+  let rawOutputTokens: number | undefined;
+  let rawContextUsage: number | undefined;
 
   try {
     unsubscribe = session.subscribe((event) => {
@@ -188,6 +191,13 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
           } else {
             lastError = null;
           }
+        }
+        // 尝试从 SDK 消息中提取 token 统计
+        const usage = msg?.usage ?? (event as any).usage;
+        if (usage) {
+          rawInputTokens = usage.inputTokens ?? usage.promptTokens ?? usage.input_tokens;
+          rawOutputTokens = usage.outputTokens ?? usage.completionTokens ?? usage.output_tokens;
+          rawContextUsage = usage.contextUsage ?? usage.context_usage;
         }
       }
 
@@ -233,19 +243,26 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
     if (unsubscribe) unsubscribe();
   }
 
+  // 计算 token 统计：优先使用 SDK 原生数据，无则通过字符数估算 (~4 char/token)
+  const stats: AgentStats = {
+    inputTokens: rawInputTokens ?? Math.ceil(command.content.length / 4),
+    outputTokens: rawOutputTokens ?? Math.ceil(accumulatedText.length / 4),
+    contextUsage: rawContextUsage ?? 0,
+  };
+
   // Handle result after prompt completed (either naturally or via abort)
   if (abortRequested) {
     abortRequested = false;
     log('prompt() completed after abort, emitting agent_done');
-    emit({ type: 'agent_done', id: command.id });
+    emit({ type: 'agent_done', id: command.id, stats });
   } else if (lastError === '__aborted__') {
-    emit({ type: 'agent_done', id: command.id });
+    emit({ type: 'agent_done', id: command.id, stats });
   } else if (lastError) {
     emit({ type: 'agent_error', id: command.id, message: lastError });
   } else if (!accumulatedText) {
     emit({ type: 'agent_error', id: command.id, message: '模型未返回任何输出，请检查模型ID和API配置是否正确' });
   } else {
-    emit({ type: 'agent_done', id: command.id });
+    emit({ type: 'agent_done', id: command.id, stats });
   }
 }
 

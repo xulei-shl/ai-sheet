@@ -8,7 +8,7 @@ export interface AgentStatus {
 export interface AgentStats {
   inputTokens: number;
   outputTokens: number;
-  contextUsage: number;
+  contextWindow: number;
 }
 
 export interface AgentMessage {

@@ -11,6 +11,7 @@ export interface SheetAgentContext {
   session: AgentSession;
   modelRegistry: ModelRegistry;
   authStorage: AuthStorage;
+  contextWindow: number;
 }
 
 export async function createSheetAgent(bridge: BridgeClient, initialCwd: string, sessionDir?: string): Promise<SheetAgentContext> {
@@ -107,5 +108,5 @@ export async function createSheetAgent(bridge: BridgeClient, initialCwd: string,
 
   log(`session created, cwd=${initialCwd}, httpIdleTimeoutMs=${settingsManager.getHttpIdleTimeoutMs()}, retry.maxRetries=${settingsManager.getRetrySettings().maxRetries}`);
 
-  return { session, modelRegistry, authStorage };
+  return { session, modelRegistry, authStorage, contextWindow: model?.contextWindow ?? 0 };
 }

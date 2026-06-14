@@ -33,6 +33,7 @@ let bridge: BridgeClient | null = null;
 let session: AgentSession | null = null;
 let modelRegistry: ModelRegistry | null = null;
 let authStorage: AuthStorage | null = null;
+let currentModelContextWindow: number = 0;
 let batchRunner: BatchRunner | null = null;
 const activeBatches = new Map<string, BatchRunner>();
 let abortRequested = false;
@@ -128,7 +129,8 @@ async function initialize() {
       session = ctx.session;
       modelRegistry = ctx.modelRegistry;
       authStorage = ctx.authStorage;
-      log('agent session created');
+      currentModelContextWindow = ctx.contextWindow;
+      log('agent session created, contextWindow=' + currentModelContextWindow);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -164,7 +166,6 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
   let unsubscribe: (() => void) | null = null;
   let rawInputTokens: number | undefined;
   let rawOutputTokens: number | undefined;
-  let rawContextUsage: number | undefined;
 
   try {
     unsubscribe = session.subscribe((event) => {
@@ -197,7 +198,6 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
         if (usage) {
           rawInputTokens = usage.inputTokens ?? usage.promptTokens ?? usage.input_tokens;
           rawOutputTokens = usage.outputTokens ?? usage.completionTokens ?? usage.output_tokens;
-          rawContextUsage = usage.contextUsage ?? usage.context_usage;
         }
       }
 
@@ -247,7 +247,7 @@ async function handleUserMessage(command: Extract<SidecarCommand, { type: 'user_
   const stats: AgentStats = {
     inputTokens: rawInputTokens ?? Math.ceil(command.content.length / 4),
     outputTokens: rawOutputTokens ?? Math.ceil(accumulatedText.length / 4),
-    contextUsage: rawContextUsage ?? 0,
+    contextWindow: currentModelContextWindow,
   };
 
   // Handle result after prompt completed (either naturally or via abort)
@@ -325,9 +325,10 @@ async function handleSetModel(command: Extract<SidecarCommand, { type: 'set_mode
     }
 
     await session.setModel(model);
+    currentModelContextWindow = model.contextWindow ?? 0;
 
     emit({ type: 'model_switch_result', id: command.id, success: true, modelName: info.name });
-    log(`model switched to ${info.name} (${model.provider}/${model.id})`);
+    log(`model switched to ${info.name} (${model.provider}/${model.id}), contextWindow=${currentModelContextWindow}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     emit({ type: 'model_switch_result', id: command.id, success: false, error: message });

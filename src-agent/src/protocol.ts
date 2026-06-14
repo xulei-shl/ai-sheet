@@ -24,7 +24,7 @@ export type SidecarCommand =
 export interface AgentStats {
   inputTokens: number;
   outputTokens: number;
-  contextUsage: number;    // 0~1 的上下文使用率
+  contextWindow: number;   // 当前模型上下文窗口大小（如 128000），0 表示未知
 }
 
 export type SidecarEvent =

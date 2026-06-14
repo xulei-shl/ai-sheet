@@ -1,6 +1,13 @@
 # Design
 
-> AI-Sheet 综合设计与架构文档（v10，2026-06-11）
+> AI-Sheet 综合设计与架构文档（v11，2026-06-14）
+>
+> v11 变更：对话底部新增 AgentFooter 状态栏——实时显示工作目录、Token 用量（↑↓）、
+> 上下文使用率（📊 `inputTokens/contextWindow`）、已加载 Skills（🛠️）、当前模型
+> （⚡）和连接状态（🟢/🔴）；Sidecar 协议扩展：`agent_done` 事件新增可选 `stats`
+> 字段，优先使用 SDK 原生 token 数据，无则通过字符数估算（~4 char/token）；
+> `contextUsage` 改为 `contextWindow`——占比由前端按 `inputTokens / contextWindow`
+> 实时计算，兼容不同模型的上下文窗口（128K/200K 等）；移除 `App.tsx` 旧全局状态条。
 >
 > v10 变更：启用 pi-agent 会话持久化——`agent.ts` 从 `SessionManager.inMemory()`
 > 切换为 `SessionManager.create(app_data_dir + '/sessions')`；sidecar 新增 `--session-dir`
@@ -225,6 +232,18 @@
 - **AI Tool Call Card**（`AgentChatPanel` 内）：`bg-[var(--surface)]` +
   `rounded-md` + 1px 透明边。头部为图标 + 工具名 + 状态指示器（运行/完成/错误），
   主体可折叠。
+- **AgentFooter**（`src/components/agent/AgentFooter.tsx`）：对话面板底部状态栏，
+  `h-7` 高度 + `text-[11px]` + `--muted` 低对比度。水平排列以下信息段，每段
+  可 hover 显示 tooltip 详情：
+  - 应用名 + 版本号（`AI-Sheet v0.1.0`）
+  - 📁 工作目录 basename（`excelStore.currentCwd`），hover 显示全路径
+  - ↑↓ Token 用量（蓝色输入 / 绿色输出），hover 显示精确值
+  - 📊 上下文使用率（`inputTokens / contextWindow`），颜色梯度：<60% 绿 /
+    60-85% 黄 / >85% 红；`contextWindow` 来自当前模型的上下文窗口大小
+    （set_model 时记录），未知时隐藏
+  - 🛠️ 已加载 Skills 名称（最多 3 个，超出显示 `+N`），hover 显示全部
+  - ⚡ 当前模型名（`uiStore.selectedAgentModelName`）
+  - 🟢 Ready / 🔴 Offline 状态点（右对齐）
 - **Excel Table**（`src/components/excel/ExcelTable.tsx`）：
   - 表头：`text-xs uppercase tracking-wider` + `--muted` + 下边线。
   - 单元格：无垂直分隔线，水平 1px 透明分隔。
@@ -542,7 +561,9 @@ ai-sheet/
     │   ├── PromptsPage.tsx        （提示词 CRUD + 搜索）
     │   └── SkillsPage.tsx         （技能列表 + 文件树 + 内容预览 + 新建/删除）
     ├── components/
-    │   ├── agent/                 （AgentChatPanel / MessageList / AgentInput）
+    │   ├── agent/                 （AgentChatPanel / MessageList / AgentInput /
+    │   │                             AgentFooter / QuickActionBar / ToolCallBlock
+    │   │                             / ContextPreview / WaitingIndicator）
     │   ├── excel/                 （FileDropZone / ExcelTable / ColumnSelector）
     │   └── ui/                    （EmptyState / ErrorBoundary / ErrorState
     │                                / LoadingState）
@@ -1107,6 +1128,42 @@ agent_delta/done → agentStore.handleEvent (按 msg- 前缀匹配)
   - 不再有独立的 `directStreamingRequestId` / `direct-` 前缀路由（已删除）。
   - 快捷消息纳入对话历史，后续提问可引用此前生成的公式或提示词。
   - BatchRunner 的独立 `stream()` 调用不受此项变更影响。
+
+### 8.9 对话底部状态栏（AgentFooter）
+
+对话面板底部通过 `<AgentFooter />` 实时展示 Agent 运行状态。数据流如下：
+
+```
+Sidecar 侧（main.ts）                        前端侧
+┌──────────────────────────────┐    ┌──────────────────────────────┐
+│ session.subscribe()          │    │ AgentFooter                  │
+│  └─ message_end:             │    │  ├─ appStatus (getAppStatus) │
+│     尝试提取 msg.usage       │    │  ├─ currentCwd (excelStore)  │
+│      (input/output tokens)   │    │  ├─ sessionStats (agentStore)│
+│                              │    │  ├─ skills (skillStore)      │
+│ prompt() 完成后              │    │  └─ model (uiStore)           │
+│  └─ 计算 stats:              │    └──────────────────────────────┘
+│     SDK 数据 ?? 字符估算     │         │
+│     (~4 char/token)          │         ▼
+│     + contextWindow          │   📊 n% = inputTokens/contextWindow
+│         │                    │   颜色梯度 <60%绿 / 60-85%黄 / >85%红
+│         ▼                    │
+│  agent_done { id, stats } ───┼──→ agentStore.handleEvent
+│                              │       └─ sessionStats = event.stats
+└──────────────────────────────┘
+```
+
+**关键设计**：
+- Token 统计优先使用 pi-agent SDK 的 `message.usage` 字段（`inputTokens` / `outputTokens`），
+  SDK 未返回时 fallback 到 `Math.ceil(content.length / 4)` 字符估算。
+- **上下文占比**由前端计算：`inputTokens / contextWindow`。`contextWindow` 来自
+  当前模型的上下文窗口大小（set_model 时从 pi-agent `Model.contextWindow` 记录，
+  初始模型由 `buildModel` 的默认值 128K 填充），不依赖 SDK 返回百分比。
+  各模型窗口不同（GPT-4o 128K、DeepSeek 64K、Gemini 200K 等），占比自动适配。
+- `contextWindow` 为 0（未知）或 `inputTokens` 为 0 时隐藏 📊 段。
+- Skills 列表通过 `skillStore.fetchSkills()` 懒加载，最多显示 3 个名称，超出部分
+  显示 `+N`，hover tooltip 展示完整列表。
+- 清空对话时 `clearMessages` 同时重置 `sessionStats: null`。
 
 ---
 

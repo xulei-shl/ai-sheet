@@ -1,5 +1,5 @@
 /**
- * provider-map.ts — providerType → (provider, api) 映射模块
+ * provider-map.ts — providerType → (provider, api) 映射 + contextWindow 查找
  *
  * pi-ai 区分两个概念：
  *   - `provider`：身份标识，用于 API Key 查找（如 'deepseek', 'openai'）
@@ -34,6 +34,66 @@ const KNOWN_API_SUFFIXES = [
   'azure-openai-responses',
 ];
 
+// ─── contextWindow 查找 ────────────────────────────────────────────
+
+/** 各 provider 默认 context window（特定模型未匹配时使用） */
+const PROVIDER_DEFAULT_WINDOW: Record<string, number> = {
+  'openai-completions':     128_000,
+  'openai-responses':       128_000,
+  'anthropic-messages':     200_000,
+  'deepseek':               128_000,
+  'mistral-conversations':  128_000,
+  'google-generative-ai':   1_000_000,
+  'google-vertex':          1_000_000,
+  'bedrock-converse-stream':128_000,
+  'azure-openai-responses': 128_000,
+};
+
+/** 已知模型 ID 前缀 → context window（优先级高于 provider 默认） */
+const MODEL_WINDOW: Array<[prefix: string, window: number]> = [
+  // ── OpenAI ──
+  ['o1',              200_000],
+  ['o3',              200_000],
+  ['gpt-4o',          128_000],
+  ['gpt-4-turbo',     128_000],
+  ['gpt-4-32k',        32_000],
+  ['gpt-4',             8_000],
+  ['gpt-3.5-turbo',    16_000],
+  // ── Anthropic ── (所有 Claude 均为 200K)
+  ['claude',           200_000],
+  // ── DeepSeek ──
+  ['deepseek',         128_000],
+  // ── Google ──
+  ['gemini-2.5-pro', 1_000_000],
+  ['gemini-2.0-pro', 2_000_000],
+  ['gemini-2.0-flash',1_000_000],
+  ['gemini-1.5-pro',  2_000_000],
+  ['gemini-1.5-flash',1_000_000],
+  ['gemini',           128_000],
+  // ── Mistral ──
+  ['mistral-large',    128_000],
+  ['mistral-small',     32_000],
+  ['mistral-medium',    32_000],
+  ['mistral',           128_000],
+  // ── Amazon Bedrock ──
+  ['claude',           200_000],
+];
+
+/**
+ * 根据 providerType + modelId 解析 contextWindow
+ *
+ * 优先级：modelId 前缀匹配 > provider 默认 > 128K
+ */
+function resolveContextWindow(providerType: string, modelId: string): number {
+  const idLower = modelId.toLowerCase();
+  for (const [prefix, window] of MODEL_WINDOW) {
+    if (idLower.startsWith(prefix)) return window;
+  }
+  return PROVIDER_DEFAULT_WINDOW[providerType] ?? 128_000;
+}
+
+// ─── provider/api 拆分 ────────────────────────────────────────────
+
 /**
  * 将项目的 providerType 拆分为 pi-ai 所需的 provider + api
  *
@@ -45,7 +105,6 @@ export function resolveProviderApi(providerType: string): { provider: string; ap
   const mapped = PROVIDER_TYPE_MAP[providerType];
   if (mapped) return { provider: mapped.provider, api: mapped.api, defaultBaseUrl: mapped.baseUrl };
 
-  // heuristic: providerType 可能是 "<provider>-<api-suffix>"
   for (const suffix of KNOWN_API_SUFFIXES) {
     if (providerType.endsWith('-' + suffix)) {
       const provider = providerType.slice(0, providerType.length - suffix.length - 1);
@@ -53,9 +112,10 @@ export function resolveProviderApi(providerType: string): { provider: string; ap
     }
   }
 
-  // fallback: 直接用 providerType 作为 api，截取第一段作为 provider
   return { provider: providerType, api: providerType, defaultBaseUrl: '' };
 }
+
+// ─── 模型构建 ──────────────────────────────────────────────────────
 
 /**
  * 从默认模型信息构建 pi-ai 所需的 model 对象
@@ -71,9 +131,7 @@ export function buildModel(info: {
 }): Model<any> {
   const { provider, api, defaultBaseUrl } = resolveProviderApi(info.providerType);
   let baseUrl = info.baseUrl || defaultBaseUrl || '';
-  // Mistral SDK 内部路径模板为 "v1/chat/completions#stream"（相对路径），
-  // 若 baseUrl 也包含路径（如 /v1），拼接后会产生双路径导致 404。
-  // 统一剥离路径部分，只保留 origin。
+
   if (api === 'mistral-conversations' && baseUrl) {
     try {
       const u = new URL(baseUrl);
@@ -83,6 +141,9 @@ export function buildModel(info: {
       baseUrl = u.toString().replace(/\/+$/, '');
     } catch { /* 保持原值 */ }
   }
+
+  const contextWindow = resolveContextWindow(info.providerType, info.modelId);
+
   return {
     id: info.modelId,
     name: info.name ?? info.modelId,
@@ -92,7 +153,7 @@ export function buildModel(info: {
     reasoning: false,
     input: ['text'],
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-    contextWindow: 128_000,
-    maxTokens: 16_384,
+    contextWindow,
+    maxTokens: Math.min(contextWindow, 16_384),
   } as Model<any>;
 }

@@ -13,9 +13,9 @@ function fmt(n: number): string {
   return String(n);
 }
 
-function contextColor(ratio: number): string {
-  if (ratio < 0.6) return 'var(--success)';
-  if (ratio < 0.85) return 'var(--warning)';
+function contextColor(pct: number): string {
+  if (pct < 60) return 'var(--success)';
+  if (pct < 85) return 'var(--warning)';
   return 'var(--danger)';
 }
 
@@ -87,20 +87,23 @@ export function AgentFooter() {
         </>
       )}
 
-      {/* 上下文使用率 */}
-      {sessionStats && sessionStats.contextUsage > 0 && (
-        <>
-          <Tooltip text={`上下文使用率 ${(sessionStats.contextUsage * 100).toFixed(0)}%`} side="top">
-            <span className="flex items-center gap-1 whitespace-nowrap">
-              <span>📊</span>
-              <span style={{ color: contextColor(sessionStats.contextUsage) }}>
-                {(sessionStats.contextUsage * 100).toFixed(0)}%
+      {/* 上下文使用率 = inputTokens / contextWindow */}
+      {sessionStats && sessionStats.contextWindow > 0 && sessionStats.inputTokens > 0 && (() => {
+        const pct = Math.min(100, Math.round((sessionStats.inputTokens / sessionStats.contextWindow) * 100));
+        return (
+          <>
+            <Tooltip text={`上下文 ${pct}% · ${sessionStats.inputTokens.toLocaleString()} / ${sessionStats.contextWindow.toLocaleString()}`} side="top">
+              <span className="flex items-center gap-1 whitespace-nowrap">
+                <span>📊</span>
+                <span style={{ color: contextColor(pct) }}>
+                  {pct}%
+                </span>
               </span>
-            </span>
-          </Tooltip>
-          <span>·</span>
-        </>
-      )}
+            </Tooltip>
+            <span>·</span>
+          </>
+        );
+      })()}
 
       {/* Skills */}
       {skillLabels.length > 0 && (

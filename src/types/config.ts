@@ -6,4 +6,5 @@ export interface ModelConfig {
   modelId: string;
   providerType: string;
   useProxy: boolean;
+  contextWindow?: number | null;
 }

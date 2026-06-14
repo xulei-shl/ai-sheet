@@ -211,6 +211,7 @@ impl SidecarManager {
                 "apiKey": model.api_key,
                 "baseUrl": model.base_url,
                 "useProxy": model.use_proxy,
+                "contextWindow": model.context_window,
             },
         });
         self.write_json_line(payload).await

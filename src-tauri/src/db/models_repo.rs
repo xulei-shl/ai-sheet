@@ -5,7 +5,7 @@ use crate::models::config::ModelConfig;
 
 pub fn get_all_models(conn: &Connection) -> AppResult<Vec<ModelConfig>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, api_key, base_url, model_id, provider_type, use_proxy
+        "SELECT id, name, api_key, base_url, model_id, provider_type, use_proxy, context_window
          FROM models ORDER BY id ASC",
     )?;
     let rows = stmt.query_map([], |row| {
@@ -17,6 +17,7 @@ pub fn get_all_models(conn: &Connection) -> AppResult<Vec<ModelConfig>> {
             model_id: row.get(4)?,
             provider_type: row.get(5)?,
             use_proxy: row.get::<_, i64>(6)? != 0,
+            context_window: row.get(7)?,
         })
     })?;
     let mut models = Vec::new();
@@ -29,8 +30,8 @@ pub fn get_all_models(conn: &Connection) -> AppResult<Vec<ModelConfig>> {
 pub fn insert_model(conn: &Connection, model: &ModelConfig) -> AppResult<ModelConfig> {
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO models (name, api_key, base_url, model_id, provider_type, use_proxy, is_default, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+        "INSERT INTO models (name, api_key, base_url, model_id, provider_type, use_proxy, context_window, is_default, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
         rusqlite::params![
             model.name,
             model.api_key,
@@ -38,6 +39,7 @@ pub fn insert_model(conn: &Connection, model: &ModelConfig) -> AppResult<ModelCo
             model.model_id,
             model.provider_type,
             model.use_proxy as i64,
+            model.context_window,
             0,
             now,
             now,
@@ -52,14 +54,15 @@ pub fn insert_model(conn: &Connection, model: &ModelConfig) -> AppResult<ModelCo
         model_id: model.model_id.clone(),
         provider_type: model.provider_type.clone(),
         use_proxy: model.use_proxy,
+        context_window: model.context_window,
     })
 }
 
 pub fn update_model(conn: &Connection, id: i64, model: &ModelConfig) -> AppResult<()> {
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "UPDATE models SET name=?1, api_key=?2, base_url=?3, model_id=?4, provider_type=?5, use_proxy=?6, updated_at=?7
-         WHERE id=?8",
+        "UPDATE models SET name=?1, api_key=?2, base_url=?3, model_id=?4, provider_type=?5, use_proxy=?6, context_window=?7, updated_at=?8
+         WHERE id=?9",
         rusqlite::params![
             model.name,
             model.api_key,
@@ -67,6 +70,7 @@ pub fn update_model(conn: &Connection, id: i64, model: &ModelConfig) -> AppResul
             model.model_id,
             model.provider_type,
             model.use_proxy as i64,
+            model.context_window,
             now,
             id,
         ],
@@ -105,6 +109,7 @@ mod tests {
             model_id: "test-model".into(),
             provider_type: "openai-completions".into(),
             use_proxy: true,
+            context_window: None,
         }
     }
 

@@ -11,6 +11,8 @@ pub struct ModelConfig {
     pub provider_type: String,
     #[serde(default = "default_use_proxy")]
     pub use_proxy: bool,
+    #[serde(default = "default_context_window")]
+    pub context_window: Option<i64>,
 }
 
 /// 用户在 Agent 面板上选中的当前模型（含明文 apiKey），仅驻留在进程内存。
@@ -25,8 +27,14 @@ pub struct ActiveModel {
     pub base_url: String,
     #[serde(default = "default_use_proxy")]
     pub use_proxy: bool,
+    #[serde(default = "default_context_window")]
+    pub context_window: Option<i64>,
 }
 
 fn default_use_proxy() -> bool {
     true
+}
+
+fn default_context_window() -> Option<i64> {
+    None
 }

@@ -37,6 +37,7 @@ interface ModelFormData {
   modelId: string;
   providerType: string;
   useProxy: boolean;
+  contextWindow: string;
 }
 
 const emptyForm: ModelFormData = {
@@ -46,6 +47,7 @@ const emptyForm: ModelFormData = {
   modelId: '',
   providerType: 'openai-completions',
   useProxy: true,
+  contextWindow: '',
 };
 
 type Mode = 'view' | 'create' | 'edit';
@@ -91,6 +93,7 @@ export function ConfigPage() {
       modelId: model.modelId,
       providerType: model.providerType,
       useProxy: model.useProxy,
+      contextWindow: model.contextWindow ? String(model.contextWindow) : '',
     });
     setTestResult(null);
   };
@@ -128,6 +131,7 @@ export function ConfigPage() {
 
   const handleSave = async () => {
     if (!form.name.trim() || !form.baseUrl.trim() || !form.modelId.trim()) return;
+    const ctxWindow = form.contextWindow.trim();
     const next: ModelConfig = {
       name: form.name.trim(),
       apiKey: form.apiKey,
@@ -135,6 +139,7 @@ export function ConfigPage() {
       modelId: form.modelId.trim(),
       providerType: form.providerType,
       useProxy: form.useProxy,
+      contextWindow: ctxWindow ? Number(ctxWindow) : null,
     };
 
     if (mode === 'edit' && selected) {
@@ -461,6 +466,10 @@ function DetailView({
           label="API Key"
           value={model.apiKey ? '••••••••' : '（未设置）'}
         />
+        <Field
+          label="上下文窗口"
+          value={model.contextWindow ? `${model.contextWindow.toLocaleString()} tokens` : '自动识别'}
+        />
         <div>
           <label
             className="mb-1 block text-xs font-medium"
@@ -670,6 +679,31 @@ function FormPanel({
             onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
             placeholder="sk-..."
           />
+        </div>
+        <div>
+          <label
+            className="mb-1 block text-xs font-medium"
+            style={{ color: 'var(--muted)' }}
+          >
+            上下文窗口（可选）
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="1000"
+            className="h-9 w-full rounded-md px-3 text-sm"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--ink)',
+            }}
+            value={form.contextWindow}
+            onChange={(e) => setForm({ ...form, contextWindow: e.target.value })}
+            placeholder="留空自动识别（如 128000）"
+          />
+          <span className="mt-1 block text-xs" style={{ color: 'var(--muted)' }}>
+            模型的最大上下文 token 数，用于计算上下文使用率。不填则根据模型 ID 自动匹配。
+          </span>
         </div>
         <div className="flex items-center justify-between rounded-md px-3 py-2" style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
           <div>

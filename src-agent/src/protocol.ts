@@ -5,6 +5,7 @@
   apiKey: string;
   baseUrl: string;
   useProxy?: boolean;
+  contextWindow?: number | null;
 }
 
 export type SidecarCommand =

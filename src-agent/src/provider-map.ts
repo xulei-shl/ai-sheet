@@ -128,6 +128,7 @@ export function buildModel(info: {
   modelId: string;
   name?: string;
   baseUrl?: string;
+  contextWindow?: number | null;
 }): Model<any> {
   const { provider, api, defaultBaseUrl } = resolveProviderApi(info.providerType);
   let baseUrl = info.baseUrl || defaultBaseUrl || '';
@@ -142,7 +143,8 @@ export function buildModel(info: {
     } catch { /* 保持原值 */ }
   }
 
-  const contextWindow = resolveContextWindow(info.providerType, info.modelId);
+  // 优先级: 显式传入 > 查找表 > provider 默认
+  const contextWindow = info.contextWindow ?? resolveContextWindow(info.providerType, info.modelId);
 
   return {
     id: info.modelId,

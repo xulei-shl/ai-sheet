@@ -130,6 +130,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
           apiKey: target.apiKey,
           baseUrl: target.baseUrl,
           useProxy: target.useProxy,
+          contextWindow: target.contextWindow,
         };
         await setActiveAgentModel(payload);
       }

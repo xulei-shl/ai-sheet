@@ -57,6 +57,8 @@ const MIGRATIONS: &[&str] = &[
         columns_key TEXT NOT NULL DEFAULT '',
         created_at  TEXT NOT NULL
     );",
+    // v8: context_window column for per-model context window override
+    "ALTER TABLE models ADD COLUMN context_window INTEGER;",
 ];
 
 pub fn run(conn: &Connection) -> AppResult<()> {

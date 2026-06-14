@@ -44,6 +44,7 @@ export interface ActiveAgentModel {
   apiKey: string;
   baseUrl: string;
   useProxy?: boolean;
+  contextWindow?: number | null;
 }
 
 export function setActiveAgentModel(model: ActiveAgentModel) {

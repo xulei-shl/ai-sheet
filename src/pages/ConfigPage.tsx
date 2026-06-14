@@ -468,7 +468,7 @@ function DetailView({
         />
         <Field
           label="上下文窗口"
-          value={model.contextWindow ? `${model.contextWindow.toLocaleString()} tokens` : '自动识别'}
+          value={model.contextWindow ? `${model.contextWindow.toLocaleString()} tokens` : '默认 128K'}
         />
         <div>
           <label
@@ -699,10 +699,10 @@ function FormPanel({
             }}
             value={form.contextWindow}
             onChange={(e) => setForm({ ...form, contextWindow: e.target.value })}
-            placeholder="留空自动识别（如 128000）"
+            placeholder="默认 128000"
           />
           <span className="mt-1 block text-xs" style={{ color: 'var(--muted)' }}>
-            模型的最大上下文 token 数，用于计算上下文使用率。不填则根据模型 ID 自动匹配。
+            模型的最大上下文 token 数，用于计算上下文使用率。留空使用默认值 128K。
           </span>
         </div>
         <div className="flex items-center justify-between rounded-md px-3 py-2" style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>

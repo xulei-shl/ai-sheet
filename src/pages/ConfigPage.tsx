@@ -699,7 +699,7 @@ function FormPanel({
             }}
             value={form.contextWindow}
             onChange={(e) => setForm({ ...form, contextWindow: e.target.value })}
-            placeholder="默认 128000"
+            placeholder="128000"
           />
           <span className="mt-1 block text-xs" style={{ color: 'var(--muted)' }}>
             模型的最大上下文 token 数，用于计算上下文使用率。留空使用默认值 128K。

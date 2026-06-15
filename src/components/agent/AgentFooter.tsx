@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getAppStatus } from '../../services/tauri';
+import { getAppDataDir, getAppStatus } from '../../services/tauri';
 import type { AppStatus } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
 import { useExcelStore } from '../../stores/excelStore';
@@ -33,6 +33,10 @@ export function AgentFooter() {
       void fetchSkills();
     }
     void getAppStatus().then(setAppStatus);
+    if (!currentCwd) {
+      void getAppDataDir().then((dir) => useExcelStore.getState().setDefaultCwd(dir));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [skills.length, fetchSkills]);
 
   const cwdLabel = useMemo(() => {

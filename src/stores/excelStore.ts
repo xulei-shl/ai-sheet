@@ -30,6 +30,7 @@ interface ExcelStore {
   error: string | null;
   includeSampleData: boolean;
   currentCwd: string | null;
+  defaultCwd: string | null;
 
   addFile: (path: string) => Promise<void>;
   removeFile: (index: number) => void;
@@ -40,6 +41,7 @@ interface ExcelStore {
   writeResults: (path: string, sheet: string, column: string, results: WriteResult[]) => Promise<void>;
   notifyContextChange: () => void;
   clearAllContext: () => void;
+  setDefaultCwd: (dir: string) => void;
   clearError: () => void;
   setIncludeSampleData: (value: boolean) => void;
 }
@@ -62,6 +64,14 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   error: null,
   includeSampleData: false,
   currentCwd: null,
+  defaultCwd: null,
+
+  setDefaultCwd: (dir: string) => {
+    set((state) => ({
+      defaultCwd: dir,
+      currentCwd: state.currentCwd ?? dir,
+    }));
+  },
 
   addFile: async (path: string) => {
     set({ loading: true, error: null });
@@ -87,34 +97,31 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
         previewData: {},
       };
 
-      // 首次加载 Excel 时，设置 agent 工作目录为文件所在目录
-      const isFirstFile = get().files.length === 0;
       const parentDir = path.replace(/[/\\][^/\\]+$/, '');
-      const cwdUpdate = isFirstFile && get().currentCwd === null
-        ? { currentCwd: parentDir }
-        : {};
 
       set((state) => ({
         files: [...state.files, fileInfo],
         selections: [...state.selections, selection],
         loading: false,
-        ...cwdUpdate,
+        currentCwd: parentDir,
       }));
 
-      if (cwdUpdate.currentCwd) {
-        setAgentCwd(parentDir).catch(() => {});
-      }
+      setAgentCwd(parentDir).catch(() => {});
     } catch (e) {
       set({ loading: false, error: e instanceof Error ? e.message : String(e) });
     }
   },
 
   removeFile: (index: number) => {
-    set((state) => ({
-      files: state.files.filter((_, i) => i !== index),
-      selections: state.selections.filter((_, i) => i !== index),
-      previewData: null,
-    }));
+    set((state) => {
+      const newFiles = state.files.filter((_, i) => i !== index);
+      return {
+        files: newFiles,
+        selections: state.selections.filter((_, i) => i !== index),
+        previewData: null,
+        currentCwd: newFiles.length === 0 ? state.defaultCwd : state.currentCwd,
+      };
+    });
   },
 
   selectSheets: async (fileIndex: number, sheets: string[]) => {

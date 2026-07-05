@@ -212,7 +212,7 @@ export function SkillsPage() {
   };
 
   const handleEdit = () => {
-    const content = selectedFile ? (selectedFileContent ?? '') : (detail?.content ?? '');
+    const content = selectedFile ? (selectedFileContent ?? '') : (detail?.raw ?? '');
     setEditContent(content);
     setMode('edit');
   };
@@ -222,7 +222,7 @@ export function SkillsPage() {
     if (selectedFile) {
       await updateSkillFile(selectedSkillName, selectedFile, editContent);
     } else {
-      // Editing SKILL.md: we write the full content (without frontmatter changes for simplicity)
+      // editContent includes frontmatter (from detail.raw), write back as-is
       await updateSkillFile(selectedSkillName, 'SKILL.md', editContent);
       // Refresh detail after SKILL.md edit
       selectSkill(selectedSkillName);

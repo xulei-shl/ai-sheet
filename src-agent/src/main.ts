@@ -420,6 +420,10 @@ async function handleReset() {
 }
 
 async function handleSetCwd(command: Extract<SidecarCommand, { type: 'set_cwd' }>) {
+  // ⚠️ 注意：不要在此处调用 loader.reload() 或 session.reload()。
+  // DefaultResourceLoader 的 cwd 在 agent.ts 构造时冻结为 initialCwd (app_data_dir)，
+  // 确保 .pi/AGENTS.md、.pi/SYSTEM.md、.pi/skills/ 不受动态 cwd 影响。
+  // 此处仅更新工具执行上下文（bash/read/write/edit 的运行时路径解析）。
   currentCwd = command.cwd;
   if (session) {
     await session.steer(

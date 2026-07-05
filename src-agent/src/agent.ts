@@ -14,6 +14,9 @@ export interface SheetAgentContext {
   contextWindow: number;
 }
 
+// initialCwd 在 sidecar 启动时固定为 --db-dir (app_data_dir)，永不被 set_cwd 更新。
+// DefaultResourceLoader 的 cwd 仅用于 .pi/ 资源扫描（AGENTS.md / SYSTEM.md / skills），
+// 与运行时 currentCwd（工具执行路径）完全解耦。
 export async function createSheetAgent(bridge: BridgeClient, initialCwd: string, sessionDir?: string): Promise<SheetAgentContext> {
   const customTools = createCustomTools(bridge);
 
@@ -65,6 +68,8 @@ export async function createSheetAgent(bridge: BridgeClient, initialCwd: string,
   const agentsMdPath = join(piDir, 'AGENTS.md');
   const systemMdPath = join(piDir, 'SYSTEM.md');
 
+  // 构造 loader，cwd 固定为 initialCwd（app_data_dir），与运行时 currentCwd 解耦。
+  // cwd 仅用于 .pi/ 资源扫描路径解析；工具执行路径由 main.ts 的 currentCwd 接管。
   const loader = new DefaultResourceLoader({
     cwd: initialCwd,
     agentDir: getAgentDir(),
@@ -86,6 +91,7 @@ export async function createSheetAgent(bridge: BridgeClient, initialCwd: string,
       }
     },
   });
+  // reload() 只在此处调用一次，后续 set_cwd 不会触发重新加载，确保 skills 缓存稳定
   await loader.reload();
 
   // 设置 60 秒超时并禁用自动重试，避免请求挂起过久或被重试淹没

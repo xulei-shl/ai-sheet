@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { getAppDataDir, getAppStatus } from '../../services/tauri';
-import type { AppStatus } from '../../services/tauri';
+import { useEffect, useMemo } from 'react';
+import { Folder, Activity, Cpu, Wrench } from 'lucide-react';
+import { getAppDataDir } from '../../services/tauri';
 import { useAgentStore } from '../../stores/agentStore';
 import { useExcelStore } from '../../stores/excelStore';
 import { useSkillStore } from '../../stores/skillStore';
@@ -16,7 +16,7 @@ function fmt(n: number): string {
 function contextColor(pct: number): string {
   if (pct < 60) return 'var(--success)';
   if (pct < 85) return 'var(--warning)';
-  return 'var(--danger)';
+  return 'var(--error)';
 }
 
 export function AgentFooter() {
@@ -26,13 +26,11 @@ export function AgentFooter() {
   const skills = useSkillStore((s) => s.skills);
   const fetchSkills = useSkillStore((s) => s.fetchSkills);
   const selectedAgentModelName = useUiStore((s) => s.selectedAgentModelName);
-  const [appStatus, setAppStatus] = useState<AppStatus | null>(null);
 
   useEffect(() => {
     if (skills.length === 0) {
       void fetchSkills();
     }
-    void getAppStatus().then(setAppStatus);
     if (!currentCwd) {
       void getAppDataDir().then((dir) => useExcelStore.getState().setDefaultCwd(dir));
     }
@@ -53,96 +51,77 @@ export function AgentFooter() {
 
   const isReady = status?.ready ?? false;
 
+  const contextPct = sessionStats && sessionStats.contextWindow > 0 && sessionStats.inputTokens > 0
+    ? Math.min(100, Math.round((sessionStats.inputTokens / sessionStats.contextWindow) * 100))
+    : null;
+
   return (
     <div
-      className="flex h-7 flex-shrink-0 items-center gap-2 overflow-hidden border-t px-3 text-[11px] leading-none"
+      className="flex h-[46px] flex-shrink-0 flex-col justify-center gap-1.5 overflow-hidden border-t px-3 text-[11px] leading-none"
       style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
     >
-      {/* 应用名 */}
-      <span className="flex-shrink-0">
-        {appStatus?.name ?? 'AI-Sheet'}
-        <span className="ml-0.5" style={{ opacity: 0.6 }}>v{appStatus?.version ?? '0.1.0'}</span>
-      </span>
+      {/* Row 1: 模型 · 技能 · 状态 */}
+      <div className="flex items-center gap-3 overflow-hidden">
+        {selectedAgentModelName && (
+          <Tooltip text={`当前模型: ${selectedAgentModelName}`} side="top">
+            <span className="flex items-center gap-1.5 truncate max-w-[140px]">
+              <Cpu size={12} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+              <span className="truncate" style={{ color: 'var(--ink)' }}>{selectedAgentModelName}</span>
+            </span>
+          </Tooltip>
+        )}
 
-      <span>·</span>
+        {skillLabels.length > 0 && (
+          <Tooltip text={skills.map((s) => s.name).join(', ')} side="top">
+            <span className="flex items-center gap-1.5 truncate max-w-[200px]">
+              <Wrench size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
+              <span className="truncate">
+                {skillLabels.join(', ')}
+                {skillOverflow > 0 && <span style={{ opacity: 0.6 }}> +{skillOverflow}</span>}
+              </span>
+            </span>
+          </Tooltip>
+        )}
 
-      {/* 工作目录 */}
-      {cwdLabel && (
-        <Tooltip text={currentCwd!} side="top">
-          <span className="flex items-center gap-1 truncate max-w-[120px]" title={currentCwd!}>
-            <span>📁</span>
-            <span className="truncate">{cwdLabel}</span>
-          </span>
-        </Tooltip>
-      )}
+        <div className="ml-auto flex items-center gap-1.5">
+          <span
+            className="inline-block h-1.5 w-1.5 rounded-full"
+            style={{ background: isReady ? 'var(--success)' : 'var(--error)' }}
+          />
+          <span>{isReady ? 'Ready' : 'Offline'}</span>
+        </div>
+      </div>
 
-      {cwdLabel && <span>·</span>}
+      {/* Row 2: 工作路径 · Token · 上下文 */}
+      <div className="flex items-center gap-3 overflow-hidden">
+        {cwdLabel && (
+          <Tooltip text={currentCwd!} side="top">
+            <span className="flex items-center gap-1.5 truncate max-w-[160px]" title={currentCwd!}>
+              <Folder size={11} style={{ color: 'var(--warning)', flexShrink: 0 }} />
+              <span className="truncate">{cwdLabel}</span>
+            </span>
+          </Tooltip>
+        )}
 
-      {/* Token 用量 */}
-      {sessionStats && (
-        <>
+        {sessionStats && (
           <Tooltip text={`输入 ${fmt(sessionStats.inputTokens)} tokens · 输出 ${fmt(sessionStats.outputTokens)} tokens`} side="top">
-            <span className="flex items-center gap-1 whitespace-nowrap">
-              <span style={{ color: 'var(--primary)' }}>↑{fmt(sessionStats.inputTokens)}</span>
+            <span className="flex items-center gap-2 whitespace-nowrap">
+              <span className="flex items-center gap-1">
+                <Activity size={10} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                <span style={{ color: 'var(--primary)' }}>↑{fmt(sessionStats.inputTokens)}</span>
+              </span>
               <span style={{ color: 'var(--success)' }}>↓{fmt(sessionStats.outputTokens)}</span>
             </span>
           </Tooltip>
-          <span>·</span>
-        </>
-      )}
+        )}
 
-      {/* 上下文使用率 = inputTokens / contextWindow */}
-      {sessionStats && sessionStats.contextWindow > 0 && sessionStats.inputTokens > 0 && (() => {
-        const pct = Math.min(100, Math.round((sessionStats.inputTokens / sessionStats.contextWindow) * 100));
-        return (
-          <>
-            <Tooltip text={`上下文 ${pct}% · ${sessionStats.inputTokens.toLocaleString()} / ${sessionStats.contextWindow.toLocaleString()}`} side="top">
-              <span className="flex items-center gap-1 whitespace-nowrap">
-                <span>📊</span>
-                <span style={{ color: contextColor(pct) }}>
-                  {pct}%
-                </span>
-              </span>
-            </Tooltip>
-            <span>·</span>
-          </>
-        );
-      })()}
-
-      {/* Skills */}
-      {skillLabels.length > 0 && (
-        <Tooltip
-          text={skills.map((s) => s.name).join(', ')}
-          side="top"
-        >
-          <span className="flex items-center gap-1 truncate max-w-[160px]">
-            <span>🛠️</span>
-            <span className="truncate">
-              {skillLabels.join(', ')}
-              {skillOverflow > 0 && <span style={{ color: 'var(--muted)' }}> +{skillOverflow}</span>}
+        {contextPct !== null && (
+          <Tooltip text={`上下文 ${contextPct}% · ${sessionStats!.inputTokens.toLocaleString()} / ${sessionStats!.contextWindow.toLocaleString()}`} side="top">
+            <span className="whitespace-nowrap">
+              <span style={{ color: contextColor(contextPct) }}>{contextPct}%</span>
             </span>
-          </span>
-        </Tooltip>
-      )}
-
-      {skillLabels.length > 0 && <span>·</span>}
-
-      {/* 模型 */}
-      {selectedAgentModelName && (
-        <Tooltip text={`当前模型: ${selectedAgentModelName}`} side="top">
-          <span className="flex items-center gap-1 truncate max-w-[120px]">
-            <span>⚡</span>
-            <span className="truncate">{selectedAgentModelName}</span>
-          </span>
-        </Tooltip>
-      )}
-
-      <div className="ml-auto flex items-center gap-1">
-        <span
-          className="inline-block h-1.5 w-1.5 rounded-full"
-          style={{ background: isReady ? 'var(--success)' : 'var(--danger)' }}
-        />
-        <span>{isReady ? 'Ready' : 'Offline'}</span>
+          </Tooltip>
+        )}
       </div>
     </div>
   );

@@ -864,9 +864,10 @@ if let Ok(data_dir) = app.path().app_data_dir() {
 
 #### 8.2.2 动态工作目录
 
-**问题**：pi agent 的 `cwd` 决定了内置工具（bash/read/write/edit）的相对路径解析基准，
-也控制了 `DefaultResourceLoader` 对 `.pi/skills/` 等项目资源的目录扫描。
-原始实现固定为 `process.cwd()`（项目代码路径），导致工具操作基于代码目录而非用户数据目录。
+**问题**：原始实现中 `DefaultResourceLoader` 的 `cwd` 与运行时工具执行路径绑定为同一值。
+pi agent 的 `cwd` 既决定了内置工具（bash/read/write/edit）的相对路径解析基准，
+也曾同时控制 `DefaultResourceLoader` 对 `.pi/skills/` 等项目资源的目录扫描。
+且原始实现固定为 `process.cwd()`（项目代码路径），导致工具操作基于代码目录而非用户数据目录。
 
 **解决方案**：两层策略——
 
@@ -883,6 +884,13 @@ if let Ok(data_dir) = app.path().app_data_dir() {
 通过 `set_agent_cwd` → Rust → sidecar `set_cwd` 命令更新 `currentCwd`，
 并 `session.steer()` 通知 agent 目录已变更。多个 Excel 以第一个为准。
 
+**cwd 切换与资源加载解耦**：`set_cwd` 仅更新 `currentCwd` 变量（工具执行上下文），
+不触发 `loader.reload()` 或 `session.reload()`。`DefaultResourceLoader` 的 `cwd`
+在启动时固定为 `initialCwd`（即 `--db-dir` 传入的 app_data_dir），
+因此 `AGENTS.md`、`SYSTEM.md`、`skills/*/SKILL.md` 的扫描路径始终不变。
+`main.ts:handleSetCwd` 中存在显式注释守卫，禁止在 cwd 变更后误调 reload 方法，
+防范未来代码演变带来的资源路径漂移风险。
+
 #### 8.2.3 System Prompt 三层注入
 
 `.pi/` 下的三个源文件在 agent 启动时分别通过不同机制加载，合并为最终 system prompt：
@@ -891,7 +899,7 @@ if let Ok(data_dir) = app.path().app_data_dir() {
 |------|----------|---------------------------|------|
 | `SYSTEM.md` | `systemPromptOverride` 显式读 `join(initialCwd, '.pi', 'SYSTEM.md')` | `customPrompt`（最顶层） | Agent 身份："你是 AI-Sheet..." |
 | `AGENTS.md` | `agentsFilesOverride` + `DefaultResourceLoader` 自动向上遍历 | `<project_context>` | 核心原则、Excel 规则、交互规则 |
-| `skills/*/SKILL.md` | `DefaultResourceLoader` 自动从 `{cwd}/.pi/skills/` 发现 | `<available_skills>` | 技能详情（Python 处理流程等） |
+| `skills/*/SKILL.md` | `DefaultResourceLoader` 自动从 `{initialCwd}/.pi/skills/` 发现 | `<available_skills>` | 技能详情（Python 处理流程等） |
 
 **代码实现**（`src-agent/src/agent.ts`）：
 
@@ -938,7 +946,7 @@ await loader.reload();
 
 #### 8.2.4 技能自动发现
 
-`DefaultResourceLoader` 自动扫描 `{cwd}/.pi/skills/*/SKILL.md`，
+`DefaultResourceLoader` 自动扫描 `{initialCwd}/.pi/skills/*/SKILL.md`，
 所有技能目录均被识别并注入 agent 可用列表。无需硬编码或 `skillsOverride` 回调。
 运行时行为一致：启动时仅注入 name + description 元数据到系统提示词，
 agent 自主判断是否需要 read 加载完整 SKILL.md 内容后执行。
